@@ -49,11 +49,60 @@
 |----|------|-----|-----------|
 | Simon Willison's Weblog | RSS | `https://simonwillison.net/atom/everything/` | metadata |
 
-## 社交媒体（authority_weight: 2–3）
+## AI Builders on X（authority_weight: 5）
+
+来源：[follow-builders](https://github.com/zarazhangrui/follow-builders) — 追踪真正在构建产品的一线 AI 从业者。
+
+| 源 | 类型 | URL | Fetch 策略 |
+|----|------|-----|-----------|
+| [Andrej Karpathy](https://x.com/karpathy) | X/Twitter | `https://x.com/karpathy` | title_only |
+| [Swyx](https://x.com/swyx) | X/Twitter | `https://x.com/swyx` | title_only |
+| [Josh Woodward](https://x.com/joshwoodward) | X/Twitter | `https://x.com/joshwoodward` | title_only |
+| [Kevin Weil](https://x.com/kevinweil) | X/Twitter | `https://x.com/kevinweil` | title_only |
+| [Peter Yang](https://x.com/petergyang) | X/Twitter | `https://x.com/petergyang` | title_only |
+| [Nan Yu](https://x.com/thenanyu) | X/Twitter | `https://x.com/thenanyu` | title_only |
+| [Madhu Guru](https://x.com/realmadhuguru) | X/Twitter | `https://x.com/realmadhuguru` | title_only |
+| [Amanda Askell](https://x.com/AmandaAskell) | X/Twitter | `https://x.com/AmandaAskell` | title_only |
+| [Cat Wu](https://x.com/_catwu) | X/Twitter | `https://x.com/_catwu` | title_only |
+| [Thariq](https://x.com/trq212) | X/Twitter | `https://x.com/trq212` | title_only |
+| [Google Labs](https://x.com/GoogleLabs) | X/Twitter | `https://x.com/GoogleLabs` | title_only |
+| [Amjad Masad](https://x.com/amasad) | X/Twitter | `https://x.com/amasad` | title_only |
+| [Guillermo Rauch](https://x.com/rauchg) | X/Twitter | `https://x.com/rauchg` | title_only |
+| [Alex Albert](https://x.com/alexalbert__) | X/Twitter | `https://x.com/alexalbert__` | title_only |
+| [Aaron Levie](https://x.com/levie) | X/Twitter | `https://x.com/levie` | title_only |
+| [Ryo Lu](https://x.com/ryolu_) | X/Twitter | `https://x.com/ryolu_` | title_only |
+| [Garry Tan](https://x.com/garrytan) | X/Twitter | `https://x.com/garrytan` | title_only |
+| [Matt Turck](https://x.com/mattturck) | X/Twitter | `https://x.com/mattturck` | title_only |
+| [Zara Zhang](https://x.com/zarazhangrui) | X/Twitter | `https://x.com/zarazhangrui` | title_only |
+| [Nikunj Kothari](https://x.com/nikunj) | X/Twitter | `https://x.com/nikunj` | title_only |
+| [Peter Steinberger](https://x.com/steipete) | X/Twitter | `https://x.com/steipete` | title_only |
+| [Dan Shipper](https://x.com/danshipper) | X/Twitter | `https://x.com/danshipper` | title_only |
+| [Aditya Agarwal](https://x.com/adityaag) | X/Twitter | `https://x.com/adityaag` | title_only |
+| [Sam Altman](https://x.com/sama) | X/Twitter | `https://x.com/sama` | title_only |
+| [Claude](https://x.com/claudeai) | X/Twitter | `https://x.com/claudeai` | title_only |
+
+## AI Builders 官方博客（authority_weight: 5）
+
+| 源 | 类型 | URL | Fetch 策略 |
+|----|------|-----|-----------|
+| [Anthropic Engineering](https://www.anthropic.com/engineering) | Web | `https://www.anthropic.com/engineering` | metadata |
+| [Claude Blog](https://claude.com/blog) | Web | `https://claude.com/blog` | metadata |
+
+## AI Builders 播客（authority_weight: 5）
+
+| 源 | 类型 | URL | Fetch 策略 |
+|----|------|-----|-----------|
+| Latent Space (Podcast) | RSS | `https://www.latent.space/feed` | summary |
+| Training Data | RSS | — | summary |
+| No Priors | RSS | — | summary |
+| Unsupervised Learning | RSS | — | summary |
+| Data Driven NYC | RSS | — | summary |
+
+## 其他社交媒体（authority_weight: 2–3）
 
 | 源 | 类型 | 账号/话题 | Fetch 策略 |
 |----|------|----------|-----------|
-| X/Twitter | Rettiwt API | @OpenAI, @AnthropicAI, @GoogleAI, @ylecun, @kaborez, @sama | title_only |
+| X/Twitter | Rettiwt API | @OpenAI, @AnthropicAI, @GoogleAI, @ylecun, @kaborez | title_only |
 
 ---
 

@@ -8,10 +8,16 @@
 
 import { writeFileSync } from 'fs';
 
-// Key AI accounts to monitor
+// Key AI accounts to monitor (company accounts + follow-builders list)
 const AI_ACCOUNTS = [
-  'OpenAI', 'AnthropicAI', 'GoogleAI', 'ylecun', 'kaborez', 'sama',
-  'GoogleDeepMind', 'nvidia', 'MetaAI', 'MistralAI',
+  // Company accounts
+  'OpenAI', 'AnthropicAI', 'GoogleAI', 'GoogleDeepMind', 'nvidia', 'MetaAI', 'MistralAI',
+  // AI Builders — from https://github.com/zarazhangrui/follow-builders
+  'karpathy', 'swyx', 'joshwoodward', 'kevinweil', 'petergyang',
+  'thenanyu', 'realmadhuguru', 'AmandaAskell', '_catwu', 'trq212',
+  'GoogleLabs', 'amasad', 'rauchg', 'alexalbert__', 'levie',
+  'ryolu_', 'garrytan', 'mattturck', 'zarazhangrui', 'nikunj',
+  'steipete', 'danshipper', 'adityaag', 'sama', 'claudeai',
 ];
 
 /**

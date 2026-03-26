@@ -1,0 +1,33 @@
+{
+  "skill_name": "news-card",
+  "status": "complete",
+  "current_experiment": 1,
+  "baseline_score": 66.7,
+  "best_score": 100.0,
+  "experiments": [
+    {
+      "id": 0,
+      "score": 4,
+      "max_score": 6,
+      "pass_rate": 66.7,
+      "status": "baseline",
+      "description": "original skill — no changes"
+    },
+    {
+      "id": 1,
+      "score": 6,
+      "max_score": 6,
+      "pass_rate": 100.0,
+      "status": "keep",
+      "description": "block Google Fonts CDN requests in Playwright to prevent screenshot timeouts"
+    }
+  ],
+  "eval_breakdown": [
+    { "name": "Output File Count", "pass_count": 4, "total": 4, "note": "baseline: 0/1, exp1+confirms: 3/3" },
+    { "name": "PNG Dimensions", "pass_count": 4, "total": 4 },
+    { "name": "Tier Distribution", "pass_count": 4, "total": 4 },
+    { "name": "Tier-1 Category Diversity", "pass_count": 4, "total": 4 },
+    { "name": "Render Integrity", "pass_count": 4, "total": 4 },
+    { "name": "Text Fit and Legibility", "pass_count": 4, "total": 4, "note": "baseline: 0/1, exp1+confirms: 3/3" }
+  ]
+}

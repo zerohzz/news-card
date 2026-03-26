@@ -1,6 +1,6 @@
 # News Card — AI 新闻日报卡片生成器
 
-Claude Code Skill，自动抓取 25+ 英文 AI 一手信息源，多维度评分筛选，AI 选题分三梯队，生成 8 张 9:16（1080×1920px）小红书风格 PNG 卡片。
+Claude Code Skill，自动抓取 55+ 英文 AI 一手信息源（含 [follow-builders](https://github.com/zarazhangrui/follow-builders) 25 位一线 AI 构建者），多维度评分筛选，AI 选题分三梯队，生成 8 张 9:16（1080×1920px）小红书风格 PNG 卡片。
 
 ## 快速开始
 
@@ -47,15 +47,18 @@ output/
 
 封面（第 0 页）展示全部 16 条标题，按分类色块排列。
 
-## 信息源（25+）
+## 信息源（55+）
 
 | 类别 | 来源 | 权威度 |
 |------|------|--------|
-| 公司博客 | OpenAI, Anthropic, Google AI, DeepMind, Meta, NVIDIA | 5 |
-| 科技媒体 | MIT Tech Review, The Verge, TechCrunch, Ars Technica, Wired, 404 Media | 4 |
-| 社区 & 论文 | Hacker News (API), HuggingFace Papers (API) | 3 |
-| Newsletter | Import AI, Ben's Bites, Latent Space, AI Snake Oil, One Useful Thing | 3–4 |
-| 独立博客 | Simon Willison's Weblog | 3 |
+| 公司博客 | [OpenAI](https://openai.com/blog), [Anthropic](https://www.anthropic.com/rss.xml), [Google AI](https://blog.google/technology/ai/), [DeepMind](https://deepmind.google/blog/), [Meta AI](https://ai.meta.com/blog/), [NVIDIA](https://blogs.nvidia.com/) | 5 |
+| 科技媒体 | [MIT Tech Review](https://www.technologyreview.com), [The Verge](https://www.theverge.com/ai-artificial-intelligence), [TechCrunch](https://techcrunch.com/category/artificial-intelligence/), [Ars Technica](https://arstechnica.com/technology-lab/), [Wired](https://www.wired.com/tag/ai/), [404 Media](https://www.404media.co/) | 4 |
+| 社区 & 论文 | [Hacker News](https://news.ycombinator.com/) (API), [HuggingFace Papers](https://huggingface.co/papers) (API) | 3 |
+| Newsletter | [Import AI](https://importai.substack.com), [Ben's Bites](https://bensbites.beehiiv.com), [Latent Space](https://www.latent.space), [AI Snake Oil](https://aisnakeoil.substack.com), [One Useful Thing](https://www.oneusefulthing.org) | 3–4 |
+| 独立博客 | [Simon Willison's Weblog](https://simonwillison.net/) | 3 |
+| AI Builders on X | [Andrej Karpathy](https://x.com/karpathy), [Swyx](https://x.com/swyx), [Josh Woodward](https://x.com/joshwoodward), [Kevin Weil](https://x.com/kevinweil), [Peter Yang](https://x.com/petergyang), [Nan Yu](https://x.com/thenanyu), [Madhu Guru](https://x.com/realmadhuguru), [Amanda Askell](https://x.com/AmandaAskell), [Cat Wu](https://x.com/_catwu), [Thariq](https://x.com/trq212), [Google Labs](https://x.com/GoogleLabs), [Amjad Masad](https://x.com/amasad), [Guillermo Rauch](https://x.com/rauchg), [Alex Albert](https://x.com/alexalbert__), [Aaron Levie](https://x.com/levie), [Ryo Lu](https://x.com/ryolu_), [Garry Tan](https://x.com/garrytan), [Matt Turck](https://x.com/mattturck), [Zara Zhang](https://x.com/zarazhangrui), [Nikunj Kothari](https://x.com/nikunj), [Peter Steinberger](https://x.com/steipete), [Dan Shipper](https://x.com/danshipper), [Aditya Agarwal](https://x.com/adityaag), [Sam Altman](https://x.com/sama), [Claude](https://x.com/claudeai) | 5 |
+| AI Builders 博客 | [Anthropic Engineering](https://www.anthropic.com/engineering), [Claude Blog](https://claude.com/blog) | 5 |
+| AI Builders 播客 | [Latent Space](https://www.latent.space), Training Data, No Priors, Unsupervised Learning, Data Driven NYC | 5 |
 
 ## 项目结构
 
@@ -65,6 +68,9 @@ news-card/
 ├── README.md
 ├── package.json
 ├── skills/
+│   ├── autoresearch/                # Meta-skill: 自动优化其他 skill
+│   │   ├── SKILL.md                 # Autoresearch 入口指令
+│   │   └── eval-guide.md           # 二元评估编写指南
 │   └── news-card/                   # Skill 主体
 │       ├── SKILL.md                 # Skill 入口指令
 │       ├── templates/

@@ -69,6 +69,11 @@ async function screenshotAll(inputDir, outputDir) {
     deviceScaleFactor: DEVICE_SCALE_FACTOR,
   });
 
+  // Block external font requests to prevent timeout in offline/restricted environments.
+  // Templates use Google Fonts CDN which hangs when unreachable.
+  await context.route('**/*fonts.googleapis.com/**', (route) => route.abort());
+  await context.route('**/*fonts.gstatic.com/**', (route) => route.abort());
+
   const results = [];
 
   for (const htmlFile of htmlFiles) {
