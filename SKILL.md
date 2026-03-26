@@ -68,20 +68,46 @@ bash scripts/score.sh workspace/candidates.json workspace/scored.json
 ### Step 4 — Render HTML
 
 ```bash
-node scripts/lib/render-html.js --input workspace/digest.json --templates templates --output workspace/html
+node scripts/lib/render-html.js --input workspace/digest.json --templates templates --output output/<datetime>/slides
 ```
 
-将 digest.json 填入 HTML 模板，输出 8 个 HTML 文件。
+将 digest.json 填入 HTML 模板，输出 8 个 HTML 文件到 `slides/` 子目录。
 
 ### Step 5 — Screenshot
 
 ```bash
-bash scripts/screenshot.sh workspace/html workspace/output
+bash scripts/screenshot.sh output/<datetime>/slides output/<datetime>/images
 ```
 
-Playwright 截图，输出 8 张 PNG（1080×1920px @2x）。
+Playwright 截图，输出 8 张 PNG（1080×1920px @2x）到 `images/` 子目录。
 
-完成后告知用户：**PNG 输出在 `workspace/output/` 目录**。
+完成后告知用户输出位置。
+
+## 输出目录结构
+
+每次运行在 `output/` 下创建以当前日期时间命名的子目录：
+
+```
+output/
+└── 2026-03-26_14-30-00/
+    ├── slides/              ← 8 个 HTML 文件
+    │   ├── page-0-cover.html
+    │   ├── page-1-top1.html
+    │   ├── ...
+    │   └── page-7-briefs.html
+    ├── images/              ← 8 张 PNG 卡片
+    │   ├── page-0-cover.png
+    │   ├── page-1-top1.png
+    │   ├── ...
+    │   └── page-7-briefs.png
+    └── digest.json          ← 本次选题数据
+```
+
+或使用一键脚本（自动创建带时间戳的目录）：
+
+```bash
+bash scripts/run-digest.sh
+```
 
 ---
 
