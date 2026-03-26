@@ -1,0 +1,17 @@
+{
+  "name": "news-card",
+  "version": "0.1.0",
+  "description": "Claude Code Skill: Automated AI news digest → 9:16 PNG cards",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch": "bash scripts/fetch-all.sh",
+    "score": "bash scripts/score.sh",
+    "screenshot": "bash scripts/screenshot.sh",
+    "digest": "bash scripts/run-digest.sh"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0",
+    "rss-parser": "^3.13.0"
+  }
+}
