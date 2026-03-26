@@ -68,6 +68,9 @@ news-card/
 ├── README.md
 ├── package.json
 ├── skills/
+│   ├── autoresearch/                # Meta-skill: 自动优化其他 skill
+│   │   ├── SKILL.md                 # Autoresearch 入口指令
+│   │   └── eval-guide.md           # 二元评估编写指南
 │   └── news-card/                   # Skill 主体
 │       ├── SKILL.md                 # Skill 入口指令
 │       ├── templates/
