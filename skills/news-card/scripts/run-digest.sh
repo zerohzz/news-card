@@ -6,9 +6,10 @@ set -euo pipefail
 # Usage: bash run-digest.sh [workspace_dir]
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
-OUTPUT_ROOT="$SKILL_DIR/output/$TIMESTAMP"
-WORK_DIR="${1:-$SKILL_DIR/workspace/$TIMESTAMP}"
+OUTPUT_ROOT="$PROJECT_ROOT/output/$TIMESTAMP"
+WORK_DIR="${1:-$PROJECT_ROOT/workspace/$TIMESTAMP}"
 SLIDES_DIR="$OUTPUT_ROOT/slides"
 IMAGES_DIR="$OUTPUT_ROOT/images"
 

@@ -10,7 +10,7 @@ npm install
 npx playwright install chromium
 
 # 说"今日 AI 日报"或运行：
-bash scripts/run-digest.sh
+bash skills/news-card/scripts/run-digest.sh
 ```
 
 ## 工作流
@@ -57,41 +57,39 @@ output/
 | Newsletter | Import AI, Ben's Bites, Latent Space, AI Snake Oil, One Useful Thing | 3–4 |
 | 独立博客 | Simon Willison's Weblog | 3 |
 
-## 目录结构
+## 项目结构
 
 ```
 news-card/
-├── SKILL.md                 # Claude Code 入口指令
+├── CLAUDE.md                        # Claude Code 项目指令
+├── README.md
 ├── package.json
-├── templates/
-│   ├── output.md            # Claude 填充的 Markdown 模板
-│   ├── cover.html           # 封面页
-│   ├── feature.html         # 第一梯队整页
-│   ├── half-page.html       # 第二梯队半页
-│   └── briefs.html          # 快讯 2×4 网格
-├── references/
-│   ├── sources-spec.md      # 信息源清单 + 抓取策略
-│   ├── scoring-spec.md      # 评分公式 + 阈值
-│   ├── density-spec.md      # 信息密度准则
-│   └── design-tokens.md     # 字体、色彩、字号
-├── scripts/
-│   ├── fetch-all.sh         # 并行抓取所有源
-│   ├── score.sh             # 评分 + 去重
-│   ├── screenshot.sh        # Playwright 截图
-│   ├── run-digest.sh        # 端到端主流程
-│   └── lib/
-│       ├── fetch-rss.js     # RSS/Atom 通用抓取器（22 源）
-│       ├── fetch-hackernews.js
-│       ├── fetch-huggingface.js
-│       ├── fetch-twitter.js # Guest mode，可选
-│       ├── score-engine.js  # 多维度评分引擎
-│       ├── dedup.js         # Jaccard 去重
-│       ├── render-html.js   # JSON → HTML
-│       └── screenshot-playwright.js
-├── examples/
-│   ├── sample-digest.json   # 16 条样例新闻
-│   └── sample-output.md     # 样例 Markdown 输出
-└── assets/fonts/            # 字体文件（可选）
+├── skills/
+│   └── news-card/                   # Skill 主体
+│       ├── SKILL.md                 # Skill 入口指令
+│       ├── templates/
+│       │   ├── output.md            # Claude 填充的 Markdown 模板
+│       │   ├── cover.html           # 封面页
+│       │   ├── feature.html         # 第一梯队整页
+│       │   ├── half-page.html       # 第二梯队半页
+│       │   └── briefs.html          # 快讯 2×4 网格
+│       ├── references/
+│       │   ├── sources-spec.md      # 信息源清单 + 抓取策略
+│       │   ├── scoring-spec.md      # 评分公式 + 阈值
+│       │   ├── density-spec.md      # 信息密度准则
+│       │   └── design-tokens.md     # 字体、色彩、字号
+│       ├── scripts/
+│       │   ├── fetch-all.sh         # 并行抓取所有源
+│       │   ├── score.sh             # 评分 + 去重
+│       │   ├── screenshot.sh        # Playwright 截图
+│       │   ├── run-digest.sh        # 端到端主流程
+│       │   └── lib/                 # Node.js 模块
+│       ├── examples/
+│       │   ├── sample-digest.json
+│       │   └── sample-output.md
+│       └── assets/fonts/
+├── workspace/                       # 中间数据（gitignored）
+└── output/                          # 最终产出（gitignored）
 ```
 
 ## 设计规范
@@ -105,22 +103,25 @@ news-card/
 
 ```bash
 # 仅抓取
-bash scripts/fetch-all.sh workspace/candidates.json
+bash skills/news-card/scripts/fetch-all.sh workspace/candidates.json
 
 # 仅评分
-bash scripts/score.sh workspace/candidates.json workspace/scored.json
+bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/scored.json
 
 # 仅渲染（需要 digest.json）
-node scripts/lib/render-html.js --input digest.json --templates templates --output output/slides
+node skills/news-card/scripts/lib/render-html.js \
+  --input digest.json \
+  --templates skills/news-card/templates \
+  --output output/slides
 
 # 仅截图
-bash scripts/screenshot.sh output/slides output/images
+bash skills/news-card/scripts/screenshot.sh output/slides output/images
 ```
 
 ## 作为 Claude Code Skill 安装
 
 ```bash
-cp -r news-card ~/.claude/skills/
+cp -r skills/news-card ~/.claude/skills/
 ```
 
 然后对 Claude 说「今日 AI 日报」即可触发。

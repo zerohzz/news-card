@@ -21,7 +21,7 @@ version: 0.1.0
 ### Step 1 — Fetch
 
 ```bash
-bash scripts/fetch-all.sh workspace/candidates.json
+bash skills/news-card/scripts/fetch-all.sh workspace/candidates.json
 ```
 
 抓取所有信息源，输出 `candidates.json`（每条含 title, url, source, published, summary, community_metrics）。
@@ -29,7 +29,7 @@ bash scripts/fetch-all.sh workspace/candidates.json
 ### Step 2 — Score + Dedup
 
 ```bash
-bash scripts/score.sh workspace/candidates.json workspace/scored.json
+bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/scored.json
 ```
 
 多维度评分 + 去重，输出 `scored.json`（按总分降序排列）。
@@ -68,7 +68,10 @@ bash scripts/score.sh workspace/candidates.json workspace/scored.json
 ### Step 4 — Render HTML
 
 ```bash
-node scripts/lib/render-html.js --input workspace/digest.json --templates templates --output output/<datetime>/slides
+node skills/news-card/scripts/lib/render-html.js \
+  --input workspace/digest.json \
+  --templates skills/news-card/templates \
+  --output output/<datetime>/slides
 ```
 
 将 digest.json 填入 HTML 模板，输出 8 个 HTML 文件到 `slides/` 子目录。
@@ -76,7 +79,7 @@ node scripts/lib/render-html.js --input workspace/digest.json --templates templa
 ### Step 5 — Screenshot
 
 ```bash
-bash scripts/screenshot.sh output/<datetime>/slides output/<datetime>/images
+bash skills/news-card/scripts/screenshot.sh output/<datetime>/slides output/<datetime>/images
 ```
 
 Playwright 截图，输出 8 张 PNG（1080×1920px @2x）到 `images/` 子目录。
@@ -85,7 +88,7 @@ Playwright 截图，输出 8 张 PNG（1080×1920px @2x）到 `images/` 子目�
 
 ## 输出目录结构
 
-每次运行在 `output/` 下创建以当前日期时间命名的子目录：
+每次运行在项目根目录的 `output/` 下创建以当前日期时间命名的子目录：
 
 ```
 output/
@@ -106,7 +109,7 @@ output/
 或使用一键脚本（自动创建带时间戳的目录）：
 
 ```bash
-bash scripts/run-digest.sh
+bash skills/news-card/scripts/run-digest.sh
 ```
 
 ---
