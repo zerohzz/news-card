@@ -8,13 +8,33 @@
  */
 
 import { chromium } from 'playwright';
-import { readdirSync, mkdirSync } from 'fs';
+import { readdirSync, mkdirSync, existsSync } from 'fs';
 import { resolve, join, basename } from 'path';
+import { homedir } from 'os';
 
 // Hardcoded — do not override
 const VIEWPORT_WIDTH = 1080;
 const VIEWPORT_HEIGHT = 1920;
 const DEVICE_SCALE_FACTOR = 2;
+
+/**
+ * Find the best available Chromium executable from Playwright cache.
+ */
+function findChromium() {
+  if (process.env.PLAYWRIGHT_CHROMIUM_PATH) return process.env.PLAYWRIGHT_CHROMIUM_PATH;
+  const cacheDir = join(homedir(), '.cache', 'ms-playwright');
+  try {
+    const dirs = readdirSync(cacheDir)
+      .filter((d) => d.startsWith('chromium-'))
+      .sort()
+      .reverse();
+    for (const d of dirs) {
+      const p = join(cacheDir, d, 'chrome-linux', 'chrome');
+      if (existsSync(p)) return p;
+    }
+  } catch {}
+  return undefined;
+}
 
 /**
  * Screenshot all HTML files in a directory.
@@ -34,7 +54,13 @@ async function screenshotAll(inputDir, outputDir) {
   console.error(`[screenshot] Found ${htmlFiles.length} HTML files`);
   console.error(`[screenshot] Viewport: ${VIEWPORT_WIDTH}×${VIEWPORT_HEIGHT} @${DEVICE_SCALE_FACTOR}x`);
 
+  const execPath = findChromium();
+  if (execPath) {
+    console.error(`[screenshot] Using Chromium at: ${execPath}`);
+  }
+
   const browser = await chromium.launch({
+    ...(execPath ? { executablePath: execPath } : {}),
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
@@ -55,15 +81,12 @@ async function screenshotAll(inputDir, outputDir) {
 
       // Load HTML file
       await page.goto(`file://${inputPath}`, {
-        waitUntil: 'networkidle',
-        timeout: 30000,
+        waitUntil: 'domcontentloaded',
+        timeout: 15000,
       });
 
-      // Wait for fonts to load
-      await page.evaluate(() => document.fonts.ready);
-
-      // Small extra wait for rendering
-      await page.waitForTimeout(500);
+      // Wait for rendering to settle
+      await page.waitForTimeout(1000);
 
       // Take screenshot
       await page.screenshot({

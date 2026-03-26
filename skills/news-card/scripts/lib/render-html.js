@@ -22,65 +22,110 @@ const CATEGORY_COLORS = {
 };
 
 /**
- * Simple template engine: replace {{var}} and process {{#each}} / {{#if}} blocks.
+ * Find the matching {{/each}} for a {{#each}} block, handling nesting.
+ * Returns the index of the start of the matching {{/each}} tag.
  */
-function renderTemplate(template, data) {
-  let result = template;
+function findMatchingEnd(str, startAfterOpen, tag = 'each') {
+  const openRe = new RegExp(`\\{\\{#${tag}\\s+\\w+\\}\\}`, 'g');
+  const closeRe = new RegExp(`\\{\\{/${tag}\\}\\}`, 'g');
+  let depth = 1;
+  let pos = startAfterOpen;
 
-  // Process {{#each collection}} ... {{/each}} blocks
-  result = result.replace(
-    /\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
-    (match, key, inner) => {
+  while (depth > 0 && pos < str.length) {
+    openRe.lastIndex = pos;
+    closeRe.lastIndex = pos;
+    const nextOpen = openRe.exec(str);
+    const nextClose = closeRe.exec(str);
+
+    if (!nextClose) return -1; // unmatched
+
+    if (nextOpen && nextOpen.index < nextClose.index) {
+      depth++;
+      pos = nextOpen.index + nextOpen[0].length;
+    } else {
+      depth--;
+      if (depth === 0) return nextClose.index;
+      pos = nextClose.index + nextClose[0].length;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Recursively render template blocks with context stack support.
+ */
+function renderTemplate(template, data, parentData) {
+  let result = '';
+  let cursor = 0;
+
+  while (cursor < template.length) {
+    // Look for next {{#each}} or {{#if}}
+    const eachMatch = template.slice(cursor).match(/\{\{#each\s+(\w+)\}\}/);
+    const ifMatch = template.slice(cursor).match(/\{\{#if\s+(\w+)\}\}/);
+
+    // Find the nearest block start
+    let nextBlock = null;
+    if (eachMatch && ifMatch) {
+      nextBlock = eachMatch.index <= ifMatch.index ? { type: 'each', match: eachMatch } : { type: 'if', match: ifMatch };
+    } else if (eachMatch) {
+      nextBlock = { type: 'each', match: eachMatch };
+    } else if (ifMatch) {
+      nextBlock = { type: 'if', match: ifMatch };
+    }
+
+    if (!nextBlock) {
+      // No more blocks — render remaining as plain text with variable substitution
+      result += template.slice(cursor);
+      break;
+    }
+
+    const blockStart = cursor + nextBlock.match.index;
+    const tagEnd = blockStart + nextBlock.match[0].length;
+    const key = nextBlock.match[1];
+
+    // Add text before this block
+    result += template.slice(cursor, blockStart);
+
+    // Find matching close tag
+    const closeIdx = findMatchingEnd(template, tagEnd, nextBlock.type);
+    if (closeIdx === -1) {
+      // Unmatched — output raw
+      result += nextBlock.match[0];
+      cursor = tagEnd;
+      continue;
+    }
+
+    const inner = template.slice(tagEnd, closeIdx);
+    const closeTagLen = nextBlock.type === 'each' ? '{{/each}}'.length : '{{/if}}'.length;
+
+    if (nextBlock.type === 'each') {
       const items = data[key] || [];
-      return items
-        .map((item, index) => {
-          const itemData = { ...item, '@index': index };
-          // Handle {{../var}} for parent context
-          let rendered = inner.replace(/\{\{\.\.\/(\w+)\}\}/g, (m, parentKey) => {
-            return item[parentKey] !== undefined ? item[parentKey] : data[parentKey] || '';
-          });
-          // Handle nested {{#each}} — one level deep
-          rendered = rendered.replace(
-            /\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
-            (m2, subKey, subInner) => {
-              const subItems = itemData[subKey] || [];
-              return subItems
-                .map((subItem) => {
-                  let subRendered = subInner;
-                  // Parent of nested each
-                  subRendered = subRendered.replace(/\{\{\.\.\/(\w+)\}\}/g, (m3, pk) => {
-                    return itemData[pk] !== undefined ? itemData[pk] : '';
-                  });
-                  // Sub-item vars
-                  subRendered = subRendered.replace(/\{\{(\w+)\}\}/g, (m3, sk) => {
-                    return subItem[sk] !== undefined ? subItem[sk] : '';
-                  });
-                  return subRendered;
-                })
-                .join('');
-            }
-          );
-          // Render item-level variables
-          rendered = rendered.replace(/\{\{(\w+)\}\}/g, (m, k) => {
-            return itemData[k] !== undefined ? itemData[k] : data[k] || '';
-          });
-          return rendered;
-        })
-        .join('');
+      for (const item of items) {
+        // Recursively render inner block with item as data, current data as parent
+        const rendered = renderTemplate(inner, item, data);
+        result += rendered;
+      }
+    } else if (nextBlock.type === 'if') {
+      if (data[key]) {
+        result += renderTemplate(inner, data, parentData);
+      }
     }
-  );
 
-  // Process {{#if var}} ... {{/if}} blocks
-  result = result.replace(
-    /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
-    (match, key, inner) => {
-      return data[key] ? inner : '';
-    }
-  );
+    cursor = closeIdx + closeTagLen;
+  }
 
-  // Replace remaining {{var}} placeholders
-  result = result.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    return data[key] !== undefined ? data[key] : '';
+  // Replace {{../var}} — parent context
+  if (parentData) {
+    result = result.replace(/\{\{\.\.\/(\w+)\}\}/g, (m, k) => {
+      return parentData[k] !== undefined ? String(parentData[k]) : '';
+    });
+  }
+
+  // Replace {{var}} — current context, fall back to parent
+  result = result.replace(/\{\{(\w+)\}\}/g, (m, k) => {
+    if (data[k] !== undefined) return String(data[k]);
+    if (parentData && parentData[k] !== undefined) return String(parentData[k]);
+    return '';
   });
 
   return result;

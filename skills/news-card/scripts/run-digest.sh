@@ -2,16 +2,24 @@
 set -euo pipefail
 
 # End-to-end AI news digest pipeline.
+# Each run creates: output/<YYYY-MM-DD_HH-MM-SS>/slides/ + images/
 # Usage: bash run-digest.sh [workspace_dir]
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-WORK_DIR="${1:-$SKILL_DIR/workspace/$(date +%Y-%m-%d)}"
-mkdir -p "$WORK_DIR"
+PROJECT_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
+TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+OUTPUT_ROOT="$PROJECT_ROOT/output/$TIMESTAMP"
+WORK_DIR="${1:-$PROJECT_ROOT/workspace/$TIMESTAMP}"
+SLIDES_DIR="$OUTPUT_ROOT/slides"
+IMAGES_DIR="$OUTPUT_ROOT/images"
+
+mkdir -p "$WORK_DIR" "$SLIDES_DIR" "$IMAGES_DIR"
 
 echo "============================================"
 echo "  News Card — AI 日报生成管线"
 echo "  Workspace: $WORK_DIR"
-echo "  Date: $(date +%Y-%m-%d)"
+echo "  Output:    $OUTPUT_ROOT"
+echo "  Date: $(date +%Y-%m-%d %H:%M:%S)"
 echo "============================================"
 
 echo ""
@@ -37,8 +45,8 @@ else
   echo "   或手动创建 $WORK_DIR/digest.json"
   echo ""
   echo "   提示: 你可以单独运行 Step 4-5:"
-  echo "   node $SKILL_DIR/scripts/lib/render-html.js --input $WORK_DIR/digest.json --templates $SKILL_DIR/templates --output $WORK_DIR/html"
-  echo "   bash $SKILL_DIR/scripts/screenshot.sh $WORK_DIR/html $WORK_DIR/output"
+  echo "   node $SKILL_DIR/scripts/lib/render-html.js --input $WORK_DIR/digest.json --templates $SKILL_DIR/templates --output $SLIDES_DIR"
+  echo "   bash $SKILL_DIR/scripts/screenshot.sh $SLIDES_DIR $IMAGES_DIR"
   exit 0
 fi
 
@@ -47,15 +55,19 @@ echo "=== Step 4/5: Render HTML ==="
 node "$SKILL_DIR/scripts/lib/render-html.js" \
   --input "$WORK_DIR/digest.json" \
   --templates "$SKILL_DIR/templates" \
-  --output "$WORK_DIR/html"
+  --output "$SLIDES_DIR"
 
 echo ""
 echo "=== Step 5/5: Screenshot ==="
-bash "$SKILL_DIR/scripts/screenshot.sh" "$WORK_DIR/html" "$WORK_DIR/output"
+bash "$SKILL_DIR/scripts/screenshot.sh" "$SLIDES_DIR" "$IMAGES_DIR"
+
+# Copy digest.json to output for reference
+cp "$WORK_DIR/digest.json" "$OUTPUT_ROOT/digest.json" 2>/dev/null || true
 
 echo ""
 echo "============================================"
 echo "  ✅ 完成！"
-echo "  PNG 输出: $WORK_DIR/output/"
-echo "  HTML 中间产物: $WORK_DIR/html/"
+echo "  输出目录: $OUTPUT_ROOT"
+echo "    slides/ — 8 个 HTML 文件"
+echo "    images/ — 8 张 PNG 卡片 (1080×1920 @2x)"
 echo "============================================"
