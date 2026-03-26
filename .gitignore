@@ -2,3 +2,4 @@ node_modules/
 workspace/
 output/
 *.png
+autoresearch-news-card/run-*/
