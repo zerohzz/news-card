@@ -54,7 +54,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
   "tier": 1,
   "headline_zh": "≤25 字，零情绪化",
   "headline_en": "English headline",
-  "summary_zh": "第一梯队 150 字 / 第二梯队 80 字 / 第三梯队 30 字",
+  "summary_zh": "第一梯队 150 字 / 第二梯队 150 字（两段） / 第三梯队 60 字（一段）",
   "content_html": "（仅第一梯队）富 HTML 内容，包含语义组件",
   "source": "来源名",
   "source_url": "原文链接",
@@ -97,6 +97,39 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 - 所有 HTML class 名必须使用上表中列出的 class（模板已定义样式）
 
 将完整 JSON 写入 `workspace/digest.json`。
+
+### 第二梯队内容填充规则
+
+第二梯队每条新闻的 `summary_zh` 必须包含 **至少 150 字**，分为两个自然段：
+- 第一段：事件本身的描述（什么、谁、何时）
+- 第二段：影响分析或背景补充（为什么重要、后续会怎样）
+
+不要让半页留白太多。即使是次要内容，也有充足的空间展开。
+
+### 第三梯队内容填充规则
+
+第三梯队每条新闻的 `summary_zh` 必须包含 **至少 60 字**，写满一个完整自然段。不要只写一句话。
+在允许范围内尽量充实内容，包括关键数据点或背景信息。
+
+### 选题准则（参考顶级 Newsletter 方法论）
+
+选题时，每条新闻必须通过以下至少一个测试：
+
+1. **转发测试**（TLDR 方法论）：「你会不会把这个转发给朋友？」— 如果不会，不入选
+2. **行动测试**（Rundown AI 方法论）：「读者能不能在 5 分钟内基于这条新闻做出行动？」
+3. **利他测试**：「这条新闻是否让人想要收藏或转发给别人？」
+
+**优先选择：**
+- 多个信息源同时报道的事件（交叉验证 = 真正重要）
+- 社交媒体高互动内容（likes > 1000, HN > 100 分）
+- 有新工具/产品可以立即使用的发布类新闻
+- AI 在某个领域超越人类能力的突破（Superhuman AI 方法论）
+
+**排除标准：**
+- 没有具体信息量的泛泛评论文章
+- 重复此前已报道过的相同事件
+- 纯融资/人事变动（除非金额或人物足够重磅）
+- 缺乏具体细节的传闻或预测
 
 ### Step 4 — Render HTML
 
