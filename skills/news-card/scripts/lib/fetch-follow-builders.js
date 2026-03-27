@@ -12,6 +12,13 @@ const FEED_X_URL = 'https://raw.githubusercontent.com/zarazhangrui/follow-builde
 const FEED_PODCASTS_URL = 'https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-podcasts.json';
 const FEED_BLOGS_URL = 'https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-blogs.json';
 
+// X/Twitter source authority by tier (sources-spec.md v2)
+const X_AUTHORITY_TIERS = {
+  'claudeai': 3, 'sama': 3, 'OpenAI': 3, 'AnthropicAI': 3, 'GoogleAI': 3,
+  'petergyang': 1, 'thenanyu': 1, 'madhuguru_': 1, 'garrytan': 1, 'mattturck': 1, 'zarazhang': 1,
+};
+const X_DEFAULT_AUTHORITY = 2;
+
 const REQUEST_TIMEOUT_MS = 30000;
 const PREFIX = '[fetch-fb]';
 
@@ -64,7 +71,8 @@ function convertTweet(builder, tweet) {
     source: `X/@${builder.handle} (${builder.name})`,
     published: tweet.createdAt || '',
     summary: text,
-    authority: 5,
+    authority: X_AUTHORITY_TIERS[builder.handle?.replace(/^@/, '')] ?? X_DEFAULT_AUTHORITY,
+    requires_confirmation: true,
     community_metrics: {
       likes: tweet.likes || 0,
       comments: tweet.replies || 0,
