@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <!-- ⚠️ DENSITY CHECK: 封面页文字内容必须占据视觉面积的 60% 以上 -->
 <!-- 参见 references/density-spec.md -->
+<!-- ⚠️ SAFE AREA: Top 180px and bottom 180px may be cropped in XiaoHongShu feed (3:4 display) -->
+<!-- All critical content must be within the center 1080×1440 zone -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -26,7 +28,7 @@
 
   html, body {
     width: 1080px;
-    height: 1920px;
+    height: 1800px;
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -36,12 +38,31 @@
   }
 
   .page {
+    position: relative;
     width: 1080px;
-    height: 1920px;
+    height: 1800px;
     display: flex;
     flex-direction: column;
     padding: 48px 60px 36px;
     box-sizing: border-box;
+  }
+
+  /* Centers header+categories as a unified block in the safe zone */
+  .content-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    filter: url(#grain);
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
   }
 
   .header {
@@ -52,34 +73,35 @@
   .header .date {
     font-family: var(--font-en);
     font-size: 20px;
+    font-weight: 300;
     color: var(--text-mid);
-    letter-spacing: 2px;
+    letter-spacing: 4px;
     text-transform: uppercase;
   }
 
   .header h1 {
-    font-size: 60px;
+    font-size: 72px;
     font-weight: 900;
     margin: 6px 0 4px;
     line-height: 1.2;
+    letter-spacing: 8px;
   }
 
   .header .subtitle {
-    font-size: 22px;
+    font-size: 28px;
     color: var(--text-mid);
     font-weight: 400;
   }
 
   .divider {
     width: 100%;
-    height: 3px;
+    height: 6px;
     background: linear-gradient(90deg, var(--accent), var(--divider));
     margin-bottom: 24px;
-    border-radius: 2px;
+    border-radius: 3px;
   }
 
   .categories {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -93,11 +115,11 @@
 
   .cat-label {
     flex-shrink: 0;
-    width: 96px;
-    padding: 6px 0;
+    width: 100px;
+    padding: 8px 0;
     border-radius: 6px;
     color: #FFFFFF;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     text-align: center;
     line-height: 1.3;
@@ -116,8 +138,9 @@
     gap: 10px;
     padding: 5px 12px;
     background: var(--card);
-    border-radius: 6px;
+    border-radius: 8px;
     border-left: 4px solid transparent;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   }
 
   .cat-item .tier-badge {
@@ -136,7 +159,7 @@
   .cat-item .title {
     font-size: 24px;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.35;
     flex: 1;
   }
 
@@ -148,29 +171,32 @@
   }
 
   .footer {
-    margin-top: auto;
     padding-top: 12px;
     border-top: 1px solid var(--divider);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 16px;
-    color: var(--text-mid);
+    font: 400 18px/1 var(--font-en);
+    color: var(--text-dim);
+    margin-top: auto;
   }
 
   .footer .brand {
     font-weight: 700;
     color: var(--accent);
-    font-family: var(--font-en);
   }
+
+  .footer .date-center { text-align: center; }
+  .footer .spacer { width: 80px; }
 </style>
 </head>
 <body>
 <div class="page">
+  <div class="content-group">
   <div class="header">
     <div class="date">{{date}}</div>
     <h1>AI 日报</h1>
-    <div class="subtitle">今日 AI 领域 {{total}} 条精选</div>
+    <div class="subtitle">今日 AI 领域 {{total}} 条精选 · 来自 {{sourceCount}} 条候选</div>
   </div>
   <div class="divider"></div>
   <div class="categories">
@@ -189,10 +215,18 @@
     </div>
     {{/each}}
   </div>
+  </div>
   <div class="footer">
     <span class="brand">News Card</span>
-    <span>{{date}} · 第 {{issue}} 期</span>
+    <span class="date-center">{{date}} · 第 {{issue}} 期</span>
+    <span class="spacer"></span>
   </div>
 </div>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+</svg>
 </body>
 </html>

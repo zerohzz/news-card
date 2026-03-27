@@ -27,12 +27,17 @@ PID_BLOGS=$!
 node "$SKILL_DIR/scripts/lib/fetch-follow-builders.js" --output "$TMPDIR/follow-builders.json" &
 PID_FB=$!
 
+echo "--- Newsletter signals ---"
+node "$SKILL_DIR/scripts/lib/fetch-newsletters.js" --output "$TMPDIR/newsletter-signals.json" &
+PID_NL=$!
+
 # Wait for all fetchers
 wait $PID_RSS || echo "⚠️  RSS fetch had errors (partial results may exist)"
 wait $PID_HN || echo "⚠️  HN fetch had errors"
 wait $PID_HF || echo "⚠️  HF fetch had errors"
 wait $PID_BLOGS || echo "⚠️  Blog scraper had errors (continuing)"
 wait $PID_FB || echo "⚠️  Follow-builders fetch had errors (continuing)"
+wait $PID_NL || echo "⚠️  Newsletter signals had errors (continuing)"
 
 # Merge all JSON arrays into one
 node -e "
@@ -50,5 +55,11 @@ for (const f of files) {
 console.error('[merge] Total candidates: ' + all.length);
 writeFileSync('$OUTPUT', JSON.stringify(all, null, 2));
 "
+
+# Copy newsletter signals alongside candidates
+if [ -f "$TMPDIR/newsletter-signals.json" ]; then
+  cp "$TMPDIR/newsletter-signals.json" "${OUTPUT%/*}/newsletter-signals.json" 2>/dev/null || true
+  cp "$TMPDIR/newsletter-signals.json" "$(dirname "$OUTPUT")/newsletter-signals.json" 2>/dev/null || true
+fi
 
 echo "✅ Wrote $(node -e "import{readFileSync as r}from'fs';console.log(JSON.parse(r('$OUTPUT','utf-8')).length)") candidates to $OUTPUT"

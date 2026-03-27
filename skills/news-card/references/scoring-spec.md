@@ -7,6 +7,8 @@ total_score = cross_validation × 2.0
             + community_heat  × 1.5
             + authority        × 1.0
             + recency          × 0.8
+            + virality         × 1.2
+            + actionability    × 0.6
 ```
 
 ---
@@ -78,3 +80,60 @@ Tokenize 规则：
 - 转小写
 - 去除标点和停用词（a, an, the, is, are, was, were, in, on, at, to, for, of, and, or, but, with）
 - 按空格分词
+
+---
+
+## 新增评分维度
+
+### 传播力 (virality) — 权重 1.2
+
+基于社交媒体互动数据评估新闻的传播力。灵感来源于 TLDR Newsletter 的「转发测试」（Would I forward this to my group chat?）。
+
+| 来源类型 | 5 分 | 4 分 | 3 分 | 2 分 | 1 分 |
+|---------|------|------|------|------|------|
+| X/Twitter | ≥5000 赞 | ≥1000 赞 | ≥500 赞 | ≥100 赞 | >0 赞 |
+| HN/其他 | ≥200 分 | ≥100 分 | ≥50 分 | ≥20 分 | >0 分 |
+
+### 可操作性 (actionability) — 权重 0.6
+
+基于标题和摘要中的关键词评估新闻的可操作性。灵感来源于 The Rundown AI 的「5分钟行动测试」。
+
+| 分数 | 触发词 | 含义 |
+|------|--------|------|
+| 3 | launch, release, open-source, announce, available, free | 高可操作性：有新工具/产品可以立即使用 |
+| 2 | raise, acquire, partner, invest, fund, merge | 中可操作性：有商业动态值得关注 |
+| 1 | 其他 | 低可操作性：分析/评论类内容 |
+
+## 同行评审 (peer_review) — 权重 3.0（最高）
+
+基于顶级 AI/Tech Newsletter 编辑的独立选题判断。如果一条新闻被多个专业编辑同时选中，说明它确实重要。类似学术界的「同行评审」机制。
+
+**信号来源：**
+- Ben's Bites (RSS) — AI 工具和 builder 圈最有影响力的 newsletter
+- Import AI (RSS) — AI 研究和政策领域的权威 newsletter (Jack Clark)
+- Platformer (RSS) — 科技平台与民主治理的深度报道
+- TLDR AI (Archive scraping) — 最大的每日 AI digest
+
+**评分规则：**
+
+| 被提及 Newsletter 数 | 分数 | 含义 |
+|---------------------|------|------|
+| 4 个 | 5 | 全行业共识的重大新闻 |
+| 3 个 | 4 | 多数编辑认为重要 |
+| 2 个 | 3 | 有一定关注度 |
+| 1 个 | 2 | 至少一位编辑关注 |
+| 0 个 | 0 | 未被任何 newsletter 覆盖 |
+
+**匹配策略：**
+1. URL 精确匹配（去除协议、www、尾斜杠、query 参数）
+2. 标题词重叠（Jaccard 系数 > 0.4）
+3. TLDR 关键词匹配（标题包含 TLDR 提取的话题关键词）
+
+**Sponsor 过滤：** 自动过滤 newsletter 中的赞助内容（"sponsored by", "brought to you by" 等关键词），避免商业推广污染评分。
+
+**更新后的完整评分公式：**
+```
+total = cross_validation × 2.0 + community × 1.5 + authority × 1.0 +
+        recency × 0.8 + virality × 1.2 + actionability × 0.6 +
+        peer_review × 3.0
+```

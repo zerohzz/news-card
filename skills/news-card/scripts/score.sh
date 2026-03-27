@@ -11,7 +11,14 @@ TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
 echo "=== Scoring candidates ==="
-node "$SKILL_DIR/scripts/lib/score-engine.js" --input "$INPUT" --output "$TMPDIR/scored.json"
+SIGNALS_FILE="$(dirname "$INPUT")/newsletter-signals.json"
+SIGNALS_ARG=""
+if [ -f "$SIGNALS_FILE" ]; then
+  SIGNALS_ARG="--signals $SIGNALS_FILE"
+  echo "📰 Using newsletter signals from $SIGNALS_FILE"
+fi
+
+node "$SKILL_DIR/scripts/lib/score-engine.js" --input "$INPUT" --output "$TMPDIR/scored.json" $SIGNALS_ARG
 
 echo "=== Deduplicating ==="
 node "$SKILL_DIR/scripts/lib/dedup.js" --input "$TMPDIR/scored.json" --output "$OUTPUT"

@@ -137,15 +137,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 16px;
-    color: var(--text-mid);
+    font: 400 18px/1 var(--font-en);
+    color: var(--text-dim);
   }
 
   .footer .brand {
     font-weight: 700;
     color: var(--accent);
-    font-family: var(--font-en);
   }
+
+  .footer .date-center { text-align: center; }
+  .footer .spacer { width: 80px; }
 </style>
 </head>
 <body>
@@ -172,7 +174,8 @@
 
   <div class="footer">
     <span class="brand">News Card</span>
-    <span>{{date}} · 第 {{issue}} 期</span>
+    <span class="date-center">{{date}} · 第 {{issue}} 期</span>
+    <span class="spacer"></span>
   </div>
 </div>
 </body>

@@ -14,7 +14,8 @@ import { homedir } from 'os';
 
 // Hardcoded — do not override
 const VIEWPORT_WIDTH = 1080;
-const VIEWPORT_HEIGHT = 1920;
+const VIEWPORT_HEIGHT_DEFAULT = 1920;
+const VIEWPORT_HEIGHT_COVER = 1800;
 const DEVICE_SCALE_FACTOR = 2;
 
 /**
@@ -52,7 +53,7 @@ async function screenshotAll(inputDir, outputDir) {
   }
 
   console.error(`[screenshot] Found ${htmlFiles.length} HTML files`);
-  console.error(`[screenshot] Viewport: ${VIEWPORT_WIDTH}×${VIEWPORT_HEIGHT} @${DEVICE_SCALE_FACTOR}x`);
+  console.error(`[screenshot] Viewport: ${VIEWPORT_WIDTH}×${VIEWPORT_HEIGHT_DEFAULT} (default) / ${VIEWPORT_WIDTH}×${VIEWPORT_HEIGHT_COVER} (cover) @${DEVICE_SCALE_FACTOR}x`);
 
   const execPath = findChromium();
   if (execPath) {
@@ -65,7 +66,7 @@ async function screenshotAll(inputDir, outputDir) {
   });
 
   const context = await browser.newContext({
-    viewport: { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT },
+    viewport: { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT_DEFAULT },
     deviceScaleFactor: DEVICE_SCALE_FACTOR,
   });
 
@@ -82,7 +83,11 @@ async function screenshotAll(inputDir, outputDir) {
     const outputPath = join(outputDir, pngName);
 
     try {
+      const isCover = htmlFile.includes('cover');
+      const viewportHeight = isCover ? VIEWPORT_HEIGHT_COVER : VIEWPORT_HEIGHT_DEFAULT;
+
       const page = await context.newPage();
+      await page.setViewportSize({ width: VIEWPORT_WIDTH, height: viewportHeight });
 
       // Load HTML file
       await page.goto(`file://${inputPath}`, {
@@ -100,7 +105,7 @@ async function screenshotAll(inputDir, outputDir) {
           x: 0,
           y: 0,
           width: VIEWPORT_WIDTH,
-          height: VIEWPORT_HEIGHT,
+          height: viewportHeight,
         },
       });
 
