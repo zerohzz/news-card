@@ -34,14 +34,14 @@
 
 ## 行业 Newsletter（authority_weight: 3–4）
 
-| 源 | 类型 | URL | Fetch 策略 | authority |
-|----|------|-----|-----------|-----------|
-| Import AI (Jack Clark) | RSS | `https://importai.substack.com/feed` | summary | 4 |
-| Latent Space | RSS | `https://www.latent.space/feed` | summary | 3 |
-| Interconnects (Nathan Lambert) | RSS | `https://www.interconnects.ai/feed` | summary | 3 |
-| AI Snake Oil | RSS | `https://aisnakeoil.substack.com/feed` | summary | 4 |
-| One Useful Thing (Ethan Mollick) | RSS | `https://www.oneusefulthing.org/feed` | summary | 3 |
-| Ahead of AI (Sebastian Raschka) | RSS | `https://magazine.sebastianraschka.com/feed` | summary | 3 |
+| 源 | 类型 | URL | Fetch 策略 | authority | status |
+|----|------|-----|-----------|-----------|--------|
+| Import AI (Jack Clark) | RSS | `https://importai.substack.com/feed` | summary | 4 | active |
+| Latent Space | RSS | `https://www.latent.space/feed` | summary | 3 | active |
+| Interconnects (Nathan Lambert) | RSS | `https://www.interconnects.ai/feed` | summary | 3 | active |
+| AI Snake Oil | RSS | `https://aisnakeoil.substack.com/feed` | summary | 4 | active |
+| One Useful Thing (Ethan Mollick) | RSS | `https://www.oneusefulthing.org/feed` | summary | 3 | active |
+| Ahead of AI (Sebastian Raschka) | RSS | `https://magazine.sebastianraschka.com/feed` | summary | 3 | active |
 
 > **Removed (404 as of 2026-03-27):** Ben's Bites (`bensbites.beehiiv.com/feed`)
 
@@ -51,37 +51,56 @@
 |----|------|-----|-----------|
 | Simon Willison's Weblog | RSS | `https://simonwillison.net/atom/everything/` | metadata |
 
-## AI Builders on X（authority_weight: 5）
+## AI Builders on X（发现源）
+
+> **X Source Policy**: 所有 X/Twitter 源均标记 `requires_confirmation: true`。
+> X 单源内容（无其他独立来源交叉验证）不允许进入第一梯队。可作为早期信号保留在候选池中。
 
 来源：[follow-builders](https://github.com/zarazhangrui/follow-builders) — 追踪真正在构建产品的一线 AI 从业者。
 
-| 源 | 类型 | URL | Fetch 策略 |
-|----|------|-----|-----------|
-| [Andrej Karpathy](https://x.com/karpathy) | X/Twitter | `https://x.com/karpathy` | title_only |
-| [Swyx](https://x.com/swyx) | X/Twitter | `https://x.com/swyx` | title_only |
-| [Josh Woodward](https://x.com/joshwoodward) | X/Twitter | `https://x.com/joshwoodward` | title_only |
-| [Kevin Weil](https://x.com/kevinweil) | X/Twitter | `https://x.com/kevinweil` | title_only |
-| [Peter Yang](https://x.com/petergyang) | X/Twitter | `https://x.com/petergyang` | title_only |
-| [Nan Yu](https://x.com/thenanyu) | X/Twitter | `https://x.com/thenanyu` | title_only |
-| [Madhu Guru](https://x.com/realmadhuguru) | X/Twitter | `https://x.com/realmadhuguru` | title_only |
-| [Amanda Askell](https://x.com/AmandaAskell) | X/Twitter | `https://x.com/AmandaAskell` | title_only |
-| [Cat Wu](https://x.com/_catwu) | X/Twitter | `https://x.com/_catwu` | title_only |
-| [Thariq](https://x.com/trq212) | X/Twitter | `https://x.com/trq212` | title_only |
-| [Google Labs](https://x.com/GoogleLabs) | X/Twitter | `https://x.com/GoogleLabs` | title_only |
-| [Amjad Masad](https://x.com/amasad) | X/Twitter | `https://x.com/amasad` | title_only |
-| [Guillermo Rauch](https://x.com/rauchg) | X/Twitter | `https://x.com/rauchg` | title_only |
-| [Alex Albert](https://x.com/alexalbert__) | X/Twitter | `https://x.com/alexalbert__` | title_only |
-| [Aaron Levie](https://x.com/levie) | X/Twitter | `https://x.com/levie` | title_only |
-| [Ryo Lu](https://x.com/ryolu_) | X/Twitter | `https://x.com/ryolu_` | title_only |
-| [Garry Tan](https://x.com/garrytan) | X/Twitter | `https://x.com/garrytan` | title_only |
-| [Matt Turck](https://x.com/mattturck) | X/Twitter | `https://x.com/mattturck` | title_only |
-| [Zara Zhang](https://x.com/zarazhangrui) | X/Twitter | `https://x.com/zarazhangrui` | title_only |
-| [Nikunj Kothari](https://x.com/nikunj) | X/Twitter | `https://x.com/nikunj` | title_only |
-| [Peter Steinberger](https://x.com/steipete) | X/Twitter | `https://x.com/steipete` | title_only |
-| [Dan Shipper](https://x.com/danshipper) | X/Twitter | `https://x.com/danshipper` | title_only |
-| [Aditya Agarwal](https://x.com/adityaag) | X/Twitter | `https://x.com/adityaag` | title_only |
-| [Sam Altman](https://x.com/sama) | X/Twitter | `https://x.com/sama` | title_only |
-| [Claude](https://x.com/claudeai) | X/Twitter | `https://x.com/claudeai` | title_only |
+### Tier A — 官方/公司账号（authority_weight: 3）
+
+| 账号 | 类型 | Fetch 策略 | requires_confirmation |
+|------|------|-----------|----------------------|
+| [Claude](https://x.com/claudeai) (@claudeai) | X/Twitter | title_only | true |
+| [Sam Altman](https://x.com/sama) (@sama) | X/Twitter | title_only | true |
+| [OpenAI](https://x.com/OpenAI) (@OpenAI) | X/Twitter | title_only | true |
+| [AnthropicAI](https://x.com/AnthropicAI) (@AnthropicAI) | X/Twitter | title_only | true |
+| [GoogleAI](https://x.com/GoogleAI) (@GoogleAI) | X/Twitter | title_only | true |
+| [Google Labs](https://x.com/GoogleLabs) (@GoogleLabs) | X/Twitter | title_only | true |
+
+### Tier B — Builder/从业者（authority_weight: 2）
+
+| 账号 | 类型 | Fetch 策略 | requires_confirmation |
+|------|------|-----------|----------------------|
+| [Andrej Karpathy](https://x.com/karpathy) (@karpathy) | X/Twitter | title_only | true |
+| [Swyx](https://x.com/swyx) (@swyx) | X/Twitter | title_only | true |
+| [Kevin Weil](https://x.com/kevinweil) (@kevinweil) | X/Twitter | title_only | true |
+| [Yann LeCun](https://x.com/ylecun) (@ylecun) | X/Twitter | title_only | true |
+| [Josh Woodward](https://x.com/joshwoodward) (@joshwoodward) | X/Twitter | title_only | true |
+| [Alex Albert](https://x.com/alexalbert__) (@alexalbert__) | X/Twitter | title_only | true |
+| [Amanda Askell](https://x.com/AmandaAskell) (@AmandaAskell) | X/Twitter | title_only | true |
+| [Amjad Masad](https://x.com/amasad) (@amasad) | X/Twitter | title_only | true |
+| [Guillermo Rauch](https://x.com/rauchg) (@rauchg) | X/Twitter | title_only | true |
+| [Aaron Levie](https://x.com/levie) (@levie) | X/Twitter | title_only | true |
+| [Thariq](https://x.com/trq212) (@trq212) | X/Twitter | title_only | true |
+| [Ryo Lu](https://x.com/ryolu_) (@ryolu_) | X/Twitter | title_only | true |
+| [Nikunj Kothari](https://x.com/nikunj) (@nikunj) | X/Twitter | title_only | true |
+| [Peter Steinberger](https://x.com/steipete) (@steipete) | X/Twitter | title_only | true |
+| [Dan Shipper](https://x.com/danshipper) (@danshipper) | X/Twitter | title_only | true |
+| [Aditya Agarwal](https://x.com/adityaag) (@adityaag) | X/Twitter | title_only | true |
+| [Cat Wu](https://x.com/_catwu) (@_catwu) | X/Twitter | title_only | true |
+
+### Tier C — 评论/投资者（authority_weight: 1）
+
+| 账号 | 类型 | Fetch 策略 | requires_confirmation |
+|------|------|-----------|----------------------|
+| [Peter Yang](https://x.com/petergyang) (@petergyang) | X/Twitter | title_only | true |
+| [Nan Yu](https://x.com/thenanyu) (@thenanyu) | X/Twitter | title_only | true |
+| [Madhu Guru](https://x.com/realmadhuguru) (@realmadhuguru) | X/Twitter | title_only | true |
+| [Garry Tan](https://x.com/garrytan) (@garrytan) | X/Twitter | title_only | true |
+| [Matt Turck](https://x.com/mattturck) (@mattturck) | X/Twitter | title_only | true |
+| [Zara Zhang](https://x.com/zarazhangrui) (@zarazhangrui) | X/Twitter | title_only | true |
 
 ## AI Builders 官方博客（authority_weight: 5）
 
@@ -90,21 +109,51 @@
 | [Anthropic Engineering](https://www.anthropic.com/engineering) | Web | `https://www.anthropic.com/engineering` | metadata |
 | [Claude Blog](https://claude.com/blog) | Web | `https://claude.com/blog` | metadata |
 
-## AI Builders 播客（authority_weight: 5）
+## AI Builders 播客（authority_weight: 3）
 
-| 源 | 类型 | URL | Fetch 策略 |
-|----|------|-----|-----------|
-| Latent Space (Podcast) | RSS | `https://www.latent.space/feed` | summary |
-| Training Data | RSS | — | summary |
-| No Priors | RSS | — | summary |
-| Unsupervised Learning | RSS | — | summary |
-| Data Driven NYC | RSS | — | summary |
+| 源 | 类型 | URL | Fetch 策略 | status |
+|----|------|-----|-----------|--------|
+| Latent Space (Podcast) | RSS | `https://www.latent.space/feed` | summary | active |
+| Training Data | RSS | — | summary | placeholder |
+| No Priors | RSS | — | summary | placeholder |
+| Unsupervised Learning | RSS | — | summary | placeholder |
+| Data Driven NYC | RSS | — | summary | placeholder |
 
-## 其他社交媒体（authority_weight: 2–3）
+## 中文 / 亚洲信息源
 
-| 源 | 类型 | 账号/话题 | Fetch 策略 |
-|----|------|----------|-----------|
-| X/Twitter | Rettiwt API | @OpenAI, @AnthropicAI, @GoogleAI, @ylecun, @kaborez | title_only |
+<!-- implementation_status: pending_verification -->
+
+> 所有中文/亚洲源处于验证阶段，需确认 RSS/API 可用性后方可激活。
+
+| 源 | 类型 | URL | Fetch 策略 | authority_weight | status |
+|----|------|-----|-----------|-----------------|--------|
+| 机器之心 (Synced) | RSS | `https://www.jiqizhixin.com/rss` | metadata | 4 | pending_verification |
+| DeepSeek Blog | Web | `https://www.deepseek.com/blog` | metadata | 5 | pending_verification |
+| 量子位 (QbitAI) | RSS | `https://www.qbitai.com/feed` | metadata | 3 | pending_verification |
+| 通义官方博客 | Web | — | title_only | 5 | pending_verification |
+| 智谱官方博客 | Web | — | title_only | 5 | pending_verification |
+| Sakana AI | Web | `https://sakana.ai/blog` | title_only | 5 | pending_verification |
+
+## 研究源
+
+<!-- implementation_status: pending_verification -->
+
+| 源 | 类型 | URL | Fetch 策略 | authority_weight | status |
+|----|------|-----|-----------|-----------------|--------|
+| arXiv CS.AI / CS.CL / CS.LG | API | `https://export.arxiv.org/api/query?...` | metadata | 4 | pending_verification |
+| Papers With Code (trending) | API | `https://paperswithcode.com/api/v1/papers/` | metadata | 3 | pending_verification |
+| GitHub Trending ML/AI | Web | `https://github.com/trending?since=daily` | title_only | 2 | pending_verification |
+
+## 类别补缺源
+
+<!-- implementation_status: pending_verification -->
+
+| 源 | 类型 | URL | Fetch 策略 | authority_weight | status | 补缺类别 |
+|----|------|-----|-----------|-----------------|--------|---------|
+| NIST AI | RSS | `https://www.nist.gov/artificial-intelligence/rss.xml` | metadata | 4 | pending_verification | 政策监管 |
+| Alignment Forum | RSS | `https://www.alignmentforum.org/feed.xml` | summary | 4 | pending_verification | 安全对齐 |
+| AWS Machine Learning Blog | RSS | `https://aws.amazon.com/blogs/machine-learning/feed/` | metadata | 3 | pending_verification | 开发工具 |
+| Azure AI Blog | RSS | — | metadata | 3 | pending_verification | 开发工具 |
 
 ---
 

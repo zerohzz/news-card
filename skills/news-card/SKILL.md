@@ -1,9 +1,9 @@
 ---
 name: news-card
 description: >
-  全自动 AI 新闻日报。抓取 25+ 英文一手信息源，多维度评分筛选，AI 选题分三梯队，
+  全自动 AI 新闻日报。抓取 40+ 英文 + 中文一手信息源，多维度评分筛选，AI 选题分三梯队，
   生成 9 张 9:16 小红书风格 PNG 卡片。说"今日 AI 日报"即可触发。
-version: 0.1.0
+version: 0.2.0
 ---
 
 # News Card Skill
@@ -16,7 +16,7 @@ version: 0.1.0
 
 ## 工作流概览
 
-执行以下 5 步，每步完成后再进入下一步：
+执行以下 6 步，每步完成后再进入下一步：
 
 ### Step 1 — Fetch
 
@@ -34,7 +34,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 多维度评分 + 去重，输出 `scored.json`（按总分降序排列）。
 
-### Step 3 — Curate（你来完成）
+### Step 4 — Curate（你来完成）
 
 读取 `workspace/scored.json`，按照下方「三梯队规则」和 `references/scoring-spec.md` 选出 16 条新闻。
 
@@ -139,7 +139,30 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 - 纯融资/人事变动（除非金额或人物足够重磅）
 - 缺乏具体细节的传闻或预测
 
-### Step 4 — Render HTML
+**X/Twitter 单源限制：**
+- X 单独发出的内容，未经其他独立来源确认时，不允许进入第一梯队
+- 可作为早期 signal 保留在候选池或第三梯队中
+
+### Step 3 — Enrich（预选题充实）
+
+<!-- implementation_status: future -->
+
+> ⚠️ 本步骤当前未实现。Score 输出直接进入 Curate。
+
+对 scored.json 中高分候选执行按需内容充实：
+
+| 当前 Fetch 级别 | 升级目标 | 触发条件 |
+|---------------|---------|---------|
+| `title_only` | `metadata` | score ≥ 12 或进入 top-20 |
+| `metadata` | `summary` | score ≥ 12 且 summary 为空 |
+| `summary` | `full_text` | 仅第一梯队最终入选后 |
+
+充实后写入 `workspace/enriched.json`，结构与 scored.json 相同，增加 `enrichment_level` 字段。
+
+**高价值关键词触发列表：**
+`announce`, `release`, `launch`, `open-source`, `model`, `benchmark`, `API`, `pricing`, `breakthrough`, `state-of-the-art`
+
+### Step 5 — Render HTML
 
 ```bash
 node skills/news-card/scripts/lib/render-html.js \
@@ -150,7 +173,7 @@ node skills/news-card/scripts/lib/render-html.js \
 
 将 digest.json 填入 HTML 模板，输出 8 个 HTML 文件到 `slides/` 子目录。
 
-### Step 5 — Screenshot
+### Step 6 — Screenshot
 
 ```bash
 bash skills/news-card/scripts/screenshot.sh output/<datetime>/slides output/<datetime>/images
