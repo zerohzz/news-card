@@ -43,10 +43,16 @@
     height: 1800px;
     display: flex;
     flex-direction: column;
-    /* Safe area: top 180px buffer for XiaoHongShu 3:4 crop.
-       Bottom uses normal padding — footer is non-critical, OK if cropped. */
-    padding: 180px 60px 36px;
+    padding: 48px 60px 36px;
     box-sizing: border-box;
+  }
+
+  /* Centers header+categories as a unified block in the safe zone */
+  .content-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .page::after {
@@ -96,10 +102,8 @@
   }
 
   .categories {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     gap: 8px;
   }
 
@@ -188,10 +192,11 @@
 </head>
 <body>
 <div class="page">
+  <div class="content-group">
   <div class="header">
     <div class="date">{{date}}</div>
     <h1>AI 日报</h1>
-    <div class="subtitle">今日 AI 领域 {{total}} 条精选 · 来自 {{sourceCount}} 条信息源</div>
+    <div class="subtitle">今日 AI 领域 {{total}} 条精选 · 来自 {{sourceCount}} 条候选</div>
   </div>
   <div class="divider"></div>
   <div class="categories">
@@ -209,6 +214,7 @@
       </div>
     </div>
     {{/each}}
+  </div>
   </div>
   <div class="footer">
     <span class="brand">News Card</span>

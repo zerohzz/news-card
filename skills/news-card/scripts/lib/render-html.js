@@ -160,7 +160,7 @@ function groupByCategory(items) {
 /**
  * Render all pages from digest.json.
  */
-function renderAll(digestPath, templatesDir, outputDir) {
+function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   const digest = JSON.parse(readFileSync(digestPath, 'utf-8'));
   const items = Array.isArray(digest) ? digest : digest.items || digest.stories || [];
 
@@ -199,7 +199,7 @@ function renderAll(digestPath, templatesDir, outputDir) {
   const coverHTML = renderTemplate(coverTpl, {
     date: today,
     total: allItems.length,
-    sourceCount: allItems.length,
+    sourceCount: sourceCount || allItems.length,
     issue,
     categories: groupByCategory(allItems),
   });
@@ -268,15 +268,18 @@ const inputIdx = args.indexOf('--input');
 const templatesIdx = args.indexOf('--templates');
 const outputIdx = args.indexOf('--output');
 
+const sourceCountIdx = args.indexOf('--source-count');
+
 if (inputIdx === -1 || templatesIdx === -1 || outputIdx === -1) {
-  console.error('Usage: node render-html.js --input digest.json --templates ./templates --output ./html');
+  console.error('Usage: node render-html.js --input digest.json --templates ./templates --output ./html [--source-count N]');
   process.exit(1);
 }
 
 const digestPath = resolve(args[inputIdx + 1]);
 const templatesDir = resolve(args[templatesIdx + 1]);
 const outputDir = resolve(args[outputIdx + 1]);
+const sourceCountOverride = sourceCountIdx !== -1 ? parseInt(args[sourceCountIdx + 1], 10) : null;
 
-renderAll(digestPath, templatesDir, outputDir);
+renderAll(digestPath, templatesDir, outputDir, sourceCountOverride);
 
 export { renderAll, renderTemplate, CATEGORY_COLORS };
