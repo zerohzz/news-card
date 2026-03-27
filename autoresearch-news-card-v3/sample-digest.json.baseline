@@ -8,8 +8,7 @@
     "source_url": "https://openai.com/blog/gpt-5",
     "category": "模型发布",
     "color_tag": "#4A90D9",
-    "highlight": "推理基准提升 40%，上下文窗口扩展至 100 万 token，推理成本降低 60%",
-    "content_html": "<p>OpenAI 正式发布 GPT-5，首个原生支持文本、图像、音频和视频的统一模型。新模型采用混合专家架构，在推理成本降低 60% 的同时，性能大幅提升。</p><div class=\"data-row\"><div class=\"data-highlight\"><span class=\"data-value\">40%</span><span class=\"data-label\">推理基准提升</span></div><div class=\"data-highlight\"><span class=\"data-value\">1M</span><span class=\"data-label\">上下文窗口</span></div><div class=\"data-highlight\"><span class=\"data-value\">-60%</span><span class=\"data-label\">推理成本</span></div></div><h3>发布时间线</h3><div class=\"timeline\"><div class=\"timeline-item\"><span class=\"timeline-marker\">1</span><div class=\"timeline-content\"><strong>API 开放</strong><p>即日起面向开发者开放 API 访问</p></div></div><div class=\"timeline-item\"><span class=\"timeline-marker\">2</span><div class=\"timeline-content\"><strong>Plus 用户推送</strong><p>本周内向 ChatGPT Plus 用户推送</p></div></div><div class=\"timeline-item\"><span class=\"timeline-marker\">3</span><div class=\"timeline-content\"><strong>企业版上线</strong><p>下月推出企业定制版本</p></div></div></div><p>GPT-5 采用全新的混合专家架构，通过动态路由机制将不同类型的输入分配给专门的子模型处理。这一设计不仅提升了多模态理解能力，还大幅降低了推理成本。</p>"
+    "highlight": "推理基准提升 40%，上下文窗口扩展至 100 万 token，推理成本降低 60%"
   },
   {
     "tier": 1,
@@ -20,8 +19,7 @@
     "source_url": "https://www.technologyreview.com/2026/03/25/eu-ai-act",
     "category": "政策监管",
     "color_tag": "#95A5A6",
-    "highlight": "违规罚款最高全球年收入 7%，2026 年全面生效，覆盖所有在欧盟运营的 AI 系统",
-    "content_html": "<p>欧洲议会以压倒性多数通过《人工智能法案》实施细则，将于 2026 年全面生效。法案要求所有在欧盟运营的 AI 系统进行风险分级。</p><div class=\"pros-cons\"><div class=\"pros-block\"><strong>支持方观点</strong><ul><li>保护公民基本权利</li><li>建立全球监管标杆</li><li>提升 AI 透明度</li></ul></div><div class=\"cons-block\"><strong>反对方观点</strong><ul><li>增加企业合规成本</li><li>可能抑制创新</li><li>执行标准模糊</li></ul></div></div><h3>合规要求清单</h3><ul class=\"checklist\"><li>高风险系统需通过第三方审计</li><li>部署前完成影响评估报告</li><li>建立人工监督机制</li><li>确保决策可解释性</li><li class=\"unchecked\">生成式 AI 标注要求（待细化）</li></ul><p>该法案被视为全球 AI 监管的里程碑。违规罚款最高可达全球年收入的 7%，预计将深刻影响中美两国的政策走向。</p>"
+    "highlight": "违规罚款最高全球年收入 7%，2026 年全面生效，覆盖所有在欧盟运营的 AI 系统"
   },
   {
     "tier": 1,
@@ -32,8 +30,7 @@
     "source_url": "https://deepmind.google/blog/alphafold-3",
     "category": "研究前沿",
     "color_tag": "#1ABC9C",
-    "highlight": "端到端蛋白质设计，从数年缩短到数小时，三个月内开源",
-    "content_html": "<p>Google DeepMind 发布 AlphaFold 3，首次实现从功能描述到蛋白质结构的端到端设计。新系统可在数小时内设计出具有特定治疗功能的蛋白质。</p><h3>设计流程</h3><div class=\"flowchart\"><div class=\"flowchart-step\">功能描述</div><span class=\"flowchart-arrow\">\u2192</span><div class=\"flowchart-step\">结构预测</div><span class=\"flowchart-arrow\">\u2192</span><div class=\"flowchart-step\">稳定性验证</div><span class=\"flowchart-arrow\">\u2192</span><div class=\"flowchart-step\">候选分子</div></div><h3>性能对比</h3><table class=\"compare-table\"><tr><th>指标</th><th>AlphaFold 3</th><th>传统方法</th></tr><tr><td>设计周期</td><td>数小时</td><td>数年</td></tr><tr><td>成功率</td><td>78%</td><td>15%</td></tr><tr><td>成本</td><td>$5K</td><td>$2M+</td></tr></table><p>AlphaFold 3 已在药物开发中验证，成功设计出针对多种罕见病的候选药物分子。开源版本将在三个月内发布，有望加速全球药物研发进程。</p>"
+    "highlight": "端到端蛋白质设计，从数年缩短到数小时，三个月内开源"
   },
   {
     "tier": 1,
@@ -44,8 +41,7 @@
     "source_url": "https://techcrunch.com/2026/03/25/github-copilot-agent",
     "category": "开发工具",
     "color_tag": "#2ECC71",
-    "highlight": "SWE-bench 解决率 64%，支持多文件自主编辑，沙箱验证",
-    "content_html": "<p>GitHub 发布 Copilot Agent，支持自主完成多文件编辑、测试编写和 bug 修复等复杂编程任务。内测数据显示显著提升开发效率。</p><h3>基准测试表现</h3><div class=\"progress-group\"><div class=\"progress-item\"><div class=\"progress-label\"><span>SWE-bench 解决率</span><span>64%</span></div><div class=\"progress-track\"><div class=\"progress-fill\" style=\"width:64%\"></div></div></div><div class=\"progress-item\"><div class=\"progress-label\"><span>HumanEval 通过率</span><span>92%</span></div><div class=\"progress-track\"><div class=\"progress-fill\" style=\"width:92%\"></div></div></div><div class=\"progress-item\"><div class=\"progress-label\"><span>多文件编辑成功率</span><span>78%</span></div><div class=\"progress-track\"><div class=\"progress-fill\" style=\"width:78%\"></div></div></div></div><h3>核心能力</h3><div class=\"definition-list\"><div class=\"definition-item\"><div class=\"definition-term\">自主规划</div><div class=\"definition-desc\">自动分析代码库结构，制定多步骤执行计划</div></div><div class=\"definition-item\"><div class=\"definition-term\">沙箱验证</div><div class=\"definition-desc\">在隔离环境中运行修改后的代码，验证正确性</div></div><div class=\"definition-item\"><div class=\"definition-term\">上下文感知</div><div class=\"definition-desc\">理解项目依赖关系和编码规范，生成一致的代码</div></div></div><p>Agent 模式可自动分析代码库结构，制定执行计划，并在沙箱环境中验证修改。所有 Copilot 订阅用户即日可用。</p>"
+    "highlight": "SWE-bench 解决率 64%，支持多文件自主编辑，沙箱验证"
   },
   {
     "tier": 2,

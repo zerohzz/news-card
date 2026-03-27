@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Autoresearch v3: Component & Density — news-card</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #1a1a1a; padding: 32px; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+  .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+  .status-running { background: #dbeafe; color: #1d4ed8; }
+  .status-complete { background: #d1fae5; color: #065f46; }
+  .status-paused { background: #fef3c7; color: #92400e; }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .summary-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .summary-card .label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .summary-card .value { font-size: 28px; font-weight: 700; }
+  .chart-container { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 32px; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+  th { background: #f9fafb; font-weight: 600; color: #374151; }
+  .tag-keep { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .tag-discard { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .tag-baseline { background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .tag-confirm { background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .eval-breakdown { margin-bottom: 32px; }
+  .eval-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .eval-bar .name { width: 240px; font-size: 13px; font-weight: 500; }
+  .eval-bar .bar-bg { flex: 1; height: 20px; background: #fee2e2; border-radius: 4px; overflow: hidden; }
+  .eval-bar .bar-fill { height: 100%; background: #86efac; border-radius: 4px; transition: width 0.3s; }
+  .eval-bar .pct { width: 50px; font-size: 13px; font-weight: 600; text-align: right; }
+  .empty { text-align: center; padding: 48px; color: #9ca3af; }
+</style>
+</head>
+<body>
+
+<h1>Autoresearch v3: Component & Density</h1>
+<p class="subtitle">Target: <strong>news-card</strong> · Focus: rich component rendering + tighter density thresholds</p>
+
+<div id="status-area"></div>
+<div class="summary" id="summary"></div>
+<div class="chart-container"><canvas id="chart" height="80"></canvas></div>
+<h3 style="margin-bottom: 12px;">Experiment Log</h3>
+<div id="table-area"></div>
+<h3 style="margin: 24px 0 12px;">Eval Breakdown</h3>
+<div class="eval-breakdown" id="eval-breakdown"></div>
+
+<script>
+let chart = null;
+
+async function load() {
+  try {
+    const res = await fetch('results.json?t=' + Date.now());
+    if (!res.ok) { document.getElementById('summary').innerHTML = '<div class="empty">Waiting for results.json...</div>'; return; }
+    const data = await res.json();
+    render(data);
+  } catch { document.getElementById('summary').innerHTML = '<div class="empty">Waiting for results.json...</div>'; }
+}
+
+function render(data) {
+  const statusClass = data.status === 'running' ? 'status-running' : data.status === 'complete' ? 'status-complete' : 'status-paused';
+  document.getElementById('status-area').innerHTML = `<span class="status-badge ${statusClass}" style="margin-bottom:16px;display:inline-block">${data.status.toUpperCase()}</span>`;
+
+  const exps = data.experiments || [];
+  const kept = exps.filter(e => e.status === 'keep').length;
+  const discarded = exps.filter(e => e.status === 'discard').length;
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-card"><div class="label">Baseline</div><div class="value">${data.baseline_score?.toFixed(1) ?? '---'}%</div></div>
+    <div class="summary-card"><div class="label">Best Score</div><div class="value" style="color:#059669">${data.best_score?.toFixed(1) ?? '---'}%</div></div>
+    <div class="summary-card"><div class="label">Experiments</div><div class="value">${data.current_experiment ?? 0}</div></div>
+    <div class="summary-card"><div class="label">Keep / Discard</div><div class="value">${kept} / ${discarded}</div></div>
+  `;
+
+  const labels = exps.map(e => `Exp ${e.id}`);
+  const scores = exps.map(e => e.pass_rate);
+  const colors = exps.map(e => e.status === 'keep' ? '#059669' : e.status === 'discard' ? '#dc2626' : e.status === 'baseline' ? '#2563eb' : '#6366f1');
+
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Pass Rate %',
+        data: scores,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointBackgroundColor: colors,
+        pointRadius: 6,
+        pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      scales: {
+        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  let rows = exps.map(e => {
+    const tagClass = e.status === 'keep' ? 'tag-keep' : e.status === 'discard' ? 'tag-discard' : e.status === 'baseline' ? 'tag-baseline' : 'tag-confirm';
+    return `<tr><td>${e.id}</td><td>${e.score}/${e.max_score}</td><td>${e.pass_rate.toFixed(1)}%</td><td><span class="${tagClass}">${e.status}</span></td><td>${e.description}</td></tr>`;
+  }).join('');
+  document.getElementById('table-area').innerHTML = rows
+    ? `<table><thead><tr><th>#</th><th>Score</th><th>Rate</th><th>Status</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table>`
+    : '<div class="empty">No experiments yet</div>';
+
+  const evals = data.eval_breakdown || [];
+  document.getElementById('eval-breakdown').innerHTML = evals.map(ev => {
+    const pct = ev.total > 0 ? Math.round(ev.pass_count / ev.total * 100) : 0;
+    return `<div class="eval-bar"><span class="name">${ev.name}</span><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span class="pct">${pct}%</span></div>`;
+  }).join('');
+}
+
+load();
+setInterval(load, 10000);
+</script>
+</body>
+</html>

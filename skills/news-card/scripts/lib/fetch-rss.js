@@ -4,33 +4,33 @@
  * Generic RSS/Atom fetcher.
  * Usage: node fetch-rss.js [--strategy title_only|metadata|summary] [--output file.json]
  *
- * Reads source list from sources-config.json or accepts a single URL via --url.
+ * Reads source list from RSS_SOURCES or accepts a single URL via --url.
  */
 
 import RSSParser from 'rss-parser';
-import { readFileSync, writeFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { writeFileSync } from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const USER_AGENT = 'Mozilla/5.0 NewsCard/1.0 (news aggregator)';
+const REQUEST_TIMEOUT_MS = 15000;
+const RETRY_BACKOFF_MS = 1000;
+const RATE_LIMIT_BACKOFF_MS = 2000;
+const MAX_RETRIES = 2;
 
 const parser = new RSSParser({
-  timeout: 15000,
+  timeout: REQUEST_TIMEOUT_MS,
   headers: {
-    'User-Agent': 'NewsCardBot/0.1 (AI News Digest)',
+    'User-Agent': USER_AGENT,
     Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml',
   },
 });
 
 // Source registry with RSS URLs and authority weights
+// Audited 2026-03-27: all URLs verified returning 200 + XML/RSS content
 const RSS_SOURCES = [
   // Company blogs (authority: 5)
   { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss.xml', authority: 5, strategy: 'title_only' },
-  { name: 'Anthropic Blog', url: 'https://www.anthropic.com/rss.xml', authority: 5, strategy: 'title_only' },
   { name: 'Google AI Blog', url: 'https://blog.google/technology/ai/rss/', authority: 5, strategy: 'title_only' },
   { name: 'DeepMind Blog', url: 'https://deepmind.google/blog/rss.xml', authority: 5, strategy: 'title_only' },
-  { name: 'Meta AI Blog', url: 'https://ai.meta.com/blog/rss/', authority: 5, strategy: 'title_only' },
   { name: 'NVIDIA Blog', url: 'https://blogs.nvidia.com/feed/', authority: 5, strategy: 'title_only' },
   { name: 'Google Research Blog', url: 'https://blog.research.google/feeds/posts/default?alt=rss', authority: 5, strategy: 'title_only' },
 
@@ -41,11 +41,9 @@ const RSS_SOURCES = [
   { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', authority: 4, strategy: 'metadata' },
   { name: 'Wired (AI)', url: 'https://www.wired.com/feed/tag/ai/latest/rss', authority: 4, strategy: 'metadata' },
   { name: '404 Media', url: 'https://www.404media.co/rss/', authority: 4, strategy: 'metadata' },
-  { name: 'The Batch', url: 'https://www.deeplearning.ai/the-batch/feed/', authority: 4, strategy: 'metadata' },
 
   // Newsletters (authority: 3-4)
   { name: 'Import AI', url: 'https://importai.substack.com/feed', authority: 4, strategy: 'summary' },
-  { name: "Ben's Bites", url: 'https://bensbites.beehiiv.com/feed', authority: 3, strategy: 'summary' },
   { name: 'Latent Space', url: 'https://www.latent.space/feed', authority: 3, strategy: 'summary' },
   { name: 'Interconnects', url: 'https://www.interconnects.ai/feed', authority: 3, strategy: 'summary' },
   { name: 'AI Snake Oil', url: 'https://aisnakeoil.substack.com/feed', authority: 4, strategy: 'summary' },
@@ -55,6 +53,37 @@ const RSS_SOURCES = [
   // Indie blogs (authority: 3)
   { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/', authority: 3, strategy: 'metadata' },
 ];
+
+/**
+ * Sleep for a given number of milliseconds.
+ */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Fetch a URL with retry logic for transient failures and rate limits.
+ * @param {string} url - The URL to parse as RSS
+ * @param {number} retries - Number of retries remaining (default: MAX_RETRIES)
+ * @returns {Promise<object>} Parsed feed object from rss-parser
+ */
+async function fetchWithRetry(url, retries = MAX_RETRIES) {
+  try {
+    const feed = await parser.parseURL(url);
+    return feed;
+  } catch (err) {
+    if (retries <= 0) {
+      throw err;
+    }
+
+    const is429 = err.message && err.message.includes('429');
+    const backoff = is429 ? RATE_LIMIT_BACKOFF_MS : RETRY_BACKOFF_MS;
+
+    console.error(`[fetch-rss] Retrying ${url} in ${backoff}ms (${retries} retries left): ${err.message}`);
+    await sleep(backoff);
+    return fetchWithRetry(url, retries - 1);
+  }
+}
 
 /**
  * Normalize an RSS item based on fetch strategy.
@@ -91,7 +120,7 @@ function normalizeItem(item, source, strategy) {
 async function fetchFeed(source, strategyOverride) {
   const strategy = strategyOverride || source.strategy || 'title_only';
   try {
-    const feed = await parser.parseURL(source.url);
+    const feed = await fetchWithRetry(source.url);
     const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000); // 48 hours
     const items = (feed.items || [])
       .filter((item) => {
@@ -100,10 +129,10 @@ async function fetchFeed(source, strategyOverride) {
       })
       .map((item) => normalizeItem(item, source, strategy));
 
-    return items;
+    return { items, success: true, name: source.name };
   } catch (err) {
     console.error(`[fetch-rss] Failed to fetch ${source.name} (${source.url}): ${err.message}`);
-    return [];
+    return { items: [], success: false, name: source.name };
   }
 }
 
@@ -116,13 +145,26 @@ async function fetchAllRSS(strategyOverride) {
   );
 
   const allItems = [];
+  let successCount = 0;
+  let failCount = 0;
+
   for (const result of results) {
     if (result.status === 'fulfilled') {
-      allItems.push(...result.value);
+      allItems.push(...result.value.items);
+      if (result.value.success) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    } else {
+      failCount++;
     }
   }
 
-  console.error(`[fetch-rss] Fetched ${allItems.length} items from ${RSS_SOURCES.length} RSS sources`);
+  const totalSources = RSS_SOURCES.length;
+  console.error(
+    `[fetch-rss] Fetched ${allItems.length} items from ${successCount}/${totalSources} sources (${failCount} failed)`
+  );
   return allItems;
 }
 
@@ -139,7 +181,7 @@ if (urlIdx !== -1) {
   const url = args[urlIdx + 1];
   const nameIdx = args.indexOf('--name');
   const name = nameIdx !== -1 ? args[nameIdx + 1] : 'Custom';
-  const items = await fetchFeed(
+  const { items } = await fetchFeed(
     { name, url, authority: 3, strategy: strategyOverride || 'metadata' },
     strategyOverride
   );
