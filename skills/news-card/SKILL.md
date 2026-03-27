@@ -81,15 +81,14 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 | 内容语义 | 推荐组件 |
 |---------|---------|
-| 关键数据/数字 | `<div class="data-row">` + `<div class="data-highlight">` |
-| 步骤/流程/时间线 | `<div class="timeline">` |
-| 对比/争议/优劣 | `<div class="compare-grid">` |
-| 名人引言/观点 | `<blockquote>` |
-| 关键要点/总结 | `<ul class="key-points">` |
-| 背景知识/定义 | `<div class="callout">` |
-| 核心洞察 | `<div class="highlight">` |
-| 段落分隔 | `<div class="divider">` |
-| 小标题 | `<h3>` |
+| 步骤/工具/流程 | `flowchart`, `timeline`, `funnel`, `gantt` |
+| 对比/选择/优劣 | `compare-grid`, `decision-tree`, `compare-table`, `pros-cons` |
+| 数字/结论/数据 | `data-row`+`data-highlight`, `progress-group`, `pie-chart`, `bubble-chart` |
+| 定义/概念/理论 | `concept-map`, `formula-box`, `definition-list`, `callout` |
+| 多要素关联 | `venn`, `quadrant`, `cycle`, `fishbone` |
+| 要点/关键词/总结 | `tag-cloud`, `numbered-grid`, `checklist`, `badge-list` |
+| 观点/金句/引用 | `blockquote`, `chat-bubble`, `highlight`, `person-card` |
+| 通用 | `<h3>`, `<p>`, `<div class="divider">`, `<ul class="key-points">` |
 
 **必须满足**：
 - content_html 包含至少 3 个 `<p>` 段落

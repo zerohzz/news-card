@@ -313,6 +313,283 @@
     font-weight: 700;
   }
 
+  /* === Category 1: 步骤/流程 === */
+
+  /* Flowchart: horizontal steps with arrows */
+  .flowchart { display: flex; align-items: center; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
+  .flowchart-step {
+    background: var(--card); border-radius: 10px; padding: 16px 20px;
+    font: 500 24px/1.4 var(--font-zh); box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    text-align: center; min-width: 120px;
+  }
+  .flowchart-arrow { font: 400 28px/1 var(--font-en); color: var(--cat-color, var(--accent)); }
+
+  /* Funnel: progressively narrowing bars */
+  .funnel { margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .funnel-level {
+    padding: 14px 20px; border-radius: 8px; text-align: center;
+    font: 500 24px/1.3 var(--font-zh); color: #fff;
+    background: var(--cat-color, var(--accent));
+  }
+
+  /* Gantt: horizontal bars showing phases */
+  .gantt { margin: 20px 0; }
+  .gantt-row { display: flex; align-items: center; margin-bottom: 8px; }
+  .gantt-label { width: 140px; font: 500 22px/1.3 var(--font-zh); flex-shrink: 0; }
+  .gantt-bar-track { flex: 1; height: 28px; background: var(--divider); border-radius: 6px; position: relative; }
+  .gantt-bar {
+    position: absolute; top: 0; height: 100%; border-radius: 6px;
+    background: var(--cat-color, var(--accent)); opacity: 0.8;
+    display: flex; align-items: center; justify-content: center;
+    font: 500 16px/1 var(--font-en); color: #fff;
+  }
+
+  /* === Category 2: 对比/选择 === */
+
+  /* Decision tree: branching paths */
+  .decision-tree { margin: 20px 0; }
+  .dt-node {
+    background: var(--card); border-radius: 10px; padding: 16px 20px;
+    font: 500 26px/1.4 var(--font-zh); text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px;
+    border: 2px solid var(--cat-color, var(--accent));
+  }
+  .dt-branches { display: flex; gap: 16px; margin: 12px 0; }
+  .dt-branch {
+    flex: 1; background: var(--card); border-radius: 10px; padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .dt-branch-label {
+    font: 700 20px/1.3 var(--font-zh); color: var(--cat-color, var(--accent));
+    margin-bottom: 8px;
+  }
+  .dt-branch p { font: 400 22px/1.5 var(--font-zh); color: var(--text-mid); margin: 0; }
+
+  /* Compare table: striped rows */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 20px 0; border-radius: 10px; overflow: hidden; }
+  .compare-table th {
+    background: var(--cat-color, var(--accent)); color: #fff;
+    font: 700 22px/1.3 var(--font-zh); padding: 14px 16px; text-align: left;
+  }
+  .compare-table td {
+    font: 400 22px/1.5 var(--font-zh); padding: 12px 16px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .compare-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+
+  /* Pros-Cons: green/red blocks */
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .pros-block { background: #ECFDF5; border-radius: 10px; padding: 20px; border-left: 4px solid #10B981; }
+  .cons-block { background: #FEF2F2; border-radius: 10px; padding: 20px; border-left: 4px solid #EF4444; }
+  .pros-block strong, .cons-block strong { font: 700 26px/1.3 var(--font-zh); display: block; margin-bottom: 10px; }
+  .pros-block li, .cons-block li { font: 400 24px/1.6 var(--font-zh); margin-bottom: 4px; }
+
+  /* === Category 3: 数字/数据 === */
+
+  /* Progress bar */
+  .progress-group { margin: 20px 0; }
+  .progress-item { margin-bottom: 14px; }
+  .progress-label { display: flex; justify-content: space-between; font: 500 22px/1.3 var(--font-zh); margin-bottom: 6px; }
+  .progress-track { height: 24px; background: var(--divider); border-radius: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 12px; background: var(--cat-color, var(--accent)); transition: width 0.3s; }
+
+  /* Pie chart (pure CSS conic-gradient) */
+  .pie-chart-container { display: flex; align-items: center; gap: 24px; margin: 20px 0; }
+  .pie-chart {
+    width: 160px; height: 160px; border-radius: 50%; flex-shrink: 0;
+  }
+  .pie-chart-donut {
+    width: 160px; height: 160px; border-radius: 50%; flex-shrink: 0;
+    position: relative;
+  }
+  .pie-chart-donut::after {
+    content: ''; position: absolute; inset: 30px; border-radius: 50%; background: var(--bg);
+  }
+  .pie-legend { list-style: none; padding: 0; }
+  .pie-legend li { font: 400 22px/1.8 var(--font-zh); display: flex; align-items: center; gap: 8px; }
+  .pie-legend-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Bubble chart */
+  .bubble-chart { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin: 20px 0; }
+  .bubble {
+    border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; font: 700 20px/1.2 var(--font-zh);
+    background: var(--cat-color, var(--accent));
+  }
+  .bubble .bubble-label { font: 400 16px/1.2 var(--font-zh); opacity: 0.85; margin-top: 4px; }
+
+  /* === Category 4: 定义/概念 === */
+
+  /* Concept map: center + radiating items */
+  .concept-map { display: flex; flex-direction: column; align-items: center; margin: 20px 0; gap: 12px; }
+  .concept-center {
+    background: var(--cat-color, var(--accent)); color: #fff;
+    border-radius: 50%; width: 140px; height: 140px;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 26px/1.2 var(--font-zh); text-align: center;
+  }
+  .concept-branches { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .concept-branch {
+    background: var(--card); border-radius: 10px; padding: 14px 18px;
+    font: 500 22px/1.3 var(--font-zh); box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-top: 3px solid var(--cat-color, var(--accent));
+  }
+
+  /* Formula box */
+  .formula-box {
+    background: var(--card); border-radius: 10px; padding: 20px 24px;
+    font: 400 28px/1.6 'SF Mono', 'Menlo', monospace;
+    border-left: 4px solid var(--cat-color, var(--accent));
+    margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow-x: auto;
+  }
+
+  /* Definition card */
+  .definition-list { margin: 20px 0; }
+  .definition-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--divider); }
+  .definition-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .definition-term { font: 700 28px/1.3 var(--font-zh); color: var(--cat-color, var(--accent)); margin-bottom: 6px; }
+  .definition-desc { font: 400 24px/1.6 var(--font-zh); color: var(--text-mid); }
+
+  /* === Category 5: 多要素关联 === */
+
+  /* Venn diagram (2 circles) */
+  .venn { position: relative; height: 200px; margin: 20px auto; width: 320px; }
+  .venn-circle {
+    position: absolute; width: 180px; height: 180px; border-radius: 50%;
+    opacity: 0.35; top: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 20px/1.2 var(--font-zh);
+  }
+  .venn-left { left: 0; background: var(--cat-color, #4A90D9); }
+  .venn-right { right: 0; background: #E74C3C; }
+  .venn-center {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font: 600 20px/1.2 var(--font-zh); z-index: 2; text-align: center;
+  }
+  .venn-label-left, .venn-label-right { position: absolute; top: 50%; transform: translateY(-50%); font: 500 20px/1.2 var(--font-zh); z-index: 2; }
+  .venn-label-left { left: 20px; }
+  .venn-label-right { right: 20px; }
+
+  /* Quadrant matrix (2x2) */
+  .quadrant { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 2px; margin: 20px 0; border-radius: 10px; overflow: hidden; }
+  .quadrant-cell { padding: 20px; background: var(--card); }
+  .quadrant-cell strong { font: 700 24px/1.3 var(--font-zh); display: block; margin-bottom: 8px; color: var(--cat-color, var(--accent)); }
+  .quadrant-cell p { font: 400 22px/1.5 var(--font-zh); color: var(--text-mid); margin: 0; }
+  .quadrant-x-label, .quadrant-y-label { font: 500 18px/1 var(--font-en); color: var(--text-dim); text-align: center; padding: 8px 0; }
+
+  /* Cycle diagram */
+  .cycle { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 20px 0; }
+  .cycle-step {
+    background: var(--card); border-radius: 10px; padding: 14px 18px;
+    font: 500 22px/1.3 var(--font-zh); box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-left: 3px solid var(--cat-color, var(--accent));
+  }
+  .cycle-arrow { font: 400 28px/1 var(--font-en); color: var(--cat-color, var(--accent)); }
+
+  /* Fishbone diagram */
+  .fishbone { margin: 20px 0; }
+  .fishbone-spine {
+    height: 3px; background: var(--cat-color, var(--accent));
+    margin: 20px 0; position: relative;
+  }
+  .fishbone-head {
+    font: 700 28px/1.3 var(--font-zh); text-align: right;
+    color: var(--cat-color, var(--accent)); margin-bottom: 12px;
+  }
+  .fishbone-causes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .fishbone-cause {
+    background: var(--card); border-radius: 8px; padding: 14px;
+    border-top: 3px solid var(--cat-color, var(--accent));
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .fishbone-cause strong { font: 700 22px/1.3 var(--font-zh); display: block; margin-bottom: 6px; }
+  .fishbone-cause p { font: 400 20px/1.5 var(--font-zh); color: var(--text-mid); margin: 0; }
+
+  /* === Category 6: 要点/总结 === */
+
+  /* Tag cloud */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; align-items: center; }
+  .tag-cloud-item {
+    padding: 8px 16px; border-radius: 20px;
+    font: 500 var(--font-zh);
+    background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    color: var(--text);
+  }
+  .tag-cloud-item.tag-lg { font-size: 28px; background: var(--cat-color, var(--accent)); color: #fff; }
+  .tag-cloud-item.tag-md { font-size: 22px; }
+  .tag-cloud-item.tag-sm { font-size: 18px; color: var(--text-mid); }
+
+  /* Numbered grid */
+  .numbered-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .numbered-item {
+    display: flex; gap: 12px; background: var(--card); border-radius: 10px;
+    padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .numbered-item .num {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+    background: var(--cat-color, var(--accent)); color: #fff;
+    font: 700 18px/36px var(--font-en); text-align: center;
+  }
+  .numbered-item .num-text { font: 400 22px/1.4 var(--font-zh); }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; margin: 20px 0; }
+  .checklist li {
+    font: 400 28px/1.6 var(--font-zh); padding: 6px 0 6px 36px; position: relative;
+  }
+  .checklist li::before {
+    content: '\2713'; position: absolute; left: 0;
+    color: var(--cat-color, var(--accent)); font-weight: 700;
+  }
+  .checklist li.unchecked::before { content: '\25CB'; color: var(--text-dim); }
+
+  /* Badge list */
+  .badge-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+  .badge {
+    padding: 6px 16px; border-radius: 6px; font: 600 20px/1.3 var(--font-zh); color: #fff;
+    background: var(--cat-color, var(--accent));
+  }
+  .badge-outline {
+    padding: 6px 16px; border-radius: 6px; font: 600 20px/1.3 var(--font-zh);
+    border: 2px solid var(--cat-color, var(--accent));
+    color: var(--cat-color, var(--accent)); background: transparent;
+  }
+
+  /* === Category 7: 观点/引用 === */
+
+  /* Chat bubble */
+  .chat-bubble { display: flex; gap: 14px; margin: 20px 0; align-items: flex-start; }
+  .chat-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--cat-color, var(--accent)); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 20px/1 var(--font-en); color: #fff;
+  }
+  .chat-body {
+    background: var(--card); border-radius: 0 12px 12px 12px;
+    padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); flex: 1;
+  }
+  .chat-name { font: 700 22px/1.3 var(--font-zh); margin-bottom: 6px; }
+  .chat-text { font: 400 26px/1.6 var(--font-zh); color: var(--text); margin: 0; }
+
+  /* Person card */
+  .person-card {
+    display: flex; gap: 16px; background: var(--card); border-radius: 12px;
+    padding: 20px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    align-items: flex-start;
+  }
+  .person-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--cat-color, var(--accent)); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 24px/1 var(--font-en); color: #fff;
+  }
+  .person-info { flex: 1; }
+  .person-name { font: 700 28px/1.3 var(--font-zh); }
+  .person-title { font: 400 22px/1.3 var(--font-en); color: var(--text-mid); margin-bottom: 10px; }
+  .person-quote { font: 400 26px/1.6 var(--font-zh); color: var(--text); font-style: italic; }
+
   /* === Footer === */
   .footer {
     flex-shrink: 0;
