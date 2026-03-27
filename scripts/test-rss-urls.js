@@ -5,30 +5,7 @@
  * Tests every RSS URL in the source list and reports status code + content-type.
  */
 
-const RSS_SOURCES = [
-  { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss.xml' },
-  { name: 'Anthropic Blog', url: 'https://www.anthropic.com/rss.xml' },
-  { name: 'Google AI Blog', url: 'https://blog.google/technology/ai/rss/' },
-  { name: 'DeepMind Blog', url: 'https://deepmind.google/blog/rss.xml' },
-  { name: 'Meta AI Blog', url: 'https://ai.meta.com/blog/rss/' },
-  { name: 'NVIDIA Blog', url: 'https://blogs.nvidia.com/feed/' },
-  { name: 'Google Research Blog', url: 'https://blog.research.google/feeds/posts/default?alt=rss' },
-  { name: 'MIT Technology Review', url: 'https://www.technologyreview.com/feed/' },
-  { name: 'The Verge (AI)', url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml' },
-  { name: 'TechCrunch (AI)', url: 'https://techcrunch.com/category/artificial-intelligence/feed/' },
-  { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab' },
-  { name: 'Wired (AI)', url: 'https://www.wired.com/feed/tag/ai/latest/rss' },
-  { name: '404 Media', url: 'https://www.404media.co/rss/' },
-  { name: 'The Batch', url: 'https://www.deeplearning.ai/the-batch/feed/' },
-  { name: 'Import AI', url: 'https://importai.substack.com/feed' },
-  { name: "Ben's Bites", url: 'https://bensbites.beehiiv.com/feed' },
-  { name: 'Latent Space', url: 'https://www.latent.space/feed' },
-  { name: 'Interconnects', url: 'https://www.interconnects.ai/feed' },
-  { name: 'AI Snake Oil', url: 'https://aisnakeoil.substack.com/feed' },
-  { name: 'One Useful Thing', url: 'https://www.oneusefulthing.org/feed' },
-  { name: 'Ahead of AI', url: 'https://magazine.sebastianraschka.com/feed' },
-  { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/' },
-];
+import { RSS_SOURCES } from './skills/news-card/scripts/lib/fetch-rss.js';
 
 async function testUrl(source) {
   try {

@@ -9,11 +9,6 @@
 
 import RSSParser from 'rss-parser';
 import { writeFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const USER_AGENT = 'Mozilla/5.0 NewsCard/1.0 (news aggregator)';
 const REQUEST_TIMEOUT_MS = 15000;
@@ -26,9 +21,6 @@ const parser = new RSSParser({
   headers: {
     'User-Agent': USER_AGENT,
     Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml',
-  },
-  requestOptions: {
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   },
 });
 

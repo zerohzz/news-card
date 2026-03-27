@@ -38,12 +38,12 @@
 |----|------|-----|-----------|-----------|
 | Import AI (Jack Clark) | RSS | `https://importai.substack.com/feed` | summary | 4 |
 | Latent Space | RSS | `https://www.latent.space/feed` | summary | 3 |
-
-> **Removed (404 as of 2026-03-27):** Ben's Bites (`bensbites.beehiiv.com/feed`)
 | Interconnects (Nathan Lambert) | RSS | `https://www.interconnects.ai/feed` | summary | 3 |
 | AI Snake Oil | RSS | `https://aisnakeoil.substack.com/feed` | summary | 4 |
 | One Useful Thing (Ethan Mollick) | RSS | `https://www.oneusefulthing.org/feed` | summary | 3 |
 | Ahead of AI (Sebastian Raschka) | RSS | `https://magazine.sebastianraschka.com/feed` | summary | 3 |
+
+> **Removed (404 as of 2026-03-27):** Ben's Bites (`bensbites.beehiiv.com/feed`)
 
 ## 独立博客（authority_weight: 3）
 
