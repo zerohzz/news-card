@@ -1,0 +1,5 @@
+experiment	score	max_score	pass_rate	status	description
+0	4	5	80.0%	baseline	original templates — no changes
+1	5	5	100.0%	keep	add justify-content: space-between to .content-body in feature.html
+1-confirm1	5	5	100.0%	confirm	confirmation run 1
+1-confirm2	5	5	100.0%	confirm	confirmation run 2
