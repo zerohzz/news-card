@@ -199,6 +199,7 @@ function renderAll(digestPath, templatesDir, outputDir) {
   const coverHTML = renderTemplate(coverTpl, {
     date: today,
     total: allItems.length,
+    sourceCount: allItems.length,
     issue,
     categories: groupByCategory(allItems),
   });
