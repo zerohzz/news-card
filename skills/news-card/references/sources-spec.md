@@ -5,12 +5,12 @@
 | 源 | 类型 | URL | Fetch 策略 |
 |----|------|-----|-----------|
 | OpenAI Blog | RSS | `https://openai.com/blog/rss.xml` | title_only |
-| Anthropic Blog | RSS | `https://www.anthropic.com/rss.xml` | title_only |
 | Google AI Blog | RSS | `https://blog.google/technology/ai/rss/` | title_only |
 | DeepMind Blog | RSS | `https://deepmind.google/blog/rss.xml` | title_only |
-| Meta AI Blog | RSS | `https://ai.meta.com/blog/rss/` | title_only |
 | NVIDIA Blog | RSS | `https://blogs.nvidia.com/feed/` | title_only |
 | Google Research Blog | RSS | `https://blog.research.google/feeds/posts/default?alt=rss` | title_only |
+
+> **Removed (404 as of 2026-03-27):** Anthropic Blog (`anthropic.com/rss.xml`), Meta AI Blog (`ai.meta.com/blog/rss/`)
 
 ## 一线科技媒体（authority_weight: 4）
 
@@ -22,7 +22,8 @@
 | Ars Technica (AI) | RSS | `https://feeds.arstechnica.com/arstechnica/technology-lab` | metadata |
 | Wired (AI) | RSS | `https://www.wired.com/feed/tag/ai/latest/rss` | metadata |
 | 404 Media | RSS | `https://www.404media.co/rss/` | metadata |
-| The Batch (Andrew Ng) | RSS | `https://www.deeplearning.ai/the-batch/feed/` | metadata |
+
+> **Removed (404 as of 2026-03-27):** The Batch (`deeplearning.ai/the-batch/feed/`)
 
 ## 社区 & 论文（authority_weight: 3）
 
@@ -36,8 +37,9 @@
 | 源 | 类型 | URL | Fetch 策略 | authority |
 |----|------|-----|-----------|-----------|
 | Import AI (Jack Clark) | RSS | `https://importai.substack.com/feed` | summary | 4 |
-| Ben's Bites | RSS | `https://bensbites.beehiiv.com/feed` | summary | 3 |
 | Latent Space | RSS | `https://www.latent.space/feed` | summary | 3 |
+
+> **Removed (404 as of 2026-03-27):** Ben's Bites (`bensbites.beehiiv.com/feed`)
 | Interconnects (Nathan Lambert) | RSS | `https://www.interconnects.ai/feed` | summary | 3 |
 | AI Snake Oil | RSS | `https://aisnakeoil.substack.com/feed` | summary | 4 |
 | One Useful Thing (Ethan Mollick) | RSS | `https://www.oneusefulthing.org/feed` | summary | 3 |
