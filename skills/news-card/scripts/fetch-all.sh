@@ -24,16 +24,20 @@ PID_HF=$!
 node "$SKILL_DIR/scripts/lib/fetch-blogs.js" --output "$TMPDIR/blogs.json" &
 PID_BLOGS=$!
 
+node "$SKILL_DIR/scripts/lib/fetch-follow-builders.js" --output "$TMPDIR/follow-builders.json" &
+PID_FB=$!
+
 # Wait for all fetchers
 wait $PID_RSS || echo "⚠️  RSS fetch had errors (partial results may exist)"
 wait $PID_HN || echo "⚠️  HN fetch had errors"
 wait $PID_HF || echo "⚠️  HF fetch had errors"
 wait $PID_BLOGS || echo "⚠️  Blog scraper had errors (continuing)"
+wait $PID_FB || echo "⚠️  Follow-builders fetch had errors (continuing)"
 
 # Merge all JSON arrays into one
 node -e "
 import { readFileSync, writeFileSync } from 'fs';
-const files = ['rss.json', 'hn.json', 'hf.json', 'blogs.json'];
+const files = ['rss.json', 'hn.json', 'hf.json', 'blogs.json', 'follow-builders.json'];
 const all = [];
 for (const f of files) {
   try {
