@@ -7,6 +7,8 @@ total_score = cross_validation × 2.0
             + community_heat  × 1.5
             + authority        × 1.0
             + recency          × 0.8
+            + virality         × 1.2
+            + actionability    × 0.6
 ```
 
 ---
@@ -78,3 +80,26 @@ Tokenize 规则：
 - 转小写
 - 去除标点和停用词（a, an, the, is, are, was, were, in, on, at, to, for, of, and, or, but, with）
 - 按空格分词
+
+---
+
+## 新增评分维度
+
+### 传播力 (virality) — 权重 1.2
+
+基于社交媒体互动数据评估新闻的传播力。灵感来源于 TLDR Newsletter 的「转发测试」（Would I forward this to my group chat?）。
+
+| 来源类型 | 5 分 | 4 分 | 3 分 | 2 分 | 1 分 |
+|---------|------|------|------|------|------|
+| X/Twitter | ≥5000 赞 | ≥1000 赞 | ≥500 赞 | ≥100 赞 | >0 赞 |
+| HN/其他 | ≥200 分 | ≥100 分 | ≥50 分 | ≥20 分 | >0 分 |
+
+### 可操作性 (actionability) — 权重 0.6
+
+基于标题和摘要中的关键词评估新闻的可操作性。灵感来源于 The Rundown AI 的「5分钟行动测试」。
+
+| 分数 | 触发词 | 含义 |
+|------|--------|------|
+| 3 | launch, release, open-source, announce, available, free | 高可操作性：有新工具/产品可以立即使用 |
+| 2 | raise, acquire, partner, invest, fund, merge | 中可操作性：有商业动态值得关注 |
+| 1 | 其他 | 低可操作性：分析/评论类内容 |
