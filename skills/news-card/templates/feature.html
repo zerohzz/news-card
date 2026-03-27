@@ -99,10 +99,10 @@
   .content {
     flex: 1;
     padding: 36px 60px;
-    overflow: visible;
-    /* Content must fit within available space. Do NOT use overflow:hidden or
-       overflow:auto — both hide content in fixed-height screenshot pages.
-       If content overflows, shorten content_html, don't change CSS. */
+    overflow: hidden;
+    /* overflow:hidden guarantees footer always stays visible.
+       If content gets clipped, the content_html is TOO LONG — shorten it.
+       Max safe content height: ~1450px (page 1920 - header ~320 - footer ~150). */
   }
 
   .accent-rule {

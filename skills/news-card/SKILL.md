@@ -66,9 +66,16 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 ### 第一梯队 content_html 生成规则
 
-对于第一梯队的 4 条新闻，你必须生成 `content_html` 字段。这是纯 HTML，会被直接渲染到卡片的内容区域（约 1200px 高度）。
+对于第一梯队的 4 条新闻，你必须生成 `content_html` 字段。这是纯 HTML，会被直接渲染到卡片的内容区域。
 
-**目标**：用信息把整个页面填满。不要只写 150 字摘要 — 写 400-600 字的深度内容，配合语义组件来可视化关键数据。
+**⚠️ 内容长度硬限制（CRITICAL）**：
+- content_html **最多 900 字符**（含 HTML 标签），超过会被裁剪
+- 内容区可用高度仅 **~1100px**（页面 1920px - 标题区 ~320px - 页脚区 ~150px - 内边距 ~350px）
+- **最多使用 4 个顶级组件**（段落 + 数据行 + 1 个语义组件 + 结尾段落）
+- **绝不使用 5 个以上组件** — 必然溢出导致页脚消失
+- 宁可少放一个组件，也不要让内容溢出
+
+**目标**：用信息把内容区填满但不溢出。写 300-400 字的深度内容，配合 1-2 个语义组件。
 
 **内容来源**：从原文中提取尽可能多的有价值信息：
 - 关键数据和数字
@@ -91,9 +98,10 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 | 通用 | `<h3>`, `<p>`, `<div class="divider">`, `<ul class="key-points">` |
 
 **必须满足**：
-- content_html 包含至少 3 个 `<p>` 段落
+- content_html **≤ 900 字符**（含标签），包含 2-3 个 `<p>` 段落
 - 至少使用 1 个语义组件（根据内容选择最合适的）
-- 页面底部空白不超过 10%
+- **最多 4 个顶级组件**（段落、数据行、语义组件各算一个）
+- 页面底部留有 footer 的空间 — 如果 footer 消失说明内容太长
 - 所有 HTML class 名必须使用上表中列出的 class（模板已定义样式）
 
 将完整 JSON 写入 `workspace/digest.json`。

@@ -43,8 +43,9 @@
     height: 1800px;
     display: flex;
     flex-direction: column;
-    /* Safe area: top/bottom 180px buffer for XiaoHongShu 3:4 crop */
-    padding: 180px 60px 180px;
+    /* Safe area: top 180px buffer for XiaoHongShu 3:4 crop.
+       Bottom uses normal padding — footer is non-critical, OK if cropped. */
+    padding: 180px 60px 36px;
     box-sizing: border-box;
   }
 
@@ -98,7 +99,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 8px;
   }
 
   .cat-group {
