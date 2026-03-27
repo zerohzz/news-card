@@ -16,7 +16,7 @@ version: 0.2.0
 
 ## 工作流概览
 
-执行以下 6 步，每步完成后再进入下一步：
+执行以下 5 步，每步完成后再进入下一步：
 
 ### Step 1 — Fetch
 
@@ -34,9 +34,9 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 多维度评分 + 去重，输出 `scored.json`（按总分降序排列）。
 
-### Step 4 — Curate（你来完成）
+### Step 3 — Curate（你来完成）
 
-读取 `workspace/scored.json`，按照下方「三梯队规则」和 `references/scoring-spec.md` 选出 16 条新闻。
+读取 `workspace/scored.json`，按照下方「三梯队规则」和 `references/scoring-spec.md` 选出 24 条新闻。
 
 为每条生成中文标题、摘要，填充为 `digest.json`，结构参见 `examples/sample-digest.json`。
 
@@ -143,7 +143,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 - X 单独发出的内容，未经其他独立来源确认时，不允许进入第一梯队
 - 可作为早期 signal 保留在候选池或第三梯队中
 
-### Step 3 — Enrich（预选题充实）
+### Step 2.5 — Enrich（预选题充实）— 未来步骤
 
 <!-- implementation_status: future -->
 
@@ -162,7 +162,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 **高价值关键词触发列表：**
 `announce`, `release`, `launch`, `open-source`, `model`, `benchmark`, `API`, `pricing`, `breakthrough`, `state-of-the-art`
 
-### Step 5 — Render HTML
+### Step 4 — Render HTML
 
 ```bash
 node skills/news-card/scripts/lib/render-html.js \
@@ -171,15 +171,15 @@ node skills/news-card/scripts/lib/render-html.js \
   --output output/<datetime>/slides
 ```
 
-将 digest.json 填入 HTML 模板，输出 8 个 HTML 文件到 `slides/` 子目录。
+将 digest.json 填入 HTML 模板，输出 9 个 HTML 文件到 `slides/` 子目录。
 
-### Step 6 — Screenshot
+### Step 5 — Screenshot
 
 ```bash
 bash skills/news-card/scripts/screenshot.sh output/<datetime>/slides output/<datetime>/images
 ```
 
-Playwright 截图，输出 8 张 PNG（1080×1920px @2x）到 `images/` 子目录。
+Playwright 截图，输出 9 张 PNG（1080×1920px @2x）到 `images/` 子目录。
 
 完成后告知用户输出位置。
 
@@ -190,12 +190,12 @@ Playwright 截图，输出 8 张 PNG（1080×1920px @2x）到 `images/` 子目�
 ```
 output/
 └── 2026-03-26_14-30-00/
-    ├── slides/              ← 8 个 HTML 文件
+    ├── slides/              ← 9 个 HTML 文件
     │   ├── page-0-cover.html
     │   ├── page-1-top1.html
     │   ├── ...
     │   └── page-7-briefs.html
-    ├── images/              ← 8 张 PNG 卡片
+    ├── images/              ← 9 张 PNG 卡片
     │   ├── page-0-cover.png
     │   ├── page-1-top1.png
     │   ├── ...

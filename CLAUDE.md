@@ -2,7 +2,7 @@
 
 ## What This Project Is
 
-`news-card` is a Claude Code Skill that generates AI news digest cards. It fetches 25+ English-language AI news sources, scores and deduplicates them, then produces 8 PNG cards (1080×1920px, 9:16 ratio) for Xiaohongshu-style sharing.
+`news-card` is a Claude Code Skill that generates AI news digest cards. It fetches 40+ English and Chinese AI news sources, scores and deduplicates them, then produces 9 PNG cards (cover 1080×1800 3:5, others 1080×1920 9:16) for Xiaohongshu-style sharing.
 
 ## Project Structure
 
@@ -44,7 +44,7 @@ output/
     │   ├── page-1-top1.html
     │   ├── ...
     │   └── page-7-briefs.html
-    ├── images/              ← PNG screenshots (8 cards, 2160×3840px @2x)
+    ├── images/              ← PNG screenshots (9 cards, cover 2160×3600 + 8×2160×3840 @2x)
     │   ├── page-0-cover.png
     │   ├── page-1-top1.png
     │   ├── ...
@@ -69,10 +69,10 @@ Runs all fetchers in parallel (RSS, Hacker News, HuggingFace, Twitter). Outputs 
 ```bash
 bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/scored.json
 ```
-Applies scoring formula: `cross_validation × 2.0 + community × 1.5 + authority × 1.0 + recency × 0.8`. Deduplicates via Jaccard similarity.
+Applies 7-dimension scoring formula (see `references/scoring-spec.md`): cross_validation, community_heat, authority, recency, virality, actionability, peer_review. Deduplicates via Jaccard similarity (threshold 0.7).
 
 ### Step 3: Curate (Claude's job)
-Read `scored.json`, select 16 stories across 3 tiers, write `digest.json`. See `skills/news-card/SKILL.md` for the full curation prompt and JSON schema.
+Read `scored.json`, select 24 stories across 3 tiers (4 tier-1 + 4 tier-2 + 16 tier-3), write `digest.json`. See `skills/news-card/SKILL.md` for the full curation prompt and JSON schema.
 
 ### Step 4: Render
 ```bash
