@@ -103,3 +103,37 @@ Tokenize 规则：
 | 3 | launch, release, open-source, announce, available, free | 高可操作性：有新工具/产品可以立即使用 |
 | 2 | raise, acquire, partner, invest, fund, merge | 中可操作性：有商业动态值得关注 |
 | 1 | 其他 | 低可操作性：分析/评论类内容 |
+
+## 同行评审 (peer_review) — 权重 3.0（最高）
+
+基于顶级 AI/Tech Newsletter 编辑的独立选题判断。如果一条新闻被多个专业编辑同时选中，说明它确实重要。类似学术界的「同行评审」机制。
+
+**信号来源：**
+- Ben's Bites (RSS) — AI 工具和 builder 圈最有影响力的 newsletter
+- Import AI (RSS) — AI 研究和政策领域的权威 newsletter (Jack Clark)
+- Platformer (RSS) — 科技平台与民主治理的深度报道
+- TLDR AI (Archive scraping) — 最大的每日 AI digest
+
+**评分规则：**
+
+| 被提及 Newsletter 数 | 分数 | 含义 |
+|---------------------|------|------|
+| 4 个 | 5 | 全行业共识的重大新闻 |
+| 3 个 | 4 | 多数编辑认为重要 |
+| 2 个 | 3 | 有一定关注度 |
+| 1 个 | 2 | 至少一位编辑关注 |
+| 0 个 | 0 | 未被任何 newsletter 覆盖 |
+
+**匹配策略：**
+1. URL 精确匹配（去除协议、www、尾斜杠、query 参数）
+2. 标题词重叠（Jaccard 系数 > 0.4）
+3. TLDR 关键词匹配（标题包含 TLDR 提取的话题关键词）
+
+**Sponsor 过滤：** 自动过滤 newsletter 中的赞助内容（"sponsored by", "brought to you by" 等关键词），避免商业推广污染评分。
+
+**更新后的完整评分公式：**
+```
+total = cross_validation × 2.0 + community × 1.5 + authority × 1.0 +
+        recency × 0.8 + virality × 1.2 + actionability × 0.6 +
+        peer_review × 3.0
+```

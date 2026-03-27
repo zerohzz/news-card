@@ -2,7 +2,7 @@
 
 /**
  * Multi-dimension scoring engine.
- * Formula: total = cross_validation × 2.0 + community × 1.5 + authority × 1.0 + recency × 0.8 + virality × 1.2 + actionability × 0.6
+ * Formula: total = cross_validation × 2.0 + community × 1.5 + authority × 1.0 + recency × 0.8 + virality × 1.2 + actionability × 0.6 + peer_review × 3.0
  *
  * Usage: node score-engine.js --input candidates.json --output scored.json
  */
@@ -16,6 +16,7 @@ const W_AUTHORITY = 1.0;
 const W_RECENCY = 0.8;
 const W_VIRALITY = 1.2;
 const W_ACTIONABILITY = 0.6;
+const W_PEER_REVIEW = 3.0;
 
 /**
  * Calculate recency score based on hours since publication.
@@ -154,9 +155,69 @@ function groupByEvent(items) {
 }
 
 /**
+ * Normalize a URL for comparison (strip protocol, www, trailing slashes, query params).
+ */
+function normalizeUrl(url) {
+  return (url || '').replace(/^https?:\/\//, '').replace(/\/+$/, '').replace(/\?.*$/, '').replace(/^www\./, '').toLowerCase();
+}
+
+/**
+ * Extract title words as a Set for similarity comparison.
+ */
+function titleWords(title) {
+  return new Set((title || '').toLowerCase().split(/[\s\-–—:,;.!?()[\]{}'"]+/).filter(w => w.length > 2));
+}
+
+/**
+ * Jaccard similarity between two Sets.
+ */
+function jaccardSimilarityPeer(setA, setB) {
+  if (setA.size === 0 || setB.size === 0) return 0;
+  let intersection = 0;
+  for (const w of setA) { if (setB.has(w)) intersection++; }
+  const union = new Set([...setA, ...setB]).size;
+  return intersection / union;
+}
+
+/**
+ * Score peer review based on newsletter signal matches.
+ */
+function scorePeerReview(item, signals) {
+  if (!signals || signals.length === 0) return 0;
+
+  const candidateUrl = normalizeUrl(item.url || item.source_url || '');
+  const candidateWords = titleWords(item.title || '');
+  let mentionCount = 0;
+
+  for (const newsletter of signals) {
+    let mentioned = false;
+    for (const signal of newsletter.items) {
+      // Primary: URL match
+      if (candidateUrl && signal.url && normalizeUrl(signal.url) === candidateUrl) {
+        mentioned = true;
+        break;
+      }
+      // Secondary: title word overlap (Jaccard > 0.4)
+      const signalWords = titleWords(signal.title);
+      if (jaccardSimilarityPeer(candidateWords, signalWords) > 0.4) {
+        mentioned = true;
+        break;
+      }
+    }
+    if (mentioned) mentionCount++;
+  }
+
+  if (mentionCount >= 4) return 5;
+  if (mentionCount >= 3) return 4;
+  if (mentionCount >= 2) return 3;
+  if (mentionCount >= 1) return 2;
+  return 0;
+}
+
+/**
  * Score all candidates.
  */
-function scoreAll(candidates) {
+function scoreAll(candidates, newsletterSignals) {
   // Group by event for cross-validation
   const eventGroups = groupByEvent(candidates);
 
@@ -179,6 +240,7 @@ function scoreAll(candidates) {
     const recency = recencyScore(item.published);
     const virality = scoreVirality(item);
     const actionability = scoreActionability(item);
+    const peerReview = scorePeerReview(item, newsletterSignals);
 
     const totalScore =
       crossValidation * W_CROSS +
@@ -186,7 +248,8 @@ function scoreAll(candidates) {
       authority * W_AUTHORITY +
       recency * W_RECENCY +
       virality * W_VIRALITY +
-      actionability * W_ACTIONABILITY;
+      actionability * W_ACTIONABILITY +
+      peerReview * W_PEER_REVIEW;
 
     // Find related sources from the same event group
     const eventGroup = eventGroups.find((g) => g.includes(idx)) || [idx];
@@ -203,6 +266,7 @@ function scoreAll(candidates) {
         recency,
         virality,
         actionability,
+        peer_review: peerReview,
         total: Math.round(totalScore * 10) / 10,
       },
       related_sources: relatedSources,
@@ -219,17 +283,30 @@ function scoreAll(candidates) {
 const args = process.argv.slice(2);
 const inputIdx = args.indexOf('--input');
 const outputIdx = args.indexOf('--output');
+const signalsIdx = args.indexOf('--signals');
 
 if (inputIdx === -1) {
-  console.error('Usage: node score-engine.js --input candidates.json [--output scored.json]');
+  console.error('Usage: node score-engine.js --input candidates.json [--output scored.json] [--signals newsletter-signals.json]');
   process.exit(1);
 }
 
 const inputFile = args[inputIdx + 1];
 const outputFile = outputIdx !== -1 ? args[outputIdx + 1] : null;
+const signalsPath = signalsIdx !== -1 ? args[signalsIdx + 1] : null;
+
+let newsletterSignals = [];
+if (signalsPath) {
+  try {
+    const data = JSON.parse(readFileSync(signalsPath, 'utf-8'));
+    newsletterSignals = data.signals || [];
+    console.error(`[score] Loaded ${newsletterSignals.length} newsletter signal sources`);
+  } catch (err) {
+    console.error(`[score] Warning: could not load signals: ${err.message}`);
+  }
+}
 
 const candidates = JSON.parse(readFileSync(inputFile, 'utf-8'));
-const scored = scoreAll(candidates);
+const scored = scoreAll(candidates, newsletterSignals);
 
 console.error(`[score] Scored ${scored.length} candidates`);
 console.error(`[score] Score distribution: ≥12: ${scored.filter((s) => s.scores.total >= 12).length}, ≥6: ${scored.filter((s) => s.scores.total >= 6).length}, <6: ${scored.filter((s) => s.scores.total < 6).length}`);
