@@ -121,6 +121,13 @@ function renderTemplate(template, data, parentData) {
     });
   }
 
+  // Replace {{{var}}} — raw HTML passthrough (triple-brace)
+  result = result.replace(/\{\{\{(\w+)\}\}\}/g, (m, k) => {
+    if (data[k] !== undefined) return String(data[k]);
+    if (parentData && parentData[k] !== undefined) return String(parentData[k]);
+    return '';
+  });
+
   // Replace {{var}} — current context, fall back to parent
   result = result.replace(/\{\{(\w+)\}\}/g, (m, k) => {
     if (data[k] !== undefined) return String(data[k]);
@@ -208,6 +215,7 @@ function renderAll(digestPath, templatesDir, outputDir) {
       .join(', ');
     const html = renderTemplate(featureTpl, {
       ...item,
+      content_html: item.content_html || '<p>' + (item.summary_zh || '') + '</p>',
       page_num: i + 1,
       date: today,
       issue,
