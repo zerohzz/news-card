@@ -102,17 +102,19 @@ async function measurePage(htmlFile, measureFn) {
 // ============================================================
 // EVAL 1: Feature Page Content Fill
 // On feature pages (1-4), the gap between the last content
-// element in .content-body and the .source-section should be < 200px.
+// element in .content and the .footer should be < 200px.
+// Supports both v1 selectors (.content-body/.source-section) and v2 (.content/.footer).
 // ============================================================
 try {
   const failures = [];
   for (const file of featurePages) {
     const measurement = await measurePage(file, () => {
-      const contentBody = document.querySelector('.content-body');
-      const sourceSection = document.querySelector('.source-section');
+      // Try v2 selectors first, fall back to v1
+      const contentBody = document.querySelector('.content') || document.querySelector('.content-body');
+      const sourceSection = document.querySelector('.footer') || document.querySelector('.source-section');
       if (!contentBody || !sourceSection) return { gap: 9999, error: 'missing elements' };
 
-      // Get the bottom of the last child in content-body
+      // Get the bottom of the last child in content area
       const children = contentBody.children;
       let lastChildBottom = 0;
       for (const child of children) {
@@ -120,7 +122,7 @@ try {
         if (rect.bottom > lastChildBottom) lastChildBottom = rect.bottom;
       }
 
-      // Get the top of source-section
+      // Get the top of footer/source section
       const sourceTop = sourceSection.getBoundingClientRect().top;
       const gap = sourceTop - lastChildBottom;
 
@@ -258,10 +260,11 @@ try {
         const size = parseFloat(getComputedStyle(headline).fontSize);
         if (size < 56) problems.push(`headline-zh: ${size}px (min 56)`);
       }
-      const summary = document.querySelector('.summary');
+      // v2 uses .content p for body text; v1 used .summary
+      const summary = document.querySelector('.summary') || document.querySelector('.content p');
       if (summary) {
         const size = parseFloat(getComputedStyle(summary).fontSize);
-        if (size < 36) problems.push(`summary: ${size}px (min 36)`);
+        if (size < 36) problems.push(`body text: ${size}px (min 36)`);
       }
       return problems;
     });
