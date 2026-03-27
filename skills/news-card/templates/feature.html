@@ -99,10 +99,10 @@
   .content {
     flex: 1;
     padding: 36px 60px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Content flows naturally top-to-bottom. No justify-content:space-between
+       which caused bottom elements to clip behind footer when content was long. */
   }
 
   .accent-rule {
