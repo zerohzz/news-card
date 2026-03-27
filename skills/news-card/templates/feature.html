@@ -99,10 +99,10 @@
   .content {
     flex: 1;
     padding: 36px 60px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Content flows naturally top-to-bottom. No justify-content:space-between
-       which caused bottom elements to clip behind footer when content was long. */
+    overflow: visible;
+    /* Content must fit within available space. Do NOT use overflow:hidden or
+       overflow:auto — both hide content in fixed-height screenshot pages.
+       If content overflows, shorten content_html, don't change CSS. */
   }
 
   .accent-rule {
