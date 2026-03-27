@@ -4,20 +4,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-primary: #FAF9F6;
-    --bg-card: #FFFFFF;
-    --text-primary: #1A1A1A;
-    --text-secondary: #6B7280;
-    --accent: #D97706;
-    --divider: #E5E7EB;
-    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', serif;
-    --font-en: 'Source Serif Pro', 'Noto Serif', serif;
-    --radius-card: 12px;
-    --radius-tag: 6px;
+    --bg: #FAF9F6; --card: #FFFFFF; --text: #1A1A1A; --text-mid: #6B7280;
+    --text-dim: #9CA3AF; --accent: #D97706; --divider: #E5E7EB;
+    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', 'PingFang SC', serif;
+    --font-en: 'Source Serif Pro', Georgia, serif;
   }
+
+  *, *::before, *::after { box-sizing: border-box; }
 
   html, body {
     width: 1080px;
@@ -25,9 +21,9 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: var(--bg-primary);
+    background: var(--bg);
     font-family: var(--font-zh);
-    color: var(--text-primary);
+    color: var(--text);
   }
 
   .page {
@@ -35,7 +31,7 @@
     height: 1920px;
     display: flex;
     flex-direction: column;
-    padding: 60px 56px 40px;
+    padding: 48px 60px 36px;
     box-sizing: border-box;
   }
 
@@ -43,19 +39,19 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 24px;
   }
 
   .top-bar .page-num {
     font-family: var(--font-en);
     font-size: 18px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .top-bar .date {
     font-family: var(--font-en);
     font-size: 18px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .stories {
@@ -66,10 +62,9 @@
   }
 
   .story {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 36px 0;
+    padding: 28px 0;
   }
 
   .story + .story {
@@ -79,34 +74,33 @@
   .story .category-tag {
     display: inline-block;
     padding: 8px 20px;
-    border-radius: var(--radius-tag);
+    border-radius: 6px;
     color: #FFFFFF;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     margin-bottom: 20px;
     align-self: flex-start;
   }
 
   .story .headline-zh {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 900;
     line-height: 1.3;
     margin-bottom: 10px;
   }
 
   .story .headline-en {
-    font-size: 18px;
+    font-size: 24px;
     font-family: var(--font-en);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-mid);
     line-height: 1.4;
     margin-bottom: 24px;
   }
 
   .story .summary {
-    font-size: 22px;
+    font-size: 32px;
     line-height: 1.7;
-    flex: 1;
     margin-bottom: 20px;
   }
 
@@ -114,7 +108,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 16px;
+    font-size: 20px;
   }
 
   .story .source-bar .source-name {
@@ -123,7 +117,7 @@
   }
 
   .story .source-bar .source-url {
-    color: var(--text-secondary);
+    color: var(--text-mid);
     font-family: var(--font-en);
     flex: 1;
     overflow: hidden;
@@ -133,13 +127,13 @@
 
   .footer {
     margin-top: auto;
-    padding-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid var(--divider);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 16px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .footer .brand {

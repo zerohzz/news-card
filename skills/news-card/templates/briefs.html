@@ -4,20 +4,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-primary: #FAF9F6;
-    --bg-card: #FFFFFF;
-    --text-primary: #1A1A1A;
-    --text-secondary: #6B7280;
-    --accent: #D97706;
-    --divider: #E5E7EB;
-    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', serif;
-    --font-en: 'Source Serif Pro', 'Noto Serif', serif;
-    --radius-card: 12px;
-    --radius-tag: 6px;
+    --bg: #FAF9F6; --card: #FFFFFF; --text: #1A1A1A; --text-mid: #6B7280;
+    --text-dim: #9CA3AF; --accent: #D97706; --divider: #E5E7EB;
+    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', 'PingFang SC', serif;
+    --font-en: 'Source Serif Pro', Georgia, serif;
   }
+
+  *, *::before, *::after { box-sizing: border-box; }
 
   html, body {
     width: 1080px;
@@ -25,9 +21,9 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: var(--bg-primary);
+    background: var(--bg);
     font-family: var(--font-zh);
-    color: var(--text-primary);
+    color: var(--text);
   }
 
   .page {
@@ -35,7 +31,7 @@
     height: 1920px;
     display: flex;
     flex-direction: column;
-    padding: 60px 56px 40px;
+    padding: 48px 60px 36px;
     box-sizing: border-box;
   }
 
@@ -49,19 +45,19 @@
   .top-bar .page-num {
     font-family: var(--font-en);
     font-size: 18px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .top-bar .date {
     font-family: var(--font-en);
     font-size: 18px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .section-title {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 900;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
     padding-bottom: 16px;
     border-bottom: 3px solid var(--accent);
   }
@@ -71,13 +67,13 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(4, 1fr);
-    gap: 20px;
+    gap: 12px;
   }
 
   .brief-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-card);
-    padding: 24px;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     border-left: 5px solid transparent;
@@ -87,45 +83,45 @@
   .brief-card .category-tag {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: var(--radius-tag);
+    border-radius: 6px;
     color: #FFFFFF;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
     margin-bottom: 12px;
     align-self: flex-start;
   }
 
   .brief-card .title {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: 700;
     line-height: 1.3;
     margin-bottom: 12px;
   }
 
   .brief-card .summary {
-    font-size: 18px;
+    font-size: 24px;
     line-height: 1.5;
-    color: var(--text-primary);
+    color: var(--text);
     flex: 1;
     margin-bottom: 12px;
   }
 
   .brief-card .source {
-    font-size: 14px;
-    color: var(--text-secondary);
+    font-size: 20px;
+    color: var(--text-mid);
     font-family: var(--font-en);
     margin-top: auto;
   }
 
   .footer {
-    margin-top: 20px;
-    padding-top: 16px;
+    margin-top: 12px;
+    padding-top: 12px;
     border-top: 1px solid var(--divider);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 16px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .footer .brand {

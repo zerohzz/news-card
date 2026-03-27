@@ -4,15 +4,11 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-primary: #FAF9F6;
-    --bg-card: #FFFFFF;
-    --text-primary: #1A1A1A;
-    --text-secondary: #6B7280;
-    --accent: #D97706;
-    --divider: #E5E7EB;
+    --bg: #FAF9F6; --card: #FFFFFF; --text: #1A1A1A; --text-mid: #6B7280;
+    --text-dim: #9CA3AF; --accent: #D97706; --divider: #E5E7EB;
     --cat-model-release: #4A90D9;
     --cat-product: #7B68EE;
     --cat-safety: #E74C3C;
@@ -22,11 +18,11 @@
     --cat-opensource: #E67E22;
     --cat-policy: #95A5A6;
     --cat-labor: #8E44AD;
-    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', serif;
-    --font-en: 'Source Serif Pro', 'Noto Serif', serif;
-    --radius-card: 12px;
-    --radius-tag: 6px;
+    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', 'PingFang SC', serif;
+    --font-en: 'Source Serif Pro', Georgia, serif;
   }
+
+  *, *::before, *::after { box-sizing: border-box; }
 
   html, body {
     width: 1080px;
@@ -34,9 +30,9 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: var(--bg-primary);
+    background: var(--bg);
     font-family: var(--font-zh);
-    color: var(--text-primary);
+    color: var(--text);
   }
 
   .page {
@@ -44,33 +40,33 @@
     height: 1920px;
     display: flex;
     flex-direction: column;
-    padding: 60px 56px 40px;
+    padding: 48px 60px 36px;
     box-sizing: border-box;
   }
 
   .header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 28px;
   }
 
   .header .date {
     font-family: var(--font-en);
     font-size: 20px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
     letter-spacing: 2px;
     text-transform: uppercase;
   }
 
   .header h1 {
-    font-size: 56px;
+    font-size: 60px;
     font-weight: 900;
-    margin: 8px 0 4px;
+    margin: 6px 0 4px;
     line-height: 1.2;
   }
 
   .header .subtitle {
     font-size: 22px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
     font-weight: 400;
   }
 
@@ -78,7 +74,7 @@
     width: 100%;
     height: 3px;
     background: linear-gradient(90deg, var(--accent), var(--divider));
-    margin-bottom: 36px;
+    margin-bottom: 24px;
     border-radius: 2px;
   }
 
@@ -86,20 +82,20 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   .cat-group {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
+    gap: 14px;
   }
 
   .cat-label {
     flex-shrink: 0;
     width: 96px;
-    padding: 8px 0;
-    border-radius: var(--radius-tag);
+    padding: 6px 0;
+    border-radius: 6px;
     color: #FFFFFF;
     font-size: 16px;
     font-weight: 700;
@@ -111,34 +107,34 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
 
   .cat-item {
     display: flex;
     align-items: baseline;
     gap: 10px;
-    padding: 6px 12px;
-    background: var(--bg-card);
-    border-radius: var(--radius-tag);
+    padding: 5px 12px;
+    background: var(--card);
+    border-radius: 6px;
     border-left: 4px solid transparent;
   }
 
   .cat-item .tier-badge {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 700;
     color: #FFF;
   }
 
   .cat-item .title {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
     line-height: 1.4;
     flex: 1;
@@ -146,20 +142,20 @@
 
   .cat-item .source {
     flex-shrink: 0;
-    font-size: 14px;
-    color: var(--text-secondary);
+    font-size: 16px;
+    color: var(--text-mid);
     font-family: var(--font-en);
   }
 
   .footer {
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: 12px;
     border-top: 1px solid var(--divider);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 16px;
-    color: var(--text-secondary);
+    color: var(--text-mid);
   }
 
   .footer .brand {
