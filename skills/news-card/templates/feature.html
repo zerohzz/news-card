@@ -631,15 +631,17 @@
     justify-content: space-between;
     align-items: center;
     padding-top: 12px;
-    font-size: 16px;
-    color: var(--text-mid);
+    font: 400 18px/1 var(--font-en);
+    color: var(--text-dim);
   }
 
   .brand-bar .brand {
     font-weight: 700;
     color: var(--accent);
-    font-family: var(--font-en);
   }
+
+  .brand-bar .date-center { text-align: center; }
+  .brand-bar .spacer { width: 80px; }
 </style>
 </head>
 <body>
@@ -670,7 +672,8 @@
     {{/if}}
     <div class="brand-bar">
       <span class="brand">News Card</span>
-      <span>{{date}} · 第 {{issue}} 期</span>
+      <span class="date-center">{{date}} · 第 {{issue}} 期</span>
+      <span class="spacer"></span>
     </div>
   </div>
 </div>
