@@ -183,7 +183,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   // Split by tier
   const tier1 = items.filter((i) => i.tier === 1).slice(0, 4);
   const tier2 = items.filter((i) => i.tier === 2).slice(0, 4);
-  const tier3 = items.filter((i) => i.tier === 3).slice(0, 8);
+  const tier3 = items.filter((i) => i.tier === 3).slice(0, 16);
 
   // Ensure color_tag is set
   for (const item of [...tier1, ...tier2, ...tier3]) {
@@ -244,18 +244,34 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
     console.error(`[render] Page ${5 + i}: Half-page (${stories.length} stories)`);
   }
 
-  // Page 7: Briefs (tier 3)
-  if (tier3.length > 0) {
+  // Page 7: Briefs page 1 (first 8 tier-3 items)
+  const briefs1 = tier3.slice(0, 8);
+  if (briefs1.length > 0) {
     const html = renderTemplate(briefsTpl, {
       page_num: 7,
       date: today,
       issue,
-      briefs: tier3,
+      briefs: briefs1,
     });
     const pagePath = join(outputDir, 'page-7-briefs.html');
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page 7: Briefs (${tier3.length} items)`);
+    console.error(`[render] Page 7: Briefs (${briefs1.length} items)`);
+  }
+
+  // Page 8: Briefs page 2 (next 8 tier-3 items)
+  const briefs2 = tier3.slice(8, 16);
+  if (briefs2.length > 0) {
+    const html = renderTemplate(briefsTpl, {
+      page_num: 8,
+      date: today,
+      issue,
+      briefs: briefs2,
+    });
+    const pagePath = join(outputDir, 'page-8-briefs.html');
+    writeFileSync(pagePath, html);
+    pages.push(pagePath);
+    console.error(`[render] Page 8: Briefs page 2 (${briefs2.length} items)`);
   }
 
   console.error(`[render] Generated ${pages.length} HTML files in ${outputDir}`);
