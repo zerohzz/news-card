@@ -10,12 +10,19 @@
 import { readFileSync, writeFileSync } from 'fs';
 
 const STOP_WORDS = new Set([
+  // General English
   'a', 'an', 'the', 'is', 'are', 'was', 'were', 'in', 'on', 'at',
   'to', 'for', 'of', 'and', 'or', 'but', 'with', 'by', 'from',
   'that', 'this', 'it', 'its', 'has', 'have', 'had', 'be', 'been',
   'will', 'can', 'could', 'would', 'should', 'may', 'might',
   'not', 'no', 'do', 'does', 'did', 'as', 'if', 'how', 'what',
   'which', 'who', 'when', 'where', 'why', 'new', 'first',
+  // AI domain (scoring-spec.md v2)
+  'ai', 'artificial', 'intelligence', 'machine', 'learning', 'deep',
+  'model', 'neural', 'network', 'using', 'based', 'powered', 'driven',
+  'enables', 'announces', 'launches', 'introduces', 'reveals', 'unveils',
+  'tool', 'platform', 'update', 'feature', 'support', 'data',
+  'training', 'system', 'research', 'user',
 ]);
 
 /**
@@ -68,7 +75,7 @@ function keywordOverlap(kwA, kwB) {
 
 /**
  * Deduplicate scored items.
- * Threshold: Jaccard > 0.6 OR keyword overlap > 70% → merge.
+ * Threshold: Jaccard > 0.7 OR keyword overlap > 70% → merge.
  * Keep highest-authority version, accumulate related_sources.
  */
 function dedup(items) {
@@ -93,7 +100,7 @@ function dedup(items) {
       const titleSim = jaccard(tokenized[i].tokens, tokenized[j].tokens);
       const kwOverlap = keywordOverlap(tokenized[i].keywords, tokenized[j].keywords);
 
-      if (titleSim > 0.6 || kwOverlap > 0.7) {
+      if (titleSim > 0.7 || kwOverlap > 0.7) {
         // Merge: keep higher authority
         merged.add(j);
         relatedSources.push({
