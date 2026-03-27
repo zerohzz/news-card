@@ -55,6 +55,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
   "headline_zh": "≤25 字，零情绪化",
   "headline_en": "English headline",
   "summary_zh": "第一梯队 150 字 / 第二梯队 80 字 / 第三梯队 30 字",
+  "content_html": "（仅第一梯队）富 HTML 内容，包含语义组件",
   "source": "来源名",
   "source_url": "原文链接",
   "category": "模型发布|产品应用|安全对齐|行业动态|开发工具|研究前沿|开源生态|政策监管|劳动力影响",
@@ -62,6 +63,39 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
   "highlight": "仅第一梯队需要：一句关键数据或亮点"
 }
 ```
+
+### 第一梯队 content_html 生成规则
+
+对于第一梯队的 4 条新闻，你必须生成 `content_html` 字段。这是纯 HTML，会被直接渲染到卡片的内容区域（约 1200px 高度）。
+
+**目标**：用信息把整个页面填满。不要只写 150 字摘要 — 写 400-600 字的深度内容，配合语义组件来可视化关键数据。
+
+**内容来源**：从原文中提取尽可能多的有价值信息：
+- 关键数据和数字
+- 事件时间线和因果关系
+- 各方观点和反应
+- 技术细节和架构信息
+- 影响分析和未来展望
+
+**组件选择**（参见 `references/components-spec.md`）：
+
+| 内容语义 | 推荐组件 |
+|---------|---------|
+| 关键数据/数字 | `<div class="data-row">` + `<div class="data-highlight">` |
+| 步骤/流程/时间线 | `<div class="timeline">` |
+| 对比/争议/优劣 | `<div class="compare-grid">` |
+| 名人引言/观点 | `<blockquote>` |
+| 关键要点/总结 | `<ul class="key-points">` |
+| 背景知识/定义 | `<div class="callout">` |
+| 核心洞察 | `<div class="highlight">` |
+| 段落分隔 | `<div class="divider">` |
+| 小标题 | `<h3>` |
+
+**必须满足**：
+- content_html 包含至少 3 个 `<p>` 段落
+- 至少使用 1 个语义组件（根据内容选择最合适的）
+- 页面底部空白不超过 10%
+- 所有 HTML class 名必须使用上表中列出的 class（模板已定义样式）
 
 将完整 JSON 写入 `workspace/digest.json`。
 
