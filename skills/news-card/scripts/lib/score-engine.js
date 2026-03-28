@@ -8,6 +8,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
+import { extractEntities, entitiesMatch } from './entities.js';
 
 // Weights
 const W_CROSS = 2.0;
@@ -28,7 +29,9 @@ const X_AUTHORITY_TIERS = {
 const X_DEFAULT_AUTHORITY = 2; // Tier B — Builder/Practitioner
 
 /**
- * Calculate recency score based on hours since publication.
+ * Calculate recency score using exponential decay.
+ * Replaces the step-function (3/2/1/0) with smooth decay to eliminate the 24h cliff.
+ * Half-life = 8 hours: score halves every 8h. Below 0.2 → rounds to 0.
  */
 function recencyScore(publishedISO) {
   const published = new Date(publishedISO);
@@ -36,10 +39,12 @@ function recencyScore(publishedISO) {
   const hoursAgo = (Date.now() - published.getTime()) / (1000 * 60 * 60);
 
   if (hoursAgo < 0) return 0; // future dates
-  if (hoursAgo < 6) return 3;
-  if (hoursAgo < 12) return 2;
-  if (hoursAgo < 24) return 1;
-  return 0;
+  const maxScore = 3;
+  const halfLifeHours = 8;
+  const minScore = 0.2;
+  const lambda = Math.LN2 / halfLifeHours;
+  const raw = maxScore * Math.exp(-lambda * hoursAgo);
+  return raw < minScore ? 0 : Math.round(raw * 10) / 10;
 }
 
 /**
@@ -136,77 +141,7 @@ function jaccardSimilarity(tokensA, tokensB) {
  * Extract key entities (company/org + product/model names) from title text.
  * Returns { org: Set, product: Set } of lowercased entity names.
  */
-// Org keywords that require word-boundary matching to avoid substring false positives.
-// Each entry: [regex, canonical_org]
-const ORG_PATTERNS = [
-  [/\bopenai\b/, 'openai'],
-  [/\banthropic\b/, 'anthropic'],
-  [/\bgoogle\b/, 'google'], [/\bdeepmind\b/, 'google'],
-  [/\bmeta ai\b/, 'meta'], [/\bmeta\b(?=.*\b(release|announce|launch|model|llama|sam\s*\d))/, 'meta'],
-  [/\bmicrosoft\b/, 'microsoft'], [/\bgithub\b/, 'microsoft'],
-  [/\bnvidia\b/, 'nvidia'],
-  [/\bapple\b/, 'apple'],
-  [/\bmistral\b/, 'mistral'],
-  [/\bstability\s*ai\b/, 'stability'],
-  [/\bhugging\s*face\b/, 'huggingface'],
-  [/\bcursor\b/, 'cursor'],
-  [/\brunway\b/, 'runway'], [/\brunwayml\b/, 'runway'],
-  [/\bfigure\s*ai\b/, 'figure'],
-  [/\bbaai\b/, 'baai'],
-  [/\bdeepseek\b/, 'deepseek'],
-];
-
-// Product names — matched with word boundaries to avoid substring collisions.
-// Sorted longest-first so "gpt-4o" matches before "gpt-4".
-const PRODUCT_PATTERNS = [
-  'gpt-5', 'gpt-4o', 'gpt-4', 'chatgpt',
-  'claude 4', 'claude 3', 'claude',
-  'gemini 2.5', 'gemini pro', 'gemini',
-  'llama 4', 'llama 3', 'llama',
-  'mistral large',
-  'copilot agent', 'copilot',
-  'alphafold 3', 'alphafold',
-  'blackwell', 'b300',
-  'phi-4', 'phi-3',
-  'sam 3', 'sam 2',
-  'gen-4', 'gen-3',
-  'stable diffusion',
-  'aquila', 'deepseek',
-  'sora', 'dall-e',
-].map(p => ({ re: new RegExp(`\\b${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`), name: p }));
-
-function extractEntities(text) {
-  const lower = text.toLowerCase();
-  const orgs = new Set();
-  const products = new Set();
-
-  for (const [re, canonical] of ORG_PATTERNS) {
-    if (re.test(lower)) orgs.add(canonical);
-  }
-  for (const { re, name } of PRODUCT_PATTERNS) {
-    if (re.test(lower)) products.add(name);
-  }
-
-  return { orgs, products };
-}
-
-/**
- * Check if two items likely cover the same event using entity overlap.
- * Returns true if they share at least one org AND one product,
- * or share at least 2 products.
- * Also accepts titleJaccard as optional context — shared org + moderate title
- * similarity (>0.3) indicates same event for non-product news (funding, policy).
- */
-function entitiesMatch(entA, entB, titleJaccard = 0) {
-  const sharedOrgs = [...entA.orgs].filter(o => entB.orgs.has(o));
-  const sharedProducts = [...entA.products].filter(p => entB.products.has(p));
-
-  if (sharedOrgs.length >= 1 && sharedProducts.length >= 1) return true;
-  if (sharedProducts.length >= 2) return true;
-  // Shared org + moderate title similarity → same event (e.g., funding news)
-  if (sharedOrgs.length >= 1 && titleJaccard > 0.3) return true;
-  return false;
-}
+// Entity extraction and matching imported from shared module (entities.js)
 
 /**
  * Map a source string to its canonical organization name.
@@ -255,8 +190,8 @@ function groupByEvent(items) {
       const titleSim = jaccardSimilarity(precomputed[i].tokens, precomputed[j].tokens);
       const entityMatch = entitiesMatch(precomputed[i].entities, precomputed[j].entities, titleSim);
 
-      // Match if title similarity > 0.3 OR entities match (which may use titleSim as context)
-      if (titleSim > 0.3 || entityMatch) {
+      // Match if title similarity > 0.2 OR entities match (which may use titleSim as context)
+      if (titleSim > 0.2 || entityMatch) {
         group.push(j);
         assigned.add(j);
       }
@@ -312,11 +247,26 @@ function scorePeerReview(item, signals) {
         mentioned = true;
         break;
       }
-      // Secondary: title word overlap (Jaccard > 0.4)
+      // Secondary: title word overlap (Jaccard > 0.4, or > 0.3 for short signals)
       const signalWords = titleWords(signal.title);
-      if (jaccardSimilarityPeer(candidateWords, signalWords) > 0.4) {
+      const jaccThreshold = signalWords.size <= 5 ? 0.3 : 0.4;
+      if (jaccardSimilarityPeer(candidateWords, signalWords) > jaccThreshold) {
         mentioned = true;
         break;
+      }
+      // Tertiary: containment match for keyword-style signals (TLDR).
+      // Check if signal keywords appear in candidate title+summary.
+      if (signalWords.size >= 2 && signalWords.size <= 8) {
+        const fullWords = titleWords((item.title || '') + ' ' + (item.summary || ''));
+        let contained = 0;
+        for (const w of signalWords) { if (fullWords.has(w)) contained++; }
+        // Short signals (2-3 words): require 100% match to avoid generic overlaps
+        // Longer signals (4+): require ≥60% match
+        const threshold = signalWords.size <= 3 ? 1.0 : 0.6;
+        if (contained / signalWords.size >= threshold) {
+          mentioned = true;
+          break;
+        }
       }
     }
     if (mentioned) mentionCount++;
