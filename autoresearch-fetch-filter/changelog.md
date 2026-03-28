@@ -84,3 +84,20 @@ Evals: 6 binary criteria for scoring quality
 **Change:** Replaced step-function recency scoring (3/2/1/0 at 6/12/24h) with exponential decay (half-life = 8h)
 **Reasoning:** The 24h cliff was the most impactful scoring bug — stories at 24h01m dropped from 1 to 0 instantly
 **Result:** Recency coverage improved from 10.5% → 15.1% non-zero. Items between 24-32h now get partial scores instead of 0. No other eval regressed.
+
+## Experiment 10 — KEEP (major: expanded newsletter sources + cross-language matching)
+
+**Score:** 6/6 (100%)
+**Change:**
+1. Added 7 new newsletter sources: The Rundown AI, AlphaSignal (EN), 雷峰网, 36氪, 钛媒体, 爱范儿, IT之家 (CN)
+2. Removed Platformer (0% AI coverage)
+3. Added CN→EN entity mapping for cross-language peer review matching
+4. Added AI keyword filter for Chinese sources
+**Reasoning:** peer_review had only 2.9% coverage with 3 sources (only TLDR was matching). Expanding to 9 sources with cross-language support should dramatically increase coverage.
+**Result:**
+- peer_review: 2.9% → **21.5%** (37/172 items) — 7× improvement!
+- Topic Fairness: HuggingFace dominance eliminated (45.8% → 4.2% of top-24)
+- Top-24 now diverse: The Verge, TechCrunch, Wired, X/Twitter, Blog all represented
+- Total signals: 50 → 115 (68 EN + 47 CN) from 9 newsletters
+- Pipeline: 24 spotlight, 45 notable, 95 discard — healthy distribution
+**Remaining improvements:** None critical. All 6 evals at 100%.

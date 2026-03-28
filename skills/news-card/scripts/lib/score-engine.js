@@ -230,42 +230,66 @@ function jaccardSimilarityPeer(setA, setB) {
 }
 
 /**
+ * Extract entity names from candidate for cross-language matching.
+ * Uses the same extractEntities from entities.js.
+ */
+function candidateEntityNames(item) {
+  const ent = extractEntities((item.title || '') + ' ' + (item.summary || ''));
+  return new Set([...ent.orgs, ...ent.products]);
+}
+
+/**
  * Score peer review based on newsletter signal matches.
+ * Supports both English (title Jaccard) and Chinese (entity-based) matching.
  */
 function scorePeerReview(item, signals) {
   if (!signals || signals.length === 0) return 0;
 
   const candidateUrl = normalizeUrl(item.url || item.source_url || '');
   const candidateWords = titleWords(item.title || '');
+  const candidateEntities = candidateEntityNames(item);
   let mentionCount = 0;
 
   for (const newsletter of signals) {
     let mentioned = false;
+    const isChinese = newsletter.lang === 'zh';
+
     for (const signal of newsletter.items) {
-      // Primary: URL match
-      if (candidateUrl && signal.url && normalizeUrl(signal.url) === candidateUrl) {
+      // Primary: URL match (EN sources only — CN sources rarely share URLs)
+      if (!isChinese && candidateUrl && signal.url && normalizeUrl(signal.url) === candidateUrl) {
         mentioned = true;
         break;
       }
-      // Secondary: title word overlap (Jaccard > 0.4, or > 0.3 for short signals)
-      const signalWords = titleWords(signal.title);
-      const jaccThreshold = signalWords.size <= 5 ? 0.3 : 0.4;
-      if (jaccardSimilarityPeer(candidateWords, signalWords) > jaccThreshold) {
-        mentioned = true;
-        break;
-      }
-      // Tertiary: containment match for keyword-style signals (TLDR).
-      // Check if signal keywords appear in candidate title+summary.
-      if (signalWords.size >= 2 && signalWords.size <= 8) {
-        const fullWords = titleWords((item.title || '') + ' ' + (item.summary || ''));
-        let contained = 0;
-        for (const w of signalWords) { if (fullWords.has(w)) contained++; }
-        // Short signals (2-3 words): require 100% match to avoid generic overlaps
-        // Longer signals (4+): require ≥60% match
-        const threshold = signalWords.size <= 3 ? 1.0 : 0.6;
-        if (contained / signalWords.size >= threshold) {
+
+      if (isChinese) {
+        // Chinese matching: use cn_entities extracted during fetch
+        // If a CN signal shares ≥1 entity with the candidate, it's a match
+        const cnEnts = signal.cn_entities || [];
+        if (cnEnts.length > 0) {
+          const shared = cnEnts.filter(e => candidateEntities.has(e));
+          if (shared.length >= 1) {
+            mentioned = true;
+            break;
+          }
+        }
+      } else {
+        // English matching: title word overlap
+        const signalWords = titleWords(signal.title);
+        const jaccThreshold = signalWords.size <= 5 ? 0.3 : 0.4;
+        if (jaccardSimilarityPeer(candidateWords, signalWords) > jaccThreshold) {
           mentioned = true;
           break;
+        }
+        // Containment match for keyword-style signals (TLDR)
+        if (signalWords.size >= 2 && signalWords.size <= 8) {
+          const fullWords = titleWords((item.title || '') + ' ' + (item.summary || ''));
+          let contained = 0;
+          for (const w of signalWords) { if (fullWords.has(w)) contained++; }
+          const threshold = signalWords.size <= 3 ? 1.0 : 0.6;
+          if (contained / signalWords.size >= threshold) {
+            mentioned = true;
+            break;
+          }
         }
       }
     }
