@@ -211,6 +211,50 @@ bash skills/news-card/scripts/run-digest.sh
 
 ---
 
+## Run Report（运行报告）
+
+每次完整 pipeline 运行必须产出一份运行报告，保存到 `docs/run-logs/YYYY-MM-DD-run-report.md`。
+
+**报告结构：**
+
+```markdown
+# Run Report: YYYY-MM-DD
+
+## 元信息
+- 时间、分支、commit
+
+## Step 1: Fetch
+- 每个源的抓取数量、失败原因
+- 总候选数
+
+## Step 2: Score + Dedup
+- 评分分布 (≥12 / ≥6 / <6)
+- 去重前后数量
+- X-only 标记数
+- Newsletter 信号加载情况
+
+## Step 3: Curate
+- 各梯队选题列表 (headline + source + score)
+- 选题依据简述
+
+## Step 4: Render
+- 生成 HTML 文件列表
+- 成功/失败
+
+## Step 5: Screenshot
+- 生成 PNG 文件列表 + 尺寸
+- 成功/失败
+
+## 总结
+- 关键数字汇总
+- 遇到的问题及处理方式
+- 最终输出路径
+```
+
+> 运行报告的目的是让后续审阅者（包括未来的自己）能完整复现决策链路。
+
+---
+
 ## 三梯队规则
 
 | 梯队 | 条数 | 页面 | 展示方式 |
