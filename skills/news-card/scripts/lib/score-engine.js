@@ -18,6 +18,15 @@ const W_VIRALITY = 1.2;
 const W_ACTIONABILITY = 0.6;
 const W_PEER_REVIEW = 3.0;
 
+// X/Twitter source authority by tier (sources-spec.md v2)
+const X_AUTHORITY_TIERS = {
+  // Tier A — Official/Company (authority: 3)
+  'claudeai': 3, 'sama': 3, 'OpenAI': 3, 'AnthropicAI': 3, 'GoogleAI': 3,
+  // Tier C — Commentary/Investor (authority: 1)
+  'petergyang': 1, 'thenanyu': 1, 'madhuguru_': 1, 'garrytan': 1, 'mattturck': 1, 'zarazhang': 1,
+};
+const X_DEFAULT_AUTHORITY = 2; // Tier B — Builder/Practitioner
+
 /**
  * Calculate recency score based on hours since publication.
  */
@@ -236,7 +245,12 @@ function scoreAll(candidates, newsletterSignals) {
     const sourceCount = crossMap.get(idx) || 1;
     const crossValidation = sourceCount > 1 ? (sourceCount - 1) * 3 : 0;
     const community = communityScore(item.community_metrics);
-    const authority = item.source_authority || 3;
+    let authority = item.source_authority || 3;
+    // Apply X tier-based authority override (sources-spec.md v2)
+    if (item.source && item.source.startsWith('X/')) {
+      const handle = item.source.replace(/^X\/@?/, '').split(' ')[0];
+      authority = X_AUTHORITY_TIERS[handle] ?? X_DEFAULT_AUTHORITY;
+    }
     const recency = recencyScore(item.published);
     const virality = scoreVirality(item);
     const actionability = scoreActionability(item);
@@ -250,6 +264,8 @@ function scoreAll(candidates, newsletterSignals) {
       virality * W_VIRALITY +
       actionability * W_ACTIONABILITY +
       peerReview * W_PEER_REVIEW;
+
+    const isXOnly = item.source?.startsWith('X/') && crossValidation === 0;
 
     // Find related sources from the same event group
     const eventGroup = eventGroups.find((g) => g.includes(idx)) || [idx];
@@ -268,6 +284,8 @@ function scoreAll(candidates, newsletterSignals) {
         actionability,
         peer_review: peerReview,
         total: Math.round(totalScore * 10) / 10,
+        x_only: isXOnly,
+        requires_confirmation: item.requires_confirmation || isXOnly,
       },
       related_sources: relatedSources,
     };

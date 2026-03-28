@@ -11,12 +11,6 @@ import RssParser from 'rss-parser';
 
 const RSS_SOURCES = [
   {
-    name: "Ben's Bites",
-    url: 'https://www.bensbites.com/feed',
-    authority: 5,
-    filterSponsors: true,
-  },
-  {
     name: 'Import AI',
     url: 'https://importai.substack.com/feed',
     authority: 4,
