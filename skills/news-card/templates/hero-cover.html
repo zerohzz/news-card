@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- Hero cover page — brand hook, no content menu -->
+<!-- Viewport: 1080×1800 (3:5), safe zone for XHS 3:4 crop: center 1080×1440 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF9F5;
+    --text: #1A1A1A;
+    --text-mid: #6B7280;
+    --text-dim: #9CA3AF;
+    --accent: #E8734A;
+    --green: #059669;
+    --red: #DC2626;
+    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    --font-en: 'Source Serif Pro', Georgia, serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1080px;
+    height: 1800px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: var(--font-zh);
+    color: var(--text);
+  }
+
+  .page {
+    position: relative;
+    width: 1080px;
+    height: 1800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 80px;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    filter: url(#grain);
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ─── Date ─── */
+  .date {
+    font-family: var(--font-en);
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--text-mid);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* ─── Brand title ─── */
+  .brand-title {
+    text-align: center;
+    margin-bottom: 12px;
+    line-height: 1.15;
+  }
+
+  .brand-title .zz {
+    font-size: 80px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 4px;
+  }
+
+  .brand-title .dash {
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--text-dim);
+    margin: 0 4px;
+  }
+
+  .brand-title .main {
+    font-size: 68px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 6px;
+  }
+
+  /* ─── Subtitle ─── */
+  .subtitle {
+    font-size: 22px;
+    color: var(--text-mid);
+    font-weight: 400;
+    margin-bottom: 80px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  /* ─── Strikethrough pain points ─── */
+  .pain-points {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .pain-points span {
+    font-size: 26px;
+    color: rgba(0, 0, 0, 0.30);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2.5px;
+    font-weight: 500;
+    letter-spacing: 2px;
+  }
+
+  /* ─── Slogan ─── */
+  .slogan {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text-mid);
+    line-height: 2.0;
+    max-width: 760px;
+  }
+
+  .slogan .green {
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  .slogan .red {
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  /* ─── AI label ─── */
+  .ai-label {
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.20);
+    border-radius: 12px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.30);
+    background: transparent;
+    font-family: var(--font-zh);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="date">{{date}}</div>
+
+  <div class="brand-title">
+    <span class="zz">zz</span><span class="dash">-</span><span class="main">AI 资讯日报</span>
+  </div>
+
+  <div class="subtitle">今日 AI 领域 {{total}} 条精选 · 来自 {{sourceCount}} 条候选</div>
+
+  <div class="pain-points">
+    <span>信息过载</span>
+    <span>新闻FOMO</span>
+    <span>落后焦虑</span>
+  </div>
+
+  <div class="slogan">
+    每天阅读<span class="green">3分钟</span><br>
+    节约 <span class="red">{{savedHours}}小时</span> 新闻网站和社交媒体无意义刷新<br>
+    和 <span class="red">${{savedCost}}</span> API 获取和筛选费用
+  </div>
+
+  <div class="ai-label">含 AI 辅助生成内容</div>
+
+</div>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+</svg>
+</body>
+</html>
