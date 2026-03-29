@@ -93,7 +93,7 @@ function extractFromNextData(html, source) {
         source: source.name,
         published: post.publishedAt || post.date || post.createdAt || new Date().toISOString(),
         summary: post.description || post.summary || post.excerpt || '',
-        authority: source.authority,
+        source_authority: source.authority,
       };
     }).filter((item) => item.title && item.url);
   } catch (err) {
@@ -124,7 +124,7 @@ function extractFromJsonLd(html, source) {
             source: source.name,
             published: entry.datePublished || entry.dateCreated || new Date().toISOString(),
             summary: entry.description || entry.abstract || '',
-            authority: source.authority,
+            source_authority: source.authority,
           });
         }
 
@@ -138,7 +138,7 @@ function extractFromJsonLd(html, source) {
               source: source.name,
               published: item.datePublished || item.dateCreated || new Date().toISOString(),
               summary: item.description || '',
-              authority: source.authority,
+              source_authority: source.authority,
             });
           }
         }
@@ -330,7 +330,15 @@ async function fetchBlogs() {
   }
 
   console.error(`[fetch-blogs] Total: ${items.length} items from ${BLOG_SOURCES.length} blogs`);
-  return items;
+
+  // 48h recency filter — same cutoff as RSS fetcher
+  const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+  const fresh = items.filter(item => {
+    const pub = new Date(item.published);
+    return !isNaN(pub.getTime()) && pub.getTime() > cutoff;
+  });
+  console.error(`[fetch-blogs] Recency filter: ${items.length} → ${fresh.length} (48h cutoff)`);
+  return fresh;
 }
 
 // CLI entry point

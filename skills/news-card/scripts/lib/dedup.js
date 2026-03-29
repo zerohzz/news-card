@@ -9,6 +9,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
+import { extractEntities, entitiesMatch } from './entities.js';
 
 const STOP_WORDS = new Set([
   // General English
@@ -74,64 +75,7 @@ function keywordOverlap(kwA, kwB) {
   return overlap / Math.min(setA.size, setB.size);
 }
 
-/**
- * Extract key entities from title + summary for entity-based dedup.
- * Reuses the same entity lists as score-engine.js.
- */
-const ORG_PATTERNS = [
-  [/\bopenai\b/, 'openai'],
-  [/\banthropic\b/, 'anthropic'],
-  [/\bgoogle\b/, 'google'], [/\bdeepmind\b/, 'google'],
-  [/\bmeta ai\b/, 'meta'], [/\bmeta\b(?=.*\b(release|announce|launch|model|llama|sam\s*\d))/, 'meta'],
-  [/\bmicrosoft\b/, 'microsoft'], [/\bgithub\b/, 'microsoft'],
-  [/\bnvidia\b/, 'nvidia'],
-  [/\bapple\b/, 'apple'],
-  [/\bmistral\b/, 'mistral'],
-  [/\bstability\s*ai\b/, 'stability'],
-  [/\bhugging\s*face\b/, 'huggingface'],
-  [/\bcursor\b/, 'cursor'],
-  [/\brunway\b/, 'runway'], [/\brunwayml\b/, 'runway'],
-  [/\bfigure\s*ai\b/, 'figure'],
-  [/\bbaai\b/, 'baai'],
-  [/\bdeepseek\b/, 'deepseek'],
-];
-
-const PRODUCT_PATTERNS = [
-  'gpt-5', 'gpt-4o', 'gpt-4', 'chatgpt',
-  'claude 4', 'claude 3', 'claude',
-  'gemini 2.5', 'gemini pro', 'gemini',
-  'llama 4', 'llama 3', 'llama',
-  'mistral large',
-  'copilot agent', 'copilot',
-  'alphafold 3', 'alphafold',
-  'blackwell', 'b300',
-  'phi-4', 'phi-3',
-  'sam 3', 'sam 2',
-  'gen-4', 'gen-3',
-  'stable diffusion', 'aquila', 'deepseek',
-].map(p => ({ re: new RegExp(`\\b${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`), name: p }));
-
-function extractEntities(text) {
-  const lower = text.toLowerCase();
-  const orgs = new Set();
-  const products = new Set();
-  for (const [re, canonical] of ORG_PATTERNS) {
-    if (re.test(lower)) orgs.add(canonical);
-  }
-  for (const { re, name } of PRODUCT_PATTERNS) {
-    if (re.test(lower)) products.add(name);
-  }
-  return { orgs, products };
-}
-
-function entitiesMatch(entA, entB, titleJaccard = 0) {
-  const sharedOrgs = [...entA.orgs].filter(o => entB.orgs.has(o));
-  const sharedProducts = [...entA.products].filter(p => entB.products.has(p));
-  if (sharedOrgs.length >= 1 && sharedProducts.length >= 1) return true;
-  if (sharedProducts.length >= 2) return true;
-  if (sharedOrgs.length >= 1 && titleJaccard > 0.3) return true;
-  return false;
-}
+// Entity extraction and matching imported from shared module (entities.js)
 
 /**
  * Deduplicate scored items.
@@ -152,8 +96,8 @@ function dedup(items) {
   for (let i = 0; i < items.length; i++) {
     if (merged.has(i)) continue;
 
-    const current = { ...items[i] };
-    const relatedSources = [...(current.related_sources || [])];
+    let best = { ...items[i] };
+    const relatedSources = [...(best.related_sources || [])];
 
     for (let j = i + 1; j < items.length; j++) {
       if (merged.has(j)) continue;
@@ -163,7 +107,6 @@ function dedup(items) {
       const entityMatch = entitiesMatch(precomputed[i].entities, precomputed[j].entities, titleSim);
 
       if (titleSim > 0.6 || kwOverlap > 0.7 || entityMatch) {
-        // Merge: keep higher authority
         merged.add(j);
 
         // Accumulate related sources from the absorbed item
@@ -172,33 +115,36 @@ function dedup(items) {
           { source: items[j].source, url: items[j].url },
         );
 
-        // If the duplicate has higher authority, swap primary
+        // If the duplicate has higher authority, swap to it (immutable)
         const jAuthority = items[j].scores?.authority || items[j].source_authority || 0;
-        const curAuthority = current.scores?.authority || current.source_authority || 0;
-        if (jAuthority > curAuthority) {
-          current.title = items[j].title;
-          current.url = items[j].url;
-          current.source = items[j].source;
-          current.source_authority = items[j].source_authority;
-          current.summary = items[j].summary || current.summary;
+        const bestAuthority = best.scores?.authority || best.source_authority || 0;
+        if (jAuthority > bestAuthority) {
+          best = {
+            ...best,
+            title: items[j].title,
+            url: items[j].url,
+            source: items[j].source,
+            source_authority: items[j].source_authority,
+            summary: items[j].summary || best.summary,
+          };
         }
 
-        // Keep the higher score
-        if (items[j].scores && items[j].scores.total > (current.scores?.total || 0)) {
-          current.scores = items[j].scores;
+        // Keep the higher score (immutable)
+        if (items[j].scores && items[j].scores.total > (best.scores?.total || 0)) {
+          best = { ...best, scores: { ...items[j].scores } };
         }
       }
     }
 
     // Deduplicate related_sources by url
     const seen = new Set();
-    current.related_sources = relatedSources.filter(rs => {
+    const dedupedSources = relatedSources.filter(rs => {
       const key = rs.url || rs.source;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-    result.push(current);
+    result.push({ ...best, related_sources: dedupedSources });
   }
 
   // Re-sort by score after merges may have swapped scores

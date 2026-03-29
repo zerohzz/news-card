@@ -36,17 +36,20 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 ### Step 3 — Curate（你来完成）
 
-读取 `workspace/scored.json`，按照下方「三梯队规则」和 `references/scoring-spec.md` 选出 24 条新闻。
+读取两个文件：
+- `workspace/scored-news.json` — 新闻主排名（已排除 X/Twitter 和 HuggingFace）
+- `workspace/scored-signals.json` — X + HuggingFace 信号池
 
-为每条生成中文标题、摘要，填充为 `digest.json`，结构参见 `examples/sample-digest.json`。
+按照下方「四梯队规则」和 `references/scoring-spec.md` 选出 24 条，填充为 `digest.json`。
 
 **选题 Prompt**：
 
-你是一位冷静的新闻编辑。从今天的候选中选出 24 条，分为三梯队：
+你是一位冷静的新闻编辑。从今天的候选中选出 24 条，分为四梯队：
 
-- **第一梯队（4 条）**：最大影响力 + 最大新颖性，4 条必须覆盖不同子领域，叙事方式错开
-- **第二梯队（4 条）**：值得关注但非头条级别，与第一梯队不重叠的领域优先
-- **其他新闻（16 条）**：从剩余候选中选最有信息量的 16 条（分两页展示，每页 8 条）
+- **第一梯队（4 条）**：从 `scored-news.json` 选。最大影响力 + 最大新颖性，4 条必须覆盖不同子领域，叙事方式错开
+- **第二梯队（4 条）**：从 `scored-news.json` 选。值得关注但非头条级别，与第一梯队不重叠的领域优先
+- **新闻快讯（8 条）**：从 `scored-news.json` 剩余候选中选最有信息量的 8 条
+- **研究前沿 / Builder 动态（8 条）**：从 `scored-signals.json` 选。涵盖最值得关注的学术论文和 AI Builder 社区动态
 
 输出 JSON 数组，每条包含：
 ```json
@@ -162,6 +165,50 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 **高价值关键词触发列表：**
 `announce`, `release`, `launch`, `open-source`, `model`, `benchmark`, `API`, `pricing`, `breakthrough`, `state-of-the-art`
 
+### Step 3.5 — 评分报告（每次必须生成）
+
+将 `workspace/scored.json` 中**全部候选新闻**（不只是入选的 24 条）整理为 Markdown 格式，写入 `output/<datetime>/scored-candidates.md`。
+
+格式要求：
+
+```markdown
+# AI 日报候选评分 — YYYY-MM-DD
+
+> 共 N 条候选，Spotlight N 条 / Notable N 条 / Discard N 条
+> 信号源：N 个 Newsletter（N EN + N CN），共 N 条信号
+
+## Spotlight 梯队（total ≥ 12）
+
+| # | Score | Source | Title | CV | Heat | Auth | Rec | Vir | Act | PR | Related |
+|---|-------|--------|-------|----|------|------|-----|-----|-----|----|---------|
+| 1 | 32.6 | TechCrunch | Claude popularity skyrocketing | 6 | 4 | 4 | 0.3 | 3 | 3 | 5 | +4 src |
+
+## Notable 梯队（6 ≤ total < 12）
+
+（同上表格式）
+
+## Discard 梯队（total < 6）
+
+（同上表格式，可折叠或简化为仅 Title + Score）
+
+## 维度活跃度
+
+| Dimension | Non-Zero | Coverage |
+|-----------|----------|----------|
+| cross_validation | 7/126 | 5.6% |
+| peer_review | 15/126 | 11.9% |
+| ... | | |
+
+## 入选标记
+
+在 Spotlight/Notable 表格中，最终被选入 digest.json 的 24 条用 **✅** 标注。
+```
+
+此报告用于：
+- 每次运行后审计评分算法质量
+- 追踪算法迭代的改进效果
+- 检查是否有高分候选被遗漏或低分候选被误选
+
 ### Step 4 — Render HTML
 
 ```bash
@@ -200,7 +247,8 @@ output/
     │   ├── page-1-top1.png
     │   ├── ...
     │   └── page-7-briefs.png
-    └── digest.json          ← 本次选题数据
+    ├── digest.json          ← 本次选题数据
+    └── scored-candidates.md ← 全部候选新闻评分报告
 ```
 
 或使用一键脚本（自动创建带时间戳的目录）：
@@ -211,17 +259,20 @@ bash skills/news-card/scripts/run-digest.sh
 
 ---
 
-## 三梯队规则
+## 四梯队规则
 
-| 梯队 | 条数 | 页面 | 展示方式 |
-|------|------|------|----------|
-| 第一梯队 | 4 条 | 第 1–4 页 | 每页一条，整页展示 |
-| 第二梯队 | 4 条 | 第 5–6 页 | 每页两条，半页展示 |
-| 其他新闻 | 16 条 | 第 7–8 页 | 方框卡片 2×4 网格，每页 8 条 |
+| 梯队 | 条数 | 数据源 | 页面 | 展示方式 |
+|------|------|--------|------|----------|
+| 第一梯队 | 4 条 | scored-news.json | 第 1–4 页 | 每页一条，整页展示 |
+| 第二梯队 | 4 条 | scored-news.json | 第 5–6 页 | 每页两条，半页展示 |
+| 新闻快讯 | 8 条 | scored-news.json | 第 7 页 | 方框卡片 2×4 网格 |
+| 研究前沿 / Builder 动态 | 8 条 | scored-signals.json | 第 8 页 | 方框卡片 2×4 网格 |
 
 封面（第 0 页）：所有 24 条新闻按 category 对应色块排列。
 
-总计 9 张 PNG：1 封面 + 4 第一梯队 + 2 第二梯队 + 2 快讯。
+总计 9 张 PNG：1 封面 + 4 第一梯队 + 2 第二梯队 + 1 新闻快讯 + 1 研究前沿。
+
+> **X/Twitter 和 HuggingFace Papers 不参与主排名。** 它们仍参与 cross_validation 和 peer_review 的评分计算（为新闻条目提供交叉验证信号），但选题时仅出现在第 8 页「研究前沿 / Builder 动态」。
 
 ---
 
