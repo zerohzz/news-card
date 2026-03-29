@@ -330,7 +330,15 @@ async function fetchBlogs() {
   }
 
   console.error(`[fetch-blogs] Total: ${items.length} items from ${BLOG_SOURCES.length} blogs`);
-  return items;
+
+  // 48h recency filter — same cutoff as RSS fetcher
+  const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+  const fresh = items.filter(item => {
+    const pub = new Date(item.published);
+    return !isNaN(pub.getTime()) && pub.getTime() > cutoff;
+  });
+  console.error(`[fetch-blogs] Recency filter: ${items.length} → ${fresh.length} (48h cutoff)`);
+  return fresh;
 }
 
 // CLI entry point

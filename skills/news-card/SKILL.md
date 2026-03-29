@@ -162,6 +162,50 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 **高价值关键词触发列表：**
 `announce`, `release`, `launch`, `open-source`, `model`, `benchmark`, `API`, `pricing`, `breakthrough`, `state-of-the-art`
 
+### Step 3.5 — 评分报告（每次必须生成）
+
+将 `workspace/scored.json` 中**全部候选新闻**（不只是入选的 24 条）整理为 Markdown 格式，写入 `output/<datetime>/scored-candidates.md`。
+
+格式要求：
+
+```markdown
+# AI 日报候选评分 — YYYY-MM-DD
+
+> 共 N 条候选，Spotlight N 条 / Notable N 条 / Discard N 条
+> 信号源：N 个 Newsletter（N EN + N CN），共 N 条信号
+
+## Spotlight 梯队（total ≥ 12）
+
+| # | Score | Source | Title | CV | Heat | Auth | Rec | Vir | Act | PR | Related |
+|---|-------|--------|-------|----|------|------|-----|-----|-----|----|---------|
+| 1 | 32.6 | TechCrunch | Claude popularity skyrocketing | 6 | 4 | 4 | 0.3 | 3 | 3 | 5 | +4 src |
+
+## Notable 梯队（6 ≤ total < 12）
+
+（同上表格式）
+
+## Discard 梯队（total < 6）
+
+（同上表格式，可折叠或简化为仅 Title + Score）
+
+## 维度活跃度
+
+| Dimension | Non-Zero | Coverage |
+|-----------|----------|----------|
+| cross_validation | 7/126 | 5.6% |
+| peer_review | 15/126 | 11.9% |
+| ... | | |
+
+## 入选标记
+
+在 Spotlight/Notable 表格中，最终被选入 digest.json 的 24 条用 **✅** 标注。
+```
+
+此报告用于：
+- 每次运行后审计评分算法质量
+- 追踪算法迭代的改进效果
+- 检查是否有高分候选被遗漏或低分候选被误选
+
 ### Step 4 — Render HTML
 
 ```bash
@@ -200,7 +244,8 @@ output/
     │   ├── page-1-top1.png
     │   ├── ...
     │   └── page-7-briefs.png
-    └── digest.json          ← 本次选题数据
+    ├── digest.json          ← 本次选题数据
+    └── scored-candidates.md ← 全部候选新闻评分报告
 ```
 
 或使用一键脚本（自动创建带时间戳的目录）：

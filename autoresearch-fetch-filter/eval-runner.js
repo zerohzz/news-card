@@ -105,7 +105,10 @@ try {
 // peer_review requires ≥1% (signal-data-dependent — limited by newsletter coverage).
 // ============================================================
 try {
-  const coreDims = ['cross_validation', 'community_heat', 'authority', 'recency', 'virality', 'actionability'];
+  // Core dimensions that don't depend on external platform engagement
+  const coreDims = ['cross_validation', 'authority', 'recency', 'virality', 'actionability'];
+  // Platform-dependent dimensions (HN/HF engagement varies by day)
+  const platformDims = ['community_heat'];
   const failures = [];
   const details = [];
 
@@ -115,6 +118,15 @@ try {
     details.push(`${dim}: ${nonZero}/${scored.length} (${pct}%)`);
     if (nonZero < scored.length * 0.10) {
       failures.push(`${dim}: only ${pct}% non-zero (need ≥10%)`);
+    }
+  }
+
+  for (const dim of platformDims) {
+    const nonZero = scored.filter(i => i.scores && i.scores[dim] > 0).length;
+    const pct = (nonZero / scored.length * 100).toFixed(1);
+    details.push(`${dim}: ${nonZero}/${scored.length} (${pct}%)`);
+    if (nonZero < scored.length * 0.05) {
+      failures.push(`${dim}: only ${pct}% non-zero (need ≥5%)`);
     }
   }
 

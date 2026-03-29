@@ -40,7 +40,7 @@ function recencyScore(publishedISO) {
 
   if (hoursAgo < 0) return 0; // future dates
   const maxScore = 3;
-  const halfLifeHours = 8;
+  const halfLifeHours = 12;
   const minScore = 0.2;
   const lambda = Math.LN2 / halfLifeHours;
   const raw = maxScore * Math.exp(-lambda * hoursAgo);
@@ -60,10 +60,10 @@ function communityScore(metrics) {
   else if (hnPoints > 300) score = Math.max(score, 4);
   else if (hnPoints > 100) score = Math.max(score, 2);
 
-  // HuggingFace
+  // HuggingFace (raised thresholds — >20 upvotes is too common on HF daily papers)
   const hfUpvotes = metrics.hf_upvotes || 0;
-  if (hfUpvotes > 20) score = Math.max(score, 4);
-  else if (hfUpvotes > 5) score = Math.max(score, 2);
+  if (hfUpvotes > 80) score = Math.max(score, 4);
+  else if (hfUpvotes > 30) score = Math.max(score, 2);
 
   return score;
 }
@@ -101,9 +101,15 @@ function scoreActionability(item) {
   const highAction = /\b(launch\w*|release[sd]?|open.?source[sd]?|announc\w*|introduc\w*|available|free|open beta|shipp?\w*|deploy\w*|now available)\b/;
   const medAction = /\b(rais\w*|acquir\w*|partner\w*|invest\w*|fund\w*|merg\w*|hir\w*|expand\w*)\b/;
 
-  if (highAction.test(text)) return 3;
-  if (medAction.test(text)) return 2;
-  return 1;
+  let score = 1;
+  if (highAction.test(text)) score = 3;
+  else if (medAction.test(text)) score = 2;
+
+  // Academic sources: "we introduce", "code available" ≠ product launch actionability
+  const isAcademic = /huggingface|arxiv|papers/i.test(item.source || '');
+  if (isAcademic && score === 3) return 2;
+
+  return score;
 }
 
 /**
@@ -267,7 +273,8 @@ function scorePeerReview(item, signals) {
         const cnEnts = signal.cn_entities || [];
         if (cnEnts.length > 0) {
           const shared = cnEnts.filter(e => candidateEntities.has(e));
-          if (shared.length >= 1) {
+          // Require ≥2 shared entities to avoid false matches on single common entity
+          if (shared.length >= 2) {
             mentioned = true;
             break;
           }
