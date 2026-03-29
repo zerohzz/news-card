@@ -195,6 +195,14 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
 
   const pages = [];
   const allItems = [...tier1, ...tier2, ...tier3];
+  const totalPages = 10; // hero + menu + 4 feature + 2 half + 2 briefs
+
+  // Generate progress dots for a given page index (0-based, hero=0 has no dots)
+  function makeProgressDots(currentPage) {
+    return Array.from({ length: totalPages }, (_, i) => ({
+      active: i === currentPage,
+    }));
+  }
 
   // Estimate saved values for hero cover
   // N1: hours saved — 40+ sources × ~3 min each = ~2h browsing, plus social media ~1h
@@ -222,6 +230,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
     sourceCount: sourceCount || allItems.length,
     issue,
     categories: groupByCategory(allItems),
+    progress_dots: makeProgressDots(1),
   });
   const menuPath = join(outputDir, 'page-1-menu.html');
   writeFileSync(menuPath, menuHTML);
@@ -241,6 +250,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
       date: today,
       issue,
       related_sources: relatedStr,
+      progress_dots: makeProgressDots(i + 2),
     });
     const pagePath = join(outputDir, `page-${i + 2}-top${i + 1}.html`);
     writeFileSync(pagePath, html);
@@ -257,6 +267,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
       date: today,
       issue,
       stories,
+      progress_dots: makeProgressDots(6 + i),
     });
     const pagePath = join(outputDir, `page-${6 + i}-second.html`);
     writeFileSync(pagePath, html);
@@ -272,6 +283,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
       date: today,
       issue,
       briefs: briefs1,
+      progress_dots: makeProgressDots(8),
     });
     const pagePath = join(outputDir, 'page-8-briefs.html');
     writeFileSync(pagePath, html);
@@ -287,6 +299,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
       date: today,
       issue,
       briefs: briefs2,
+      progress_dots: makeProgressDots(9),
     });
     const pagePath = join(outputDir, 'page-9-briefs.html');
     writeFileSync(pagePath, html);

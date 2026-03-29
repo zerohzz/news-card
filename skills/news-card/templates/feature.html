@@ -642,10 +642,36 @@
 
   .brand-bar .date-center { text-align: center; }
   .brand-bar .spacer { width: 80px; }
+
+  /* Progress dots */
+  .progress-dots {
+    position: absolute;
+    top: 16px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+  }
+  .progress-dots .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.12);
+  }
+  .progress-dots .dot.active {
+    background: var(--accent);
+    width: 24px;
+    border-radius: 4px;
+  }
 </style>
 </head>
 <body>
 <div class="page" style="--cat-color: {{color_tag}}">
+  <div class="progress-dots">
+    {{#each progress_dots}}<span class="dot{{#if active}} active{{/if}}"></span>{{/each}}
+  </div>
   <div class="header">
     <div class="meta-bar">
       <span>{{page_num}} / 8</span>
@@ -671,8 +697,8 @@
     <div style="font-size: 17px; color: var(--text-mid); padding: 8px 0 0; line-height: 1.5;">同题报道：{{related_sources}}</div>
     {{/if}}
     <div class="brand-bar">
-      <span class="brand">News Card</span>
-      <span class="date-center">{{date}} · 第 {{issue}} 期</span>
+      <span class="brand">zz AI 资讯日报</span>
+      <span class="date-center">{{date}}</span>
       <span class="spacer"></span>
     </div>
   </div>

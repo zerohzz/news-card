@@ -188,15 +188,37 @@
 
   .footer .date-center { text-align: center; }
   .footer .spacer { width: 80px; }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 0 0;
+  }
+  .progress-dots .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--divider);
+  }
+  .progress-dots .dot.active {
+    background: var(--accent);
+    width: 24px;
+    border-radius: 4px;
+  }
 </style>
 </head>
 <body>
 <div class="page">
+  <div class="progress-dots">
+    {{#each progress_dots}}<span class="dot{{#if active}} active{{/if}}"></span>{{/each}}
+  </div>
   <div class="content-group">
   <div class="header">
     <div class="date">{{date}}</div>
-    <h1>AI 日报</h1>
-    <div class="subtitle">今日 AI 领域 {{total}} 条精选 · 来自 {{sourceCount}} 条候选</div>
+    <h1 style="font-size: 60px; letter-spacing: 4px;"><span style="color: var(--accent);">zz</span> AI 资讯日报</h1>
+    <div class="subtitle">今日 AI 领域新闻和资讯</div>
   </div>
   <div class="divider"></div>
   <div class="categories">
@@ -217,8 +239,8 @@
   </div>
   </div>
   <div class="footer">
-    <span class="brand">News Card</span>
-    <span class="date-center">{{date}} · 第 {{issue}} 期</span>
+    <span class="brand">zz AI 资讯日报</span>
+    <span class="date-center">{{date}}</span>
     <span class="spacer"></span>
   </div>
 </div>
