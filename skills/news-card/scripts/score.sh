@@ -23,18 +23,39 @@ node "$SKILL_DIR/scripts/lib/score-engine.js" --input "$INPUT" --output "$TMPDIR
 echo "=== Deduplicating ==="
 node "$SKILL_DIR/scripts/lib/dedup.js" --input "$TMPDIR/scored.json" --output "$OUTPUT"
 
+# Split into news (main ranking) vs signals (X + HuggingFace → last page)
+echo "=== Splitting news vs signals ==="
+NEWS_OUTPUT="${OUTPUT%.json}-news.json"
+SIGNALS_OUTPUT="${OUTPUT%.json}-signals.json"
+node --input-type=module -e "
+import { readFileSync, writeFileSync } from 'fs';
+const all = JSON.parse(readFileSync('$OUTPUT', 'utf-8'));
+const news = all.filter(i => !i.source?.startsWith('X/') && !i.source?.includes('HuggingFace'));
+const signals = all.filter(i => i.source?.startsWith('X/') || i.source?.includes('HuggingFace'));
+writeFileSync('$NEWS_OUTPUT', JSON.stringify(news, null, 2));
+writeFileSync('$SIGNALS_OUTPUT', JSON.stringify(signals, null, 2));
+console.error('[split] ' + news.length + ' news + ' + signals.length + ' signals');
+"
+
 # Show summary
-node -e "
+node --input-type=module -e "
 import { readFileSync } from 'fs';
-const items = JSON.parse(readFileSync('$OUTPUT', 'utf-8'));
-const spotlight = items.filter(i => i.scores.total >= 12).length;
-const notable = items.filter(i => i.scores.total >= 6 && i.scores.total < 12).length;
-const discard = items.filter(i => i.scores.total < 6).length;
+const all = JSON.parse(readFileSync('$OUTPUT', 'utf-8'));
+const news = JSON.parse(readFileSync('$NEWS_OUTPUT', 'utf-8'));
+const signals = JSON.parse(readFileSync('$SIGNALS_OUTPUT', 'utf-8'));
+const spotlight = news.filter(i => i.scores.total >= 12).length;
+const notable = news.filter(i => i.scores.total >= 6 && i.scores.total < 12).length;
+const discard = news.filter(i => i.scores.total < 6).length;
 console.log('📊 Score summary:');
-console.log('   ≥12 (spotlight): ' + spotlight);
-console.log('   ≥6  (notable):   ' + notable);
-console.log('   <6  (discard):   ' + discard);
-console.log('   Total:           ' + items.length);
+console.log('   News (main ranking):');
+console.log('     ≥12 (spotlight): ' + spotlight);
+console.log('     ≥6  (notable):   ' + notable);
+console.log('     <6  (discard):   ' + discard);
+console.log('     Subtotal:        ' + news.length);
+console.log('   Signals (X + HF → last page): ' + signals.length);
+console.log('   Total:           ' + all.length);
 "
 
 echo "✅ Scored output: $OUTPUT"
+echo "   News ranking:  $NEWS_OUTPUT"
+echo "   Signal pool:   $SIGNALS_OUTPUT"
