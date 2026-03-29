@@ -89,6 +89,41 @@ function scoreVirality(item) {
 }
 
 /**
+ * Check if an item is relevant to AI/tech topics.
+ * Returns a multiplier: 1.0 for AI-relevant, 0.3 for off-topic.
+ * This prevents non-AI viral news from leaking into spotlight tier.
+ */
+function aiRelevance(item) {
+  const text = ((item.title || '') + ' ' + (item.summary || '')).toLowerCase();
+
+  // Strong AI signals — if any match, it's relevant
+  const aiPatterns = [
+    /\b(artificial intelligence|machine learning|deep learning|neural net\w*|llm|large language model)\b/,
+    /\b(gpt|chatgpt|claude|gemini|llama|mistral|copilot|alphafold|diffusion|transformer)\b/,
+    /\b(openai|anthropic|deepmind|hugging\s*face|nvidia|stability\s*ai)\b/,
+    /\b(ai\s+(model|agent|safety|regulation|act|startup|chip|inference|training|benchmark))\b/,
+    /\b(robot\w*|autonom\w*|self.driving|computer vision|nlp|natural language)\b/,
+    /\b(gpu|tpu|cuda|tensor|embedding|fine.?tun\w*|rlhf|rag)\b/,
+    /\b(generative|gen.?ai|foundation model|frontier model|open.?source.*model)\b/,
+    /\bai\b/,
+  ];
+
+  for (const p of aiPatterns) {
+    if (p.test(text)) return 1.0;
+  }
+
+  // Weak signal: source is an AI-specific outlet
+  const aiSources = ['hacker news', 'huggingface', 'deepmind', 'openai', 'anthropic', 'mistral'];
+  const sourceLower = (item.source || '').toLowerCase();
+  for (const s of aiSources) {
+    if (sourceLower.includes(s)) return 1.0;
+  }
+
+  // No AI signal found — heavy penalty
+  return 0.3;
+}
+
+/**
  * Score actionability based on keywords in title and summary.
  */
 function scoreActionability(item) {
@@ -304,19 +339,33 @@ function scorePeerReview(item, signals) {
   const candidateWords = titleWords(item.title || '');
   let mentionCount = 0;
 
+  const candidateEntities = extractEntities((item.title || '') + ' ' + (item.summary || ''));
+
   for (const newsletter of signals) {
     let mentioned = false;
     for (const signal of newsletter.items) {
-      // Primary: URL match
+      // Primary: URL match (most reliable)
       if (candidateUrl && signal.url && normalizeUrl(signal.url) === candidateUrl) {
         mentioned = true;
         break;
       }
-      // Secondary: title word overlap (Jaccard > 0.4)
+      // Secondary: title word overlap
       const signalWords = titleWords(signal.title);
-      if (jaccardSimilarityPeer(candidateWords, signalWords) > 0.4) {
+      const sim = jaccardSimilarityPeer(candidateWords, signalWords);
+      // High similarity — direct match
+      if (sim > 0.5) {
         mentioned = true;
         break;
+      }
+      // Moderate similarity — require entity overlap to confirm
+      if (sim > 0.3) {
+        const signalEntities = extractEntities(signal.title || '');
+        const sharedOrgs = [...candidateEntities.orgs].some(o => signalEntities.orgs.has(o));
+        const sharedProducts = [...candidateEntities.products].some(p => signalEntities.products.has(p));
+        if (sharedOrgs || sharedProducts) {
+          mentioned = true;
+          break;
+        }
       }
     }
     if (mentioned) mentionCount++;
@@ -362,19 +411,29 @@ function scoreAll(candidates, newsletterSignals) {
     const actionability = scoreActionability(item);
     const peerReview = scorePeerReview(item, newsletterSignals);
 
-    let totalScore =
+    const relevance = aiRelevance(item);
+
+    let totalScore = (
       crossValidation * W_CROSS +
       community * W_COMMUNITY +
       authority * W_AUTHORITY +
       recency * W_RECENCY +
       virality * W_VIRALITY +
       actionability * W_ACTIONABILITY +
-      peerReview * W_PEER_REVIEW;
+      peerReview * W_PEER_REVIEW
+    ) * relevance;
 
     const isXOnly = item.source?.startsWith('X/') && crossValidation === 0;
 
     // X-only items cannot enter spotlight tier (scoring-spec.md: "不得进入第一梯队")
     if (isXOnly) {
+      totalScore = Math.min(totalScore, 11.9);
+    }
+
+    // Single-source academic papers (HuggingFace only, no cross-validation)
+    // cap at notable tier — they need external coverage to reach spotlight
+    const isHfOnly = (item.source || '').toLowerCase().includes('huggingface') && crossValidation === 0 && peerReview === 0;
+    if (isHfOnly) {
       totalScore = Math.min(totalScore, 11.9);
     }
 
