@@ -30,8 +30,9 @@ SIGNALS_OUTPUT="${OUTPUT%.json}-signals.json"
 node --input-type=module -e "
 import { readFileSync, writeFileSync } from 'fs';
 const all = JSON.parse(readFileSync('$OUTPUT', 'utf-8'));
-const news = all.filter(i => !i.source?.startsWith('X/') && !i.source?.includes('HuggingFace'));
-const signals = all.filter(i => i.source?.startsWith('X/') || i.source?.includes('HuggingFace'));
+const isSignal = i => i.source?.startsWith('X/') || i.source?.includes('HuggingFace') || i.source?.includes('Hacker News');
+const news = all.filter(i => !isSignal(i));
+const signals = all.filter(i => isSignal(i));
 writeFileSync('$NEWS_OUTPUT', JSON.stringify(news, null, 2));
 writeFileSync('$SIGNALS_OUTPUT', JSON.stringify(signals, null, 2));
 console.error('[split] ' + news.length + ' news + ' + signals.length + ' signals');
