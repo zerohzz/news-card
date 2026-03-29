@@ -273,21 +273,36 @@ function scorePeerReview(item, signals) {
         const cnEnts = signal.cn_entities || [];
         if (cnEnts.length > 0) {
           const shared = cnEnts.filter(e => candidateEntities.has(e));
-          // Require ≥2 shared entities to avoid false matches on single common entity
-          if (shared.length >= 2) {
+          // Require ≥1 shared entity (relaxed from ≥2; single-entity matches are
+          // valuable since CN sources often mention only one entity per headline)
+          if (shared.length >= 1) {
             mentioned = true;
             break;
           }
         }
       } else {
-        // English matching: title word overlap
+        // English matching strategy 1: URL match (handled above)
+        // Strategy 2: title word Jaccard
         const signalWords = titleWords(signal.title);
         const jaccThreshold = signalWords.size <= 5 ? 0.3 : 0.4;
         if (jaccardSimilarityPeer(candidateWords, signalWords) > jaccThreshold) {
           mentioned = true;
           break;
         }
-        // Containment match for keyword-style signals (TLDR)
+        // Strategy 3: entity-based matching for EN newsletters
+        // If signal and candidate share ≥1 org+product or ≥2 entities, match
+        const signalEntities = extractEntities(signal.title || '');
+        const sharedOrgs = [...signalEntities.orgs].filter(o => candidateEntities.has(o));
+        const sharedProducts = [...signalEntities.products].filter(p => candidateEntities.has(p));
+        if (sharedOrgs.length >= 1 && sharedProducts.length >= 1) {
+          mentioned = true;
+          break;
+        }
+        if (sharedOrgs.length + sharedProducts.length >= 2) {
+          mentioned = true;
+          break;
+        }
+        // Strategy 4: containment match for keyword-style signals (TLDR)
         if (signalWords.size >= 2 && signalWords.size <= 8) {
           const fullWords = titleWords((item.title || '') + ' ' + (item.summary || ''));
           let contained = 0;

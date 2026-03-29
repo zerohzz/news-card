@@ -41,6 +41,8 @@ const RSS_SOURCES = [
   { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', authority: 4, strategy: 'metadata' },
   { name: 'Wired (AI)', url: 'https://www.wired.com/feed/tag/ai/latest/rss', authority: 4, strategy: 'metadata' },
   { name: '404 Media', url: 'https://www.404media.co/rss/', authority: 4, strategy: 'metadata' },
+  { name: 'The Guardian (AI)', url: 'https://www.theguardian.com/technology/artificialintelligenceai/rss', authority: 4, strategy: 'metadata' },
+  { name: 'The Register', url: 'https://www.theregister.com/headlines.rss', authority: 4, strategy: 'metadata', filterAI: true },
 
   // Newsletters (authority: 3-4)
   { name: 'Import AI', url: 'https://importai.substack.com/feed', authority: 4, strategy: 'summary' },
@@ -122,12 +124,22 @@ async function fetchFeed(source, strategyOverride) {
   try {
     const feed = await fetchWithRetry(source.url);
     const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000); // 48 hours
-    const items = (feed.items || [])
+    let items = (feed.items || [])
       .filter((item) => {
         const pubDate = new Date(item.isoDate || item.pubDate || 0);
         return pubDate >= cutoff;
       })
       .map((item) => normalizeItem(item, source, strategy));
+
+    // Filter non-AI content from general-tech feeds
+    if (source.filterAI) {
+      const aiPattern = /\bAI\b|artificial intelligence|machine learn|deep learn|\bLLM\b|\bGPT\b|Claude|Gemini|Llama|OpenAI|Anthropic|DeepMind|chatbot|neural|transformer|diffusion|agent|automat|robot/i;
+      const before = items.length;
+      items = items.filter(item => aiPattern.test(item.title + ' ' + (item.summary || '')));
+      if (before > items.length) {
+        console.error(`[fetch-rss] ${source.name}: filtered ${before - items.length} non-AI items`);
+      }
+    }
 
     return { items, success: true, name: source.name };
   } catch (err) {
