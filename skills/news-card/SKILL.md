@@ -1,8 +1,8 @@
 ---
 name: news-card
 description: >
-  全自动 AI 新闻日报。抓取 40+ 英文 + 中文一手信息源，多维度评分筛选，AI 选题分三梯队，
-  生成 9 张 9:16 小红书风格 PNG 卡片。说"今日 AI 日报"即可触发。
+  全自动 AI 新闻日报。抓取 65+ 英文 + 中文一手信息源，多维度评分筛选，AI 选题分三梯队，
+  生成 10 张 9:16 小红书风格 PNG 卡片。说"今日 AI 日报"即可触发。
 version: 0.2.0
 ---
 
@@ -37,8 +37,8 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 ### Step 3 — Curate（你来完成）
 
 读取两个文件：
-- `workspace/scored-news.json` — 新闻主排名（已排除 X/Twitter 和 HuggingFace）
-- `workspace/scored-signals.json` — X + HuggingFace 信号池
+- `workspace/scored-news.json` — 新闻主排名（RSS + Blogs + follow-builders Blog/Podcast）
+- `workspace/scored-signals.json` — 信号池（X/Twitter + Hacker News + HuggingFace Papers）
 
 按照下方「四梯队规则」和 `references/scoring-spec.md` 选出 24 条，填充为 `digest.json`。
 
@@ -57,7 +57,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
   "tier": 1,
   "headline_zh": "≤25 字，零情绪化",
   "headline_en": "English headline",
-  "summary_zh": "第一梯队 150 字 / 第二梯队 150 字（两段） / 第三梯队 60 字（一段）",
+  "summary_zh": "第一梯队 150 字 / 第二梯队 150 字（两段） / 第三梯队 60–90 字（一段，硬上限 90 字）",
   "content_html": "（仅第一梯队）富 HTML 内容，包含语义组件",
   "source": "来源名",
   "source_url": "原文链接",
@@ -119,8 +119,13 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 ### 第三梯队内容填充规则
 
-第三梯队每条新闻的 `summary_zh` 必须包含 **至少 60 字**，写满一个完整自然段。不要只写一句话。
-在允许范围内尽量充实内容，包括关键数据点或背景信息。
+第三梯队每条新闻的 `summary_zh` 必须在 **60–90 字** 范围内（硬上限 90 字），写满一个完整自然段。不要只写一句话。
+
+**⚠️ 字数硬限制（CRITICAL）**：
+- `headline_zh`：**≤ 25 字**（超过会导致卡片标题溢出为 3 行）
+- `summary_zh`：**60–90 字**（超过 90 字会导致 2×4 网格卡片溢出，遮挡页脚）
+- 排版预算：每张卡片高度约 400px，标题 2 行 + 摘要 5 行是上限
+- 宁可精简措辞，也不要超出字数限制
 
 ### 选题准则（参考顶级 Newsletter 方法论）
 
@@ -165,9 +170,9 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 **高价值关键词触发列表：**
 `announce`, `release`, `launch`, `open-source`, `model`, `benchmark`, `API`, `pricing`, `breakthrough`, `state-of-the-art`
 
-### Step 3.5 — 评分报告（每次必须生成）
+### Step 3.5 — 评分报告（推荐生成）
 
-将 `workspace/scored.json` 中**全部候选新闻**（不只是入选的 24 条）整理为 Markdown 格式，写入 `output/<datetime>/scored-candidates.md`。
+将 `workspace/scored.json` 中**全部候选新闻**（不只是入选的 24 条）整理为 Markdown 格式，写入 `output/<datetime>/scored-candidates.md`。可通过 `generate-score-report.js` 自动生成。
 
 格式要求：
 
@@ -218,7 +223,7 @@ node skills/news-card/scripts/lib/render-html.js \
   --output output/<datetime>/slides
 ```
 
-将 digest.json 填入 HTML 模板，输出 9 个 HTML 文件到 `slides/` 子目录。
+将 digest.json 填入 HTML 模板，输出 10 个 HTML 文件到 `slides/` 子目录。
 
 ### Step 5 — Screenshot
 
@@ -226,9 +231,94 @@ node skills/news-card/scripts/lib/render-html.js \
 bash skills/news-card/scripts/screenshot.sh output/<datetime>/slides output/<datetime>/images
 ```
 
-Playwright 截图，输出 9 张 PNG（1080×1920px @2x）到 `images/` 子目录。
+Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目录。
 
 完成后告知用户输出位置。
+
+### Step 6 — 输出附带文档（必须）
+
+每次运行完成后，必须在输出目录中生成以下文档：
+
+#### 6a. 选题理由说明 (`selection-rationale.md`)
+
+解释为什么选择这 24 条新闻。包含：
+
+```markdown
+# 选题理由 — YYYY-MM-DD
+
+## 第一梯队（4 条）
+| # | 标题 | 入选理由 |
+|---|------|---------|
+| 1 | ... | 多源交叉验证（3+ 媒体）、行业影响大、叙事方式独特 |
+
+## 第二梯队（4 条）
+（同上格式）
+
+## 第三梯队（16 条）
+### 快讯速览（8 条）
+### 研究前沿 / Builder 动态（8 条）
+（同上格式，理由可简短）
+
+## 落选说明
+列出 3-5 条高分但未入选的候选，说明为什么没选。
+```
+
+#### 6b. 管线问题记录 (`pipeline-issues.md`)
+
+记录本次运行中遇到的所有问题、错误、异常，以及修复或绕过措施：
+
+```markdown
+# Pipeline Issues — YYYY-MM-DD Run
+
+| # | Issue | Step | Severity | Fixed? | 说明 |
+|---|-------|------|----------|--------|------|
+| 1 | ... | Fetch | BLOCKING | Yes | ... |
+
+## 详细描述
+（每个 issue 的症状、根因、修复方式）
+
+## 改进建议
+（基于本次运行，对管线代码或配置的改进建议）
+```
+
+#### 6c. 小红书发布文案 (`xiaohongshu-post.md`)
+
+生成可直接复制粘贴到小红书的发布文案。
+
+**标题格式（强制）**：
+```
+MM/DD日报 · <当日最大亮点，一句话>
+```
+示例：`03/30日报 · Bluesky 用 Claude 让你自己定义算法`
+
+**正文格式**：
+```markdown
+# MM/DD日报 · <亮点>
+
+🔥 今日头条
+1. <tier-1 headline> — <一句话说明>
+2. <tier-1 headline> — <一句话说明>
+3. <tier-1 headline> — <一句话说明>
+4. <tier-1 headline> — <一句话说明>
+
+📰 值得关注
+5. <tier-2 headline> — <一句话说明>
+6. <tier-2 headline> — <一句话说明>
+7. <tier-2 headline> — <一句话说明>
+8. <tier-2 headline> — <一句话说明>
+
+⚡ 快讯
+· <tier-3 headline>
+· <tier-3 headline>
+...
+
+#AI日报 #AI资讯 #人工智能 #科技新闻
+```
+
+**注意**：
+- 标题 prefix 永远是 `MM/DD日报 · `，不可省略
+- 正文用中文，简洁有力
+- hashtag 固定使用上述 4 个
 
 ## 输出目录结构
 
@@ -237,18 +327,19 @@ Playwright 截图，输出 9 张 PNG（1080×1920px @2x）到 `images/` 子目�
 ```
 output/
 └── 2026-03-26_14-30-00/
-    ├── slides/              ← 9 个 HTML 文件
-    │   ├── page-0-cover.html
-    │   ├── page-1-top1.html
-    │   ├── ...
-    │   └── page-7-briefs.html
-    ├── images/              ← 9 张 PNG 卡片
-    │   ├── page-0-cover.png
-    │   ├── page-1-top1.png
-    │   ├── ...
-    │   └── page-7-briefs.png
+    ├── slides/              ← 10 个 HTML 文件
+    │   ├── page-0-cover.html    (Hero Cover)
+    │   ├── page-1-menu.html     (Menu / 目录)
+    │   ├── page-2-top1.html … page-5-top4.html  (Tier 1 × 4)
+    │   ├── page-6-second.html, page-7-second.html  (Tier 2 × 2)
+    │   ├── page-8-briefs.html   (快讯速览)
+    │   └── page-9-briefs.html   (研究前沿 / Builder 动态)
+    ├── images/              ← 10 张 PNG 卡片 (1080×1920 @2x)
     ├── digest.json          ← 本次选题数据
-    └── scored-candidates.md ← 全部候选新闻评分报告
+    ├── scored-candidates.md ← 全部候选新闻评分报告
+    ├── selection-rationale.md ← 选题理由说明（为什么选这 24 条）
+    ├── pipeline-issues.md   ← 本次运行遇到的问题与改进建议
+    └── xiaohongshu-post.md  ← 小红书发布文案
 ```
 
 或使用一键脚本（自动创建带时间戳的目录）：
@@ -259,20 +350,24 @@ bash skills/news-card/scripts/run-digest.sh
 
 ---
 
-## 四梯队规则
+## 页面与梯队规则
 
-| 梯队 | 条数 | 数据源 | 页面 | 展示方式 |
-|------|------|--------|------|----------|
-| 第一梯队 | 4 条 | scored-news.json | 第 1–4 页 | 每页一条，整页展示 |
-| 第二梯队 | 4 条 | scored-news.json | 第 5–6 页 | 每页两条，半页展示 |
-| 新闻快讯 | 8 条 | scored-news.json | 第 7 页 | 方框卡片 2×4 网格 |
-| 研究前沿 / Builder 动态 | 8 条 | scored-signals.json | 第 8 页 | 方框卡片 2×4 网格 |
+| 页码 | 页面 | 梯队 | 条数 | 数据源 | 展示方式 |
+|------|------|------|------|--------|----------|
+| P0 | Hero Cover | — | — | — | 品牌封面 + Top 4 标题 |
+| P1 | Menu | — | 24 | digest.json | 目录索引，按 category 色块 |
+| P2–P5 | Feature | 第一梯队 (tier 1) | 4 条 | scored-news.json | 每页一条，整页展示 |
+| P6–P7 | Half-page | 第二梯队 (tier 2) | 4 条 | scored-news.json | 每页两条，半页展示 |
+| P8 | Briefs | 快讯速览 (tier 3) | 8 条 | scored-news.json | 方框卡片 2×4 网格 |
+| P9 | Briefs | 研究前沿 / Builder 动态 (tier 3) | 8 条 | scored-signals.json | 方框卡片 2×4 网格 |
 
-封面（第 0 页）：所有 24 条新闻按 category 对应色块排列。
+总计 10 张 PNG：1 封面 + 1 目录 + 4 第一梯队 + 2 第二梯队 + 1 快讯速览 + 1 研究前沿。
 
-总计 9 张 PNG：1 封面 + 4 第一梯队 + 2 第二梯队 + 1 新闻快讯 + 1 研究前沿。
+> **页码规则**：Hero Cover (P0) 不显示页码。内容页（P1–P9）显示 `X / 9`，共 9 页内容。
 
-> **X/Twitter 和 HuggingFace Papers 不参与主排名。** 它们仍参与 cross_validation 和 peer_review 的评分计算（为新闻条目提供交叉验证信号），但选题时仅出现在第 8 页「研究前沿 / Builder 动态」。
+> **数据层只有 tier 1/2/3。** P8 和 P9 在数据上都是 `tier: 3`，但 P9 的 section 标题为「研究前沿 / Builder 动态」，内容优先从 `scored-signals.json` 选取。
+
+> **信号池来源（进入 scored-signals.json）：** X/Twitter、Hacker News、HuggingFace Papers。它们仍参与 cross_validation 和 peer_review 的评分计算（为新闻条目提供交叉验证信号），但选题时仅出现在 P9「研究前沿 / Builder 动态」。follow-builders 的 Blog 和 Podcast 进入主排名（scored-news.json）。
 
 ---
 

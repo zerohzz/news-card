@@ -1,0 +1,64 @@
+{
+  "fetchedAt": "2026-03-30T08:00:00Z",
+  "signals": [
+    {
+      "newsletter": "Import AI",
+      "authority": 4,
+      "lang": "en",
+      "items": [
+        {
+          "title": "OpenAI launches Agents SDK for enterprise customers",
+          "url": "https://techcrunch.com/2026/03/30/openai-agents-sdk-enterprise",
+          "published": "2026-03-30T07:00:00Z",
+          "source_family": "newsletter_signal",
+          "source_collection": "editorial-consensus"
+        }
+      ]
+    },
+    {
+      "newsletter": "The Rundown AI",
+      "authority": 4,
+      "lang": "en",
+      "items": [
+        {
+          "title": "OpenAI expands Agents SDK observability",
+          "url": "https://openai.com/blog/agents-sdk-observability",
+          "published": "2026-03-30T07:10:00Z",
+          "source_family": "newsletter_signal",
+          "source_collection": "editorial-consensus"
+        }
+      ]
+    },
+    {
+      "newsletter": "雷峰网",
+      "authority": 4,
+      "lang": "zh",
+      "items": [
+        {
+          "title": "OpenAI 发布 Agents SDK 企业版更新",
+          "url": "",
+          "published": "2026-03-30T07:20:00Z",
+          "cn_entities": [
+            "openai"
+          ],
+          "source_family": "newsletter_signal",
+          "source_collection": "editorial-consensus"
+        }
+      ]
+    },
+    {
+      "newsletter": "TLDR AI",
+      "authority": 5,
+      "lang": "en",
+      "items": [
+        {
+          "title": "Agents SDK",
+          "url": "",
+          "published": "2026-03-30T07:30:00Z",
+          "source_family": "newsletter_signal",
+          "source_collection": "editorial-consensus"
+        }
+      ]
+    }
+  ]
+}

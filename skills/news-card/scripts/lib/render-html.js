@@ -7,6 +7,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
+import { pathToFileURL } from 'url';
 
 // Category → color mapping (from design-tokens.md)
 const CATEGORY_COLORS = {
@@ -158,10 +159,56 @@ function groupByCategory(items) {
 }
 
 /**
+ * Sanitize JSON string by replacing bare Chinese quotation marks (U+201C / U+201D)
+ * with corner brackets (「」) so they don't break JSON parsing.
+ * This fixes a common issue when LLM-generated Chinese text uses "" inside JSON values.
+ */
+function sanitizeChineseQuotes(jsonStr) {
+  return jsonStr.replace(/\u201c/g, '\u300c').replace(/\u201d/g, '\u300d');
+}
+
+/**
+ * Estimate reading time (in minutes) from digest items.
+ * Chinese reading speed ~400 chars/min; English ~200 words/min.
+ */
+function estimateReadingMinutes(items) {
+  let totalChars = 0;
+  for (const item of items) {
+    // Count Chinese characters + English words across all text fields
+    const texts = [item.headline_zh, item.summary_zh, item.content_html].filter(Boolean);
+    for (const t of texts) {
+      // Strip HTML tags for content_html
+      const plain = t.replace(/<[^>]+>/g, '');
+      totalChars += plain.length;
+    }
+  }
+  // Chinese mixed text averages ~350 chars/min reading speed
+  const minutes = Math.max(2, Math.ceil(totalChars / 350));
+  return minutes;
+}
+
+/**
+ * Estimate Claude API cost for the full pipeline (curation + enrichment).
+ * Assumes Claude Opus 4 ($15/M input, $75/M output).
+ * Returns a string like "2" or "1.5".
+ */
+function estimateApiCost(candidateCount) {
+  // Typical pipeline: ~50K input tokens (scored candidates + context) + ~10K output tokens (digest)
+  const inputTokens = Math.max(40000, candidateCount * 400);  // ~400 tokens per candidate
+  const outputTokens = 10000;  // digest.json enriched output
+  const inputCostPerM = 15;   // Opus 4 pricing
+  const outputCostPerM = 75;
+  const cost = (inputTokens / 1_000_000) * inputCostPerM + (outputTokens / 1_000_000) * outputCostPerM;
+  // Round to nearest 0.5
+  return String(Math.round(cost * 2) / 2);
+}
+
+/**
  * Render all pages from digest.json.
  */
-function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
-  const digest = JSON.parse(readFileSync(digestPath, 'utf-8'));
+function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numSourcesOverride = null) {
+  const rawJson = readFileSync(digestPath, 'utf-8');
+  const digest = JSON.parse(sanitizeChineseQuotes(rawJson));
   const items = Array.isArray(digest) ? digest : digest.items || digest.stories || [];
 
   if (items.length === 0) {
@@ -207,29 +254,36 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
 
   const pages = [];
   const allItems = [...tier1, ...tier2, ...tier3];
-  const totalPages = 10; // hero + menu + 4 feature + 2 half + 2 briefs
+  const totalPages = 9; // menu + 4 feature + 2 half + 2 briefs (hero cover excluded)
 
-  // Generate progress dots for a given page index (0-based, hero=0 has no dots)
+  // Generate progress dots for a given page index (1-based, menu=1)
   function makeProgressDots(currentPage) {
     return Array.from({ length: totalPages }, (_, i) => ({
-      active: i === currentPage,
+      active: i + 1 === currentPage,
     }));
   }
 
+  // Reading time — hardcoded editorial choice
+  const readingMinutes = 3;
+
   // Estimate saved values for hero cover
-  // N1: hours saved — 40+ sources × ~3 min each = ~2h browsing, plus social media ~1h
+  // N1: hours saved — 65+ sources × ~3 min each = ~3h+ manual browsing
   const savedHours = 3;
-  // N2: API cost — ~130 candidates × scoring + newsletter signals ≈ $0.15/day compute
-  const savedCost = '0.15';
+  // N2: API cost — hardcoded editorial choice (actual session cost ~$100+)
+  const savedCost = '10+';
 
   // Page 0: Hero Cover (brand hook — no content)
-  // Distinct source domains across curated items (floor for display)
-  const numSources = new Set(allItems.map((i) => i.source).filter(Boolean)).size || 40;
+  // numSources = total fetch targets (RSS feeds + HN + HF + X accounts + newsletters + blogs)
+  // Use CLI override or fall back to curated item sources as minimum
+  const numSources = numSourcesOverride
+    || new Set(allItems.map((i) => i.source).filter(Boolean)).size
+    || 40;
 
   const heroHTML = renderTemplate(heroCoverTpl, {
     date: today,
     date_year: dateYear,
     date_md: dateMD,
+    date_dow: dateDow,
     date_month_en: dateMonthEn,
     date_day_ordinal: dateDayOrdinal,
     total: allItems.length,
@@ -237,8 +291,8 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
     numSources,
     savedHours,
     savedCost,
+    readingMinutes,
     tier1,
-    date_dow: dateDow,
   });
   const heroPath = join(outputDir, 'page-0-cover.html');
   writeFileSync(heroPath, heroHTML);
@@ -263,74 +317,82 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   pages.push(menuPath);
   console.error(`[render] Page 1: Menu (${allItems.length} items)`);
 
-  // Pages 2-5: Feature (tier 1)
+  // Pages 2-5: Feature (tier 1) → content page 2-5
   for (let i = 0; i < tier1.length; i++) {
     const item = tier1[i];
+    const pageNum = i + 2; // content pages 2-5
     const relatedStr = (item.related_sources || [])
       .map((s) => s.source)
       .join(', ');
     const html = renderTemplate(featureTpl, {
       ...item,
       content_html: item.content_html || '<p>' + (item.summary_zh || '') + '</p>',
-      page_num: i + 2,
+      page_num: pageNum,
+      total_pages: totalPages,
       date: today,
       issue,
       related_sources: relatedStr,
-      progress_dots: makeProgressDots(i + 2),
+      progress_dots: makeProgressDots(pageNum),
     });
     const pagePath = join(outputDir, `page-${i + 2}-top${i + 1}.html`);
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page ${i + 2}: Feature — ${item.headline_zh}`);
+    console.error(`[render] Page ${pageNum}/${totalPages}: Feature — ${item.headline_zh}`);
   }
 
-  // Pages 6-7: Half-page (tier 2, 2 per page)
+  // Pages 6-7: Half-page (tier 2, 2 per page) → content page 6-7
   for (let i = 0; i < 2; i++) {
     const stories = tier2.slice(i * 2, i * 2 + 2);
     if (stories.length === 0) break;
+    const pageNum = 6 + i;
     const html = renderTemplate(halfPageTpl, {
-      page_num: 6 + i,
+      page_num: pageNum,
+      total_pages: totalPages,
       date: today,
       issue,
       stories,
-      progress_dots: makeProgressDots(6 + i),
+      progress_dots: makeProgressDots(pageNum),
     });
     const pagePath = join(outputDir, `page-${6 + i}-second.html`);
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page ${6 + i}: Half-page (${stories.length} stories)`);
+    console.error(`[render] Page ${pageNum}/${totalPages}: Half-page (${stories.length} stories)`);
   }
 
-  // Page 8: Briefs page 1 (first 8 tier-3 items)
+  // Page 8: Briefs page 1 (first 8 tier-3 items) → content page 8
   const briefs1 = tier3.slice(0, 8);
   if (briefs1.length > 0) {
     const html = renderTemplate(briefsTpl, {
       page_num: 8,
+      total_pages: totalPages,
       date: today,
       issue,
+      section_title: '快讯速览',
       briefs: briefs1,
       progress_dots: makeProgressDots(8),
     });
     const pagePath = join(outputDir, 'page-8-briefs.html');
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page 8: Briefs (${briefs1.length} items)`);
+    console.error(`[render] Page 8/${totalPages}: Briefs (${briefs1.length} items)`);
   }
 
-  // Page 9: Briefs page 2 (next 8 tier-3 items)
+  // Page 9: Briefs page 2 (next 8 tier-3 items) → content page 9
   const briefs2 = tier3.slice(8, 16);
   if (briefs2.length > 0) {
     const html = renderTemplate(briefsTpl, {
       page_num: 9,
+      total_pages: totalPages,
       date: today,
       issue,
+      section_title: '研究前沿',
       briefs: briefs2,
       progress_dots: makeProgressDots(9),
     });
     const pagePath = join(outputDir, 'page-9-briefs.html');
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page 9: Briefs page 2 (${briefs2.length} items)`);
+    console.error(`[render] Page 9/${totalPages}: Briefs page 2 (${briefs2.length} items)`);
   }
 
   console.error(`[render] Generated ${pages.length} HTML files in ${outputDir}`);
@@ -344,17 +406,22 @@ const templatesIdx = args.indexOf('--templates');
 const outputIdx = args.indexOf('--output');
 
 const sourceCountIdx = args.indexOf('--source-count');
+const numSourcesIdx = args.indexOf('--num-sources');
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-if (inputIdx === -1 || templatesIdx === -1 || outputIdx === -1) {
-  console.error('Usage: node render-html.js --input digest.json --templates ./templates --output ./html [--source-count N]');
+if (isDirectExecution && (inputIdx === -1 || templatesIdx === -1 || outputIdx === -1)) {
+  console.error('Usage: node render-html.js --input digest.json --templates ./templates --output ./html [--source-count N] [--num-sources N]');
   process.exit(1);
 }
 
-const digestPath = resolve(args[inputIdx + 1]);
-const templatesDir = resolve(args[templatesIdx + 1]);
-const outputDir = resolve(args[outputIdx + 1]);
-const sourceCountOverride = sourceCountIdx !== -1 ? parseInt(args[sourceCountIdx + 1], 10) : null;
-
-renderAll(digestPath, templatesDir, outputDir, sourceCountOverride);
+if (isDirectExecution) {
+  const digestPath = resolve(args[inputIdx + 1]);
+  const templatesDir = resolve(args[templatesIdx + 1]);
+  const outputDir = resolve(args[outputIdx + 1]);
+  const sourceCountOverride = sourceCountIdx !== -1 ? parseInt(args[sourceCountIdx + 1], 10) : null;
+  const numSourcesOverride = numSourcesIdx !== -1 ? parseInt(args[numSourcesIdx + 1], 10) : null;
+  renderAll(digestPath, templatesDir, outputDir, sourceCountOverride, numSourcesOverride);
+}
 
 export { renderAll, renderTemplate, CATEGORY_COLORS };

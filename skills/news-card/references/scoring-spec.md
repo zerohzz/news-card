@@ -35,7 +35,7 @@ total_score = cross_validation × 2.0
 
 "独立来源"定义：不同组织/媒体。同一组织的博客 + Twitter 算 1 个来源。
 
-事件匹配规则：标题 Jaccard 相似度 > 0.4 或关键实体（公司名 + 产品名）相同 → 视为同一事件。
+事件匹配规则：标题 Jaccard 相似度 > 0.2 或关键实体匹配（`entitiesMatch()`） → 视为同一事件。阈值比纯 Jaccard 更宽松，依赖实体匹配补偿。
 
 ### 2. 社区热度分（community_heat）
 
@@ -46,8 +46,8 @@ total_score = cross_validation × 2.0
 | Hacker News | points > 100 | +2 |
 | Hacker News | points > 300 | +4（不累加） |
 | Hacker News | points > 500 | +6（不累加） |
-| HuggingFace Papers | upvotes > 5 | +2 |
-| HuggingFace Papers | upvotes > 20 | +4（不累加） |
+| HuggingFace Papers | upvotes > 30 | +2 |
+| HuggingFace Papers | upvotes > 80 | +4（不累加） |
 | Twitter/X | 无量化指标（guest mode 不返回） | 0 |
 
 ### 3. 来源权威度（authority）
@@ -60,26 +60,19 @@ total_score = cross_validation × 2.0
 
 <!-- implementation_status: active -->
 
-以 fetch 时间为基准：
+使用指数衰减函数（替代早期的阶梯分），消除 24h 硬断崖：
 
-| 发布距今 | 分数 |
-|---------|------|
-| < 6 小时 | 3 |
-| < 12 小时 | 2 |
-| < 24 小时 | 1 |
-| ≥ 24 小时 | 0 |
+```
+maxScore = 3
+halfLife = 12 hours
+score = 3 × exp(-ln2/12 × hoursAgo)
+```
 
-**时效性配置参数（规划中）：**
+- 0h → 3.0, 6h → 2.1, 12h → 1.5, 24h → 0.75, 36h → 0.4
+- 低于 0.2 → 记为 0
+- 四舍五入到 0.1
 
-<!-- implementation_status: future -->
-
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `scoring.recency.baseline` | `digest_generation_time` | 计算"距今"的基准时间 |
-| `scoring.recency.timezone` | `UTC` | 基准时区 |
-| `scoring.recency.windows` | `[6, 12, 24]` | 小时窗口，对应分数 3/2/1 |
-
-> 当前实现使用 `Date.now()` (UTC)，窗口硬编码为 6/12/24h。
+> 基准时间使用 `Date.now()` (UTC)。
 
 ### 5. 传播力（virality）
 
@@ -104,34 +97,59 @@ total_score = cross_validation × 2.0
 | 2 | raise, acquire, partner, invest, fund, merge | 中可操作性：有商业动态值得关注 |
 | 1 | 其他 | 低可操作性：分析/评论类内容 |
 
-### 7. 同行评审（peer_review）
+### 7. 编辑/媒体共识（peer_review）
 
-<!-- implementation_status: active; migration_target: stage2_rerank -->
+<!-- implementation_status: active -->
 
-基于顶级 AI/Tech Newsletter 编辑的独立选题判断。如果一条新闻被多个专业编辑同时选中，说明它确实重要。类似学术界的「同行评审」机制。
+基于顶级 AI/Tech Newsletter 和科技媒体编辑的独立选题判断。字段名保留 `peer_review`，实际语义为 **editorial/media consensus**。
 
-**信号来源：**
-- Ben's Bites (RSS) — AI 工具和 builder 圈最有影响力的 newsletter — **status: deprecated** (404 as of 2026-03-27)
-- Import AI (RSS) — AI 研究和政策领域的权威 newsletter (Jack Clark)
-- Platformer (RSS) — 科技平台与民主治理的深度报道
-- TLDR AI (Archive scraping) — 最大的每日 AI digest
+**信号来源（EN + CN 共 10 个）：**
 
-**评分规则：**
+| Source | 方式 | Authority | Sponsor Filter | Lang |
+|--------|------|-----------|----------------|------|
+| Import AI | RSS (Substack) | 4 | ✅ | EN |
+| The Rundown AI | RSS (Beehiiv) | 4 | ✅ | EN |
+| AlphaSignal | RSS (Substack) | 4 | ✅ | EN |
+| AI Supremacy | RSS (Substack) | 3 | ❌ | EN |
+| TLDR AI | Archive scraping | 3 | — | EN |
+| 雷峰网 | RSS | 4 | ❌ | ZH |
+| 36氪 | RSS | 3 | ❌ | ZH |
+| 钛媒体 | RSS | 3 | ❌ | ZH |
+| 爱范儿 | RSS | 3 | ❌ | ZH |
+| IT之家 | RSS | 2 | ❌ | ZH |
 
-| 被提及 Newsletter 数 | 分数 | 含义 |
-|---------------------|------|------|
-| 4 个 | 5 | 全行业共识的重大新闻 |
-| 3 个 | 4 | 多数编辑认为重要 |
-| 2 个 | 3 | 有一定关注度 |
-| 1 个 | 2 | 至少一位编辑关注 |
-| 0 个 | 0 | 未被任何 newsletter 覆盖 |
+**加权评分规则：**
 
-**匹配策略：**
+每个 source match 按 authority 加权（而非等权 +1）：
+
+| Authority | Weight |
+|-----------|--------|
+| 5 | 1.5 |
+| 4 | 1.2 |
+| 3 | 1.0 |
+| 2 | 0.7 |
+
+加权总分映射为 0–5：
+
+| 加权总分 | peer_review 分数 | 含义 |
+|---------|-----------------|------|
+| ≥ 4.0 | 5 | 多个高权威来源共识 |
+| ≥ 3.0 | 4 | 显著共识 |
+| ≥ 2.0 | 3 | 有一定关注度 |
+| ≥ 0.5 | 2 | 至少一个来源关注 |
+| < 0.5 | 0 | 未被覆盖 |
+
+**匹配策略（EN）：**
 1. URL 精确匹配（去除协议、www、尾斜杠、query 参数）
-2. 标题词重叠（Jaccard 系数 > 0.4）
-3. TLDR 关键词匹配（标题包含 TLDR 提取的话题关键词）
+2. 标题词 Jaccard（短标题 > 0.3，长标题 > 0.4）
+3. 实体匹配（≥1 org + ≥1 product，或 ≥2 entities）
+4. TLDR 关键词 containment match
 
-**Sponsor 过滤：** 自动过滤 newsletter 中的赞助内容（"sponsored by", "brought to you by" 等关键词），避免商业推广污染评分。
+**匹配策略（ZH）：**
+- 中文实体交集：≥2 个共享实体直接命中
+- 1 个共享实体 + 标题 Jaccard > 0.15 作为 fallback
+
+**Sponsor 过滤：** EN 来源（Import AI, Rundown AI, AlphaSignal）已启用 sponsor filter。CN 来源未启用。
 
 ---
 
@@ -163,14 +181,22 @@ total_score = cross_validation × 2.0
 
 ### Newsletter 信号源注册表
 
-| Newsletter | 方式 | Status | 说明 |
-|-----------|------|--------|------|
-| Ben's Bites | RSS | **deprecated** | 404 as of 2026-03-27 |
-| Import AI | RSS (Substack) | **active** | Jack Clark, AI 研究+政策 |
-| Platformer | RSS | **active** | 科技平台与治理 |
-| TLDR AI | Archive scraping | **pending_verification** | 最大 AI digest, archive 页抓取 |
+| Source | 方式 | Authority | Status | 说明 |
+|--------|------|-----------|--------|------|
+| Import AI | RSS (Substack) | 4 | **active** | Jack Clark, AI 研究+政策 |
+| The Rundown AI | RSS (Beehiiv) | 4 | **active** | 每日 AI 新闻速递 |
+| AlphaSignal | RSS (Substack) | 4 | **active** | AI 研究信号 |
+| AI Supremacy | RSS (Substack) | 3 | **active** | AI 行业分析 |
+| TLDR AI | Archive scraping | 3 | **active** | 最大 AI digest, archive 页关键词抽取 |
+| 雷峰网 | RSS | 4 | **active** | 中文 AI/科技深度报道 |
+| 36氪 | RSS | 3 | **active** | 中文科技媒体 |
+| 钛媒体 | RSS | 3 | **active** | 中文科技媒体 |
+| 爱范儿 | RSS | 3 | **active** | 中文科技消费 |
+| IT之家 | RSS | 2 | **active** | 中文泛科技媒体 |
 
-> authority（来源权威度）≠ editorial_consensus（被多个编辑选中）。两者不应无限线性叠加。
+> **Deprecated:** Ben's Bites (404 as of 2026-03-27), Platformer (replaced by The Rundown AI / AlphaSignal)
+
+> authority（来源权威度）≠ editorial_consensus（被多个编辑选中）。peer_review 使用加权评分，高 authority source 贡献更大权重。
 
 ---
 
@@ -189,8 +215,8 @@ total_score = cross_validation × 2.0
 <!-- implementation_status: active -->
 
 当一条新闻仅由 X/Twitter 来源支撑时（`cross_validation = 0` 且唯一来源类型为 X/Twitter）：
-- 不得进入第一梯队
-- authority 分按 sources-spec.md 中 X 源的分级权重计算（Tier A: 3 / Tier B: 2 / Tier C: 1）
+- 不得进入第一梯队（总分 cap 到 11.9，低于 spotlight 阈值 12）
+- authority 分按 X tier 计算：Tier A（官方/公司）: 4 / Tier B（builder）: 3 / Tier C（评论/投资者）: 2
 - 可保留在候选池中作为早期信号
 
 ---
@@ -203,18 +229,16 @@ total_score = cross_validation × 2.0
 2. **关键词重叠**：提取 top-5 关键词，重叠 > 70% → 合并
 3. **合并策略**：保留 authority_weight 最高的来源版本，将其他来源记录在 `related_sources` 字段中（用于交叉验证加分）
 
-> 建议将合并阈值从 0.6 上调至 0.7 以减少误合并。<!-- implementation_status: future -->
-
 Tokenize 规则：
 - 转小写
-- 去除标点和停用词（a, an, the, is, are, was, were, in, on, at, to, for, of, and, or, but, with）
+- 去除标点和停用词（a, an, the, is, are, was, were, in, on, at, to, for, of, and, or, but, with, ...）
 - 按空格分词
 
-AI 领域停用词（待实现）：
-<!-- implementation_status: future -->
+AI 领域停用词（已实现）：
+<!-- implementation_status: active -->
 `ai, artificial, intelligence, machine, learning, deep, model, neural, network, new, first, using, based, powered, driven, enables, announces, launches, introduces, reveals, unveils, tool, platform, update, feature, support, data, training, system, research, user`
 
-> 当前实现仅使用通用停用词。AI 领域停用词待 dedup.js 升级后生效。
+> 通用停用词 + AI 领域停用词均已在 `dedup.js` 中生效。
 
 ---
 

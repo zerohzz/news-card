@@ -1,0 +1,108 @@
+[
+  {
+    "title": "OpenAI launches Agents SDK observability update",
+    "url": "https://openai.com/blog/agents-sdk-observability",
+    "source": "Blog/OpenAI",
+    "source_authority": 5,
+    "published": "2026-03-30T02:00:00Z",
+    "summary": "OpenAI expands Agents SDK observability with traces, eval hooks, and enterprise monitoring workflows.",
+    "fetch_strategy": "summary",
+    "community_metrics": {},
+    "requires_confirmation": false,
+    "source_family": "follow_builders_blog",
+    "source_collection": "follow-builders"
+  },
+  {
+    "title": "OpenAI launches Agents SDK for enterprise customers",
+    "url": "https://techcrunch.com/2026/03/30/openai-agents-sdk-enterprise",
+    "source": "TechCrunch (AI)",
+    "source_authority": 4,
+    "published": "2026-03-30T04:00:00Z",
+    "summary": "TechCrunch reports OpenAI is positioning Agents SDK as an enterprise orchestration layer with evals and tracing.",
+    "fetch_strategy": "metadata",
+    "community_metrics": {},
+    "requires_confirmation": false,
+    "source_family": "core_rss",
+    "source_collection": "direct"
+  },
+  {
+    "title": "OpenAI launches Agents SDK for enterprise orchestration",
+    "url": "https://x.com/openai/status/1001",
+    "source": "X/@OpenAI (OpenAI)",
+    "source_authority": 4,
+    "published": "2026-03-30T06:00:00Z",
+    "summary": "OpenAI says the Agents SDK now supports better tracing, eval tooling, and enterprise workflows.",
+    "fetch_strategy": "metadata",
+    "community_metrics": {
+      "likes": 1800,
+      "comments": 95,
+      "score": 2440
+    },
+    "requires_confirmation": true,
+    "source_family": "follow_builders_x",
+    "source_collection": "follow-builders"
+  },
+  {
+    "title": "Inside enterprise agent deployment patterns",
+    "url": "https://latent.space/podcast/enterprise-agents",
+    "source": "Podcast/Latent Space",
+    "source_authority": 4,
+    "published": "2026-03-30T03:00:00Z",
+    "summary": "Latent Space interviews operators about deployment guardrails, evaluation loops, and enterprise rollout patterns for agents.",
+    "fetch_strategy": "summary",
+    "community_metrics": {
+      "score": 0
+    },
+    "requires_confirmation": false,
+    "source_family": "follow_builders_podcast",
+    "source_collection": "follow-builders"
+  },
+  {
+    "title": "Anthropic hints at new Claude memory controls",
+    "url": "https://x.com/AnthropicAI/status/2001",
+    "source": "X/@AnthropicAI (Anthropic)",
+    "source_authority": 4,
+    "published": "2026-03-30T05:30:00Z",
+    "summary": "Anthropic teases better Claude memory controls for team workflows, without a matching external confirmation yet.",
+    "fetch_strategy": "metadata",
+    "community_metrics": {
+      "likes": 250,
+      "comments": 18,
+      "score": 340
+    },
+    "requires_confirmation": true,
+    "source_family": "follow_builders_x",
+    "source_collection": "follow-builders"
+  },
+  {
+    "title": "Open source AI agent runtime hits front page on Hacker News",
+    "url": "https://news.ycombinator.com/item?id=44000001",
+    "source": "Hacker News",
+    "source_authority": 3,
+    "published": "2026-03-30T01:15:00Z",
+    "summary": "A production AI agent runtime reaches the Hacker News front page with strong discussion among practitioners.",
+    "fetch_strategy": "metadata",
+    "community_metrics": {
+      "hn_points": 320,
+      "hn_comments": 148
+    },
+    "requires_confirmation": false,
+    "source_family": "community_signal",
+    "source_collection": "direct"
+  },
+  {
+    "title": "Sparse routers improve agent planning efficiency",
+    "url": "https://huggingface.co/papers/2603.42424",
+    "source": "HuggingFace Papers",
+    "source_authority": 3,
+    "published": "2026-03-30T00:45:00Z",
+    "summary": "A new paper explores sparse routers that improve planning efficiency for long-horizon agents.",
+    "fetch_strategy": "metadata",
+    "community_metrics": {
+      "hf_upvotes": 46
+    },
+    "requires_confirmation": false,
+    "source_family": "research_signal",
+    "source_collection": "direct"
+  }
+]

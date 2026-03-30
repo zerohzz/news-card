@@ -6,6 +6,9 @@
  * Usage: node fetch-hackernews.js [--output file.json] [--limit 50]
  */
 
+import { writeFileSync } from 'fs';
+import { SOURCE_FAMILIES } from './pipeline-utils.js';
+
 const HN_API = 'https://hacker-news.firebaseio.com/v0';
 
 const AI_KEYWORDS = new Set([
@@ -72,6 +75,8 @@ async function fetchHackerNews(limit = 50) {
         published: new Date(item.time * 1000).toISOString(),
         summary: item.text ? item.text.replace(/<[^>]*>/g, '').slice(0, 500) : '',
         fetch_strategy: 'metadata',
+        source_family: SOURCE_FAMILIES.COMMUNITY_SIGNAL,
+        source_collection: 'direct',
         community_metrics: {
           hn_points: item.score || 0,
           hn_comments: item.descendants || 0,
@@ -85,9 +90,6 @@ async function fetchHackerNews(limit = 50) {
     return [];
   }
 }
-
-// CLI entry point
-import { writeFileSync } from 'fs';
 
 const args = process.argv.slice(2);
 const outputIdx = args.indexOf('--output');

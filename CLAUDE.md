@@ -2,7 +2,7 @@
 
 ## What This Project Is
 
-`news-card` is a Claude Code Skill that generates AI news digest cards. It fetches 65+ English AI news sources, scores and deduplicates them, then produces 9 PNG cards (all 1080×1920 9:16) for Xiaohongshu-style sharing.
+`news-card` is a Claude Code Skill that generates AI news digest cards. It fetches 65+ English AI news sources, scores and deduplicates them, then produces 10 PNG cards (all 1080×1920 9:16) for Xiaohongshu-style sharing.
 
 ## Project Structure
 
@@ -50,13 +50,13 @@ bash skills/news-card/scripts/run-digest.sh
 ```
 output/
 └── YYYY-MM-DD_HH-MM-SS/
-    ├── slides/              ← HTML files (9 pages)
+    ├── slides/              ← HTML files (10 pages)
     │   ├── page-0-cover.html
     │   ├── page-1-menu.html
     │   ├── page-2-top1.html ... page-5-top4.html
     │   ├── page-6-second.html, page-7-second.html
     │   └── page-8-briefs.html, page-9-briefs.html
-    ├── images/              ← PNG screenshots (9 cards, all 2160×3840 @2x)
+    ├── images/              ← PNG screenshots (10 cards, all 2160×3840 @2x)
     └── digest.json          ← Curated news data for this run
 ```
 
@@ -75,10 +75,12 @@ Runs all fetchers in parallel. Outputs `candidates.json` with 100+ candidates an
 ```bash
 bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/scored.json
 ```
-7-dimension scoring: `cross_validation × 2.0`, `community_heat × 1.5`, `authority × 1.0`, `recency × 0.8`, `virality`, `actionability`, `peer_review`. Jaccard dedup at threshold 0.7. X/HuggingFace kept as signal pool only (not ranked).
+7-dimension scoring: `cross_validation × 2.0`, `community_heat × 1.5`, `authority × 1.0`, `recency × 0.8`, `virality × 1.2`, `actionability × 0.6`, `peer_review × 3.0`. Jaccard dedup at threshold 0.6. X/HN/HuggingFace kept as signal pool only (not ranked); follow-builders Blog/Podcast enter main ranking.
 
 ### Step 3: Curate (Claude's job)
 Read `scored.json`, select 24 stories (4 tier-1 + 4 tier-2 + 16 tier-3), write `digest.json`.
+
+**Important:** When writing `digest.json`, use `「」` (corner brackets) for Chinese quotation marks inside JSON string values, never `""` (smart quotes or bare ASCII `"`). The renderer sanitizes `\u201c`/`\u201d` → `「」` as a safety net, but avoid the issue at authoring time.
 
 ### Step 4: Render
 ```bash
@@ -87,8 +89,9 @@ node skills/news-card/scripts/lib/render-html.js \
   --templates skills/news-card/templates \
   --output output/<timestamp>/slides \
   --source-count <N>   # total candidates fetched
+  --num-sources <N>    # total feed targets monitored (RSS + HN + HF + X + newsletters + blogs ≈ 65)
 ```
-Injects: date vars (`date_year`, `date_md`, `date_dow`, `date_month_en`, `date_day_ordinal`), `total`, `sourceCount`, `numSources`, `tier1` items into cover template.
+Injects: date vars (`date_year`, `date_md`, `date_dow`, `date_month_en`, `date_day_ordinal`), `total`, `sourceCount`, `numSources`, `readingMinutes`, `savedCost`, `tier1` items into cover template. Reading time and API cost are calculated dynamically from content.
 
 ### Step 5: Screenshot
 ```bash
@@ -137,7 +140,7 @@ The hero cover layout (top → bottom within 3:4 safe zone):
 
 1. **Date** — `2026.03.30 Mon` format, 40px, above logo
 2. **Brand mark** — SVG double arc circle + `zz` (gold, Noto Serif SC 900) + `AI资讯日报` (black)
-3. **Slogan** — 2 lines, green/red highlights: `每天阅读3分钟 / 节约N小时无效刷新 · $X聚合费用`
+3. **Slogan** — 2 lines, green/red highlights: `每天阅读N分钟 / 节约N小时无效刷新 · $X 新闻获取 · 筛选 · 聚合 API 费用`
 4. **Rule** — double line separator
 5. **Stats bar** — `精选N条 | M+条候选 | P+个来源` (compact, secondary)
 6. **Top 4 news** — tier-1 headlines (34px) + category badge + source
@@ -152,9 +155,10 @@ The hero cover layout (top → bottom within 3:4 safe zone):
 | `date_month_en` | render-html.js | `MARCH` |
 | `total` | digest.json item count | `24` |
 | `sourceCount` | `--source-count` CLI arg | `130` |
-| `numSources` | distinct source fields in curated items | `13` |
+| `numSources` | `--num-sources` CLI arg (total feed targets) | `65` |
 | `savedHours` | hardcoded `3` | `3` |
-| `savedCost` | hardcoded `0.15` | `0.15` |
+| `savedCost` | dynamic: `estimateApiCost(candidateCount)` | `1.5` |
+| `readingMinutes` | dynamic: `estimateReadingMinutes(items)` | `5` |
 | `tier1` | first 4 tier-1 items | array |
 
 ## File Reference

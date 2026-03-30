@@ -22,8 +22,11 @@
 | Ars Technica (AI) | RSS | `https://feeds.arstechnica.com/arstechnica/technology-lab` | metadata |
 | Wired (AI) | RSS | `https://www.wired.com/feed/tag/ai/latest/rss` | metadata |
 | 404 Media | RSS | `https://www.404media.co/rss/` | metadata |
+| The Guardian (AI) | RSS | `https://www.theguardian.com/technology/artificialintelligenceai/rss` | metadata |
+| The Register (AI) | RSS | `https://www.theregister.com/headlines.atom` | metadata |
+| The Decoder | RSS | `https://the-decoder.com/feed/` | metadata |
 
-> **Removed (404 as of 2026-03-27):** The Batch (`deeplearning.ai/the-batch/feed/`)
+> **Removed (404 as of 2026-03-27):** The Batch (`deeplearning.ai/the-batch/feed/`), VentureBeat (stale feed, replaced by The Decoder)
 
 ## 社区 & 论文（authority_weight: 3）
 
@@ -50,6 +53,32 @@
 | 源 | 类型 | URL | Fetch 策略 |
 |----|------|-----|-----------|
 | Simon Willison's Weblog | RSS | `https://simonwillison.net/atom/everything/` | metadata |
+
+## 编辑/媒体共识信号源（peer_review scoring only）
+
+> 以下来源不进入候选池，仅输出 `newsletter-signals.json` 用于 peer_review 加权评分。
+
+### 英文 Newsletter
+
+| Source | 方式 | Authority | Sponsor Filter | Status |
+|--------|------|-----------|----------------|--------|
+| Import AI | RSS (Substack) | 4 | ✅ | active |
+| The Rundown AI | RSS (Beehiiv) | 4 | ✅ | active |
+| AlphaSignal | RSS (Substack) | 4 | ✅ | active |
+| AI Supremacy | RSS (Substack) | 3 | ❌ | active |
+| TLDR AI | Archive scraping | 3 | — | active |
+
+### 中文科技媒体
+
+| Source | 方式 | Authority | Lang | Status |
+|--------|------|-----------|------|--------|
+| 雷峰网 | RSS | 4 | zh | active |
+| 36氪 | RSS | 3 | zh | active |
+| 钛媒体 | RSS | 3 | zh | active |
+| 爱范儿 | RSS | 3 | zh | active |
+| IT之家 | RSS | 2 | zh | active |
+
+---
 
 ## AI Builders on X（发现源）
 
