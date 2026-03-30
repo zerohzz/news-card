@@ -181,6 +181,18 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   const today = new Date().toISOString().slice(0, 10);
   const issue = Math.floor(Date.now() / 86400000) % 10000;
 
+  // Editorial date components for cover templates
+  const dateObj = new Date(today);
+  const dateYear = String(dateObj.getUTCFullYear());
+  const dateMD = String(dateObj.getUTCMonth() + 1).padStart(2, '0') + '.' + String(dateObj.getUTCDate()).padStart(2, '0');
+  const MONTHS_EN = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const dateMonthEn = MONTHS_EN[dateObj.getUTCMonth()];
+  const dayNum = dateObj.getUTCDate();
+  const ordinalSuffix = (d) => { const s = ['TH','ST','ND','RD']; const v = d % 100; return d + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const dateDayOrdinal = ordinalSuffix(dayNum);
+  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dateDow = DAYS_SHORT[dateObj.getUTCDay()];
+
   // Split by tier
   const tier1 = items.filter((i) => i.tier === 1).slice(0, 4);
   const tier2 = items.filter((i) => i.tier === 2).slice(0, 4);
@@ -211,12 +223,22 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   const savedCost = '0.15';
 
   // Page 0: Hero Cover (brand hook — no content)
+  // Distinct source domains across curated items (floor for display)
+  const numSources = new Set(allItems.map((i) => i.source).filter(Boolean)).size || 40;
+
   const heroHTML = renderTemplate(heroCoverTpl, {
     date: today,
+    date_year: dateYear,
+    date_md: dateMD,
+    date_month_en: dateMonthEn,
+    date_day_ordinal: dateDayOrdinal,
     total: allItems.length,
     sourceCount: sourceCount || allItems.length,
+    numSources,
     savedHours,
     savedCost,
+    tier1,
+    date_dow: dateDow,
   });
   const heroPath = join(outputDir, 'page-0-cover.html');
   writeFileSync(heroPath, heroHTML);
@@ -226,6 +248,10 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   // Page 1: Menu (content index — old cover.html)
   const menuHTML = renderTemplate(menuTpl, {
     date: today,
+    date_year: dateYear,
+    date_md: dateMD,
+    date_month_en: dateMonthEn,
+    date_day_ordinal: dateDayOrdinal,
     total: allItems.length,
     sourceCount: sourceCount || allItems.length,
     issue,

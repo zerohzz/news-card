@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap');
+
+@theme {
+  --font-cinzel: "Cinzel", serif;
+  --font-noto-serif-sc: "Noto Serif SC", serif;
+  --font-brush: "Ma Shan Zheng", cursive;
+}
