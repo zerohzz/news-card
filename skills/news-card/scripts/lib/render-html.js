@@ -172,13 +172,26 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   mkdirSync(outputDir, { recursive: true });
 
   // Read templates
-  const coverTpl = readFileSync(join(templatesDir, 'cover.html'), 'utf-8');
+  const heroCoverTpl = readFileSync(join(templatesDir, 'hero-cover.html'), 'utf-8');
+  const menuTpl = readFileSync(join(templatesDir, 'cover.html'), 'utf-8');
   const featureTpl = readFileSync(join(templatesDir, 'feature.html'), 'utf-8');
   const halfPageTpl = readFileSync(join(templatesDir, 'half-page.html'), 'utf-8');
   const briefsTpl = readFileSync(join(templatesDir, 'briefs.html'), 'utf-8');
 
   const today = new Date().toISOString().slice(0, 10);
   const issue = Math.floor(Date.now() / 86400000) % 10000;
+
+  // Editorial date components for cover templates
+  const dateObj = new Date(today);
+  const dateYear = String(dateObj.getUTCFullYear());
+  const dateMD = String(dateObj.getUTCMonth() + 1).padStart(2, '0') + '.' + String(dateObj.getUTCDate()).padStart(2, '0');
+  const MONTHS_EN = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const dateMonthEn = MONTHS_EN[dateObj.getUTCMonth()];
+  const dayNum = dateObj.getUTCDate();
+  const ordinalSuffix = (d) => { const s = ['TH','ST','ND','RD']; const v = d % 100; return d + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const dateDayOrdinal = ordinalSuffix(dayNum);
+  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dateDow = DAYS_SHORT[dateObj.getUTCDay()];
 
   // Split by tier
   const tier1 = items.filter((i) => i.tier === 1).slice(0, 4);
@@ -193,22 +206,64 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
   }
 
   const pages = [];
-
-  // Page 0: Cover
   const allItems = [...tier1, ...tier2, ...tier3];
-  const coverHTML = renderTemplate(coverTpl, {
+  const totalPages = 10; // hero + menu + 4 feature + 2 half + 2 briefs
+
+  // Generate progress dots for a given page index (0-based, hero=0 has no dots)
+  function makeProgressDots(currentPage) {
+    return Array.from({ length: totalPages }, (_, i) => ({
+      active: i === currentPage,
+    }));
+  }
+
+  // Estimate saved values for hero cover
+  // N1: hours saved — 40+ sources × ~3 min each = ~2h browsing, plus social media ~1h
+  const savedHours = 3;
+  // N2: API cost — ~130 candidates × scoring + newsletter signals ≈ $0.15/day compute
+  const savedCost = '0.15';
+
+  // Page 0: Hero Cover (brand hook — no content)
+  // Distinct source domains across curated items (floor for display)
+  const numSources = new Set(allItems.map((i) => i.source).filter(Boolean)).size || 40;
+
+  const heroHTML = renderTemplate(heroCoverTpl, {
     date: today,
+    date_year: dateYear,
+    date_md: dateMD,
+    date_month_en: dateMonthEn,
+    date_day_ordinal: dateDayOrdinal,
+    total: allItems.length,
+    sourceCount: sourceCount || allItems.length,
+    numSources,
+    savedHours,
+    savedCost,
+    tier1,
+    date_dow: dateDow,
+  });
+  const heroPath = join(outputDir, 'page-0-cover.html');
+  writeFileSync(heroPath, heroHTML);
+  pages.push(heroPath);
+  console.error(`[render] Page 0: Hero Cover`);
+
+  // Page 1: Menu (content index — old cover.html)
+  const menuHTML = renderTemplate(menuTpl, {
+    date: today,
+    date_year: dateYear,
+    date_md: dateMD,
+    date_month_en: dateMonthEn,
+    date_day_ordinal: dateDayOrdinal,
     total: allItems.length,
     sourceCount: sourceCount || allItems.length,
     issue,
     categories: groupByCategory(allItems),
+    progress_dots: makeProgressDots(1),
   });
-  const coverPath = join(outputDir, 'page-0-cover.html');
-  writeFileSync(coverPath, coverHTML);
-  pages.push(coverPath);
-  console.error(`[render] Page 0: Cover (${allItems.length} items)`);
+  const menuPath = join(outputDir, 'page-1-menu.html');
+  writeFileSync(menuPath, menuHTML);
+  pages.push(menuPath);
+  console.error(`[render] Page 1: Menu (${allItems.length} items)`);
 
-  // Pages 1-4: Feature (tier 1)
+  // Pages 2-5: Feature (tier 1)
   for (let i = 0; i < tier1.length; i++) {
     const item = tier1[i];
     const relatedStr = (item.related_sources || [])
@@ -217,61 +272,65 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null) {
     const html = renderTemplate(featureTpl, {
       ...item,
       content_html: item.content_html || '<p>' + (item.summary_zh || '') + '</p>',
-      page_num: i + 1,
+      page_num: i + 2,
       date: today,
       issue,
       related_sources: relatedStr,
+      progress_dots: makeProgressDots(i + 2),
     });
-    const pagePath = join(outputDir, `page-${i + 1}-top${i + 1}.html`);
+    const pagePath = join(outputDir, `page-${i + 2}-top${i + 1}.html`);
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page ${i + 1}: Feature — ${item.headline_zh}`);
+    console.error(`[render] Page ${i + 2}: Feature — ${item.headline_zh}`);
   }
 
-  // Pages 5-6: Half-page (tier 2, 2 per page)
+  // Pages 6-7: Half-page (tier 2, 2 per page)
   for (let i = 0; i < 2; i++) {
     const stories = tier2.slice(i * 2, i * 2 + 2);
     if (stories.length === 0) break;
     const html = renderTemplate(halfPageTpl, {
-      page_num: 5 + i,
+      page_num: 6 + i,
       date: today,
       issue,
       stories,
+      progress_dots: makeProgressDots(6 + i),
     });
-    const pagePath = join(outputDir, `page-${5 + i}-second.html`);
+    const pagePath = join(outputDir, `page-${6 + i}-second.html`);
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page ${5 + i}: Half-page (${stories.length} stories)`);
+    console.error(`[render] Page ${6 + i}: Half-page (${stories.length} stories)`);
   }
 
-  // Page 7: Briefs page 1 (first 8 tier-3 items)
+  // Page 8: Briefs page 1 (first 8 tier-3 items)
   const briefs1 = tier3.slice(0, 8);
   if (briefs1.length > 0) {
-    const html = renderTemplate(briefsTpl, {
-      page_num: 7,
-      date: today,
-      issue,
-      briefs: briefs1,
-    });
-    const pagePath = join(outputDir, 'page-7-briefs.html');
-    writeFileSync(pagePath, html);
-    pages.push(pagePath);
-    console.error(`[render] Page 7: Briefs (${briefs1.length} items)`);
-  }
-
-  // Page 8: Briefs page 2 (next 8 tier-3 items)
-  const briefs2 = tier3.slice(8, 16);
-  if (briefs2.length > 0) {
     const html = renderTemplate(briefsTpl, {
       page_num: 8,
       date: today,
       issue,
-      briefs: briefs2,
+      briefs: briefs1,
+      progress_dots: makeProgressDots(8),
     });
     const pagePath = join(outputDir, 'page-8-briefs.html');
     writeFileSync(pagePath, html);
     pages.push(pagePath);
-    console.error(`[render] Page 8: Briefs page 2 (${briefs2.length} items)`);
+    console.error(`[render] Page 8: Briefs (${briefs1.length} items)`);
+  }
+
+  // Page 9: Briefs page 2 (next 8 tier-3 items)
+  const briefs2 = tier3.slice(8, 16);
+  if (briefs2.length > 0) {
+    const html = renderTemplate(briefsTpl, {
+      page_num: 9,
+      date: today,
+      issue,
+      briefs: briefs2,
+      progress_dots: makeProgressDots(9),
+    });
+    const pagePath = join(outputDir, 'page-9-briefs.html');
+    writeFileSync(pagePath, html);
+    pages.push(pagePath);
+    console.error(`[render] Page 9: Briefs page 2 (${briefs2.length} items)`);
   }
 
   console.error(`[render] Generated ${pages.length} HTML files in ${outputDir}`);
