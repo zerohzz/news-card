@@ -6,6 +6,7 @@
  */
 
 import { writeFileSync } from 'fs';
+import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
 const HF_API = 'https://huggingface.co/api/daily_papers';
 
@@ -36,6 +37,8 @@ async function fetchHuggingFacePapers() {
         published: p.publishedAt || paper.publishedAt || new Date().toISOString(),
         summary: (p.summary || paper.summary || '').slice(0, 500),
         fetch_strategy: 'metadata',
+        source_family: SOURCE_FAMILIES.RESEARCH_SIGNAL,
+        source_collection: 'direct',
         community_metrics: {
           hf_upvotes: paper.paper?.upvotes || paper.upvotes || 0,
         },

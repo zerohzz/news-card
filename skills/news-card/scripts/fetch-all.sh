@@ -32,12 +32,12 @@ node "$SKILL_DIR/scripts/lib/fetch-newsletters.js" --output "$TMPDIR/newsletter-
 PID_NL=$!
 
 # Wait for all fetchers
-wait $PID_RSS || echo "⚠️  RSS fetch had errors (partial results may exist)"
-wait $PID_HN || echo "⚠️  HN fetch had errors"
-wait $PID_HF || echo "⚠️  HF fetch had errors"
-wait $PID_BLOGS || echo "⚠️  Blog scraper had errors (continuing)"
-wait $PID_FB || echo "⚠️  Follow-builders fetch had errors (continuing)"
-wait $PID_NL || echo "⚠️  Newsletter signals had errors (continuing)"
+wait $PID_RSS || echo "âš ï¸  RSS fetch had errors (partial results may exist)"
+wait $PID_HN || echo "âš ï¸  HN fetch had errors"
+wait $PID_HF || echo "âš ï¸  HF fetch had errors"
+wait $PID_BLOGS || echo "âš ï¸  Blog scraper had errors (continuing)"
+wait $PID_FB || echo "âš ï¸  Follow-builders fetch had errors (continuing)"
+wait $PID_NL || echo "âš ï¸  Newsletter signals had errors (continuing)"
 
 # Merge all JSON arrays into one
 node -e "
@@ -62,4 +62,4 @@ if [ -f "$TMPDIR/newsletter-signals.json" ]; then
   cp "$TMPDIR/newsletter-signals.json" "$(dirname "$OUTPUT")/newsletter-signals.json" 2>/dev/null || true
 fi
 
-echo "✅ Wrote $(node -e "import{readFileSync as r}from'fs';console.log(JSON.parse(r('$OUTPUT','utf-8')).length)") candidates to $OUTPUT"
+echo "âœ… Wrote $(node -e "import{readFileSync as r}from'fs';console.log(JSON.parse(r('$OUTPUT','utf-8')).length)") candidates to $OUTPUT"

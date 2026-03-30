@@ -9,6 +9,7 @@
  */
 
 import { writeFileSync } from 'fs';
+import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
 const USER_AGENT = 'Mozilla/5.0 (compatible; NewsCardBot/1.0)';
 
@@ -36,13 +37,7 @@ const BLOG_SOURCES = [
     pathPattern: /^\/(?:news|research)\/[\w-]+/,
     authority: 5,
   },
-  {
-    name: 'Meta AI Blog',
-    indexUrl: 'https://ai.meta.com/blog/',
-    baseUrl: 'https://ai.meta.com',
-    pathPattern: /^\/blog\/[\w-]+/,
-    authority: 5,
-  },
+  // Meta AI Blog removed 2026-03-30: link extraction broken, 0 items returned
 ];
 
 /**
@@ -94,6 +89,9 @@ function extractFromNextData(html, source) {
         published: post.publishedAt || post.date || post.createdAt || new Date().toISOString(),
         summary: post.description || post.summary || post.excerpt || '',
         source_authority: source.authority,
+        source_family: SOURCE_FAMILIES.CORE_RSS,
+        source_collection: 'direct',
+        fetch_strategy: 'metadata',
       };
     }).filter((item) => item.title && item.url);
   } catch (err) {
@@ -125,6 +123,9 @@ function extractFromJsonLd(html, source) {
             published: entry.datePublished || entry.dateCreated || new Date().toISOString(),
             summary: entry.description || entry.abstract || '',
             source_authority: source.authority,
+            source_family: SOURCE_FAMILIES.CORE_RSS,
+            source_collection: 'direct',
+            fetch_strategy: 'metadata',
           });
         }
 
@@ -139,6 +140,9 @@ function extractFromJsonLd(html, source) {
               published: item.datePublished || item.dateCreated || new Date().toISOString(),
               summary: item.description || '',
               source_authority: source.authority,
+              source_family: SOURCE_FAMILIES.CORE_RSS,
+              source_collection: 'direct',
+              fetch_strategy: 'metadata',
             });
           }
         }
@@ -271,7 +275,10 @@ function extractFromLinks(html, source) {
       source: source.name,
       published: extractedDate || new Date().toISOString(),
       summary: extractedSummary,
-      authority: source.authority,
+      source_authority: source.authority,
+      source_family: SOURCE_FAMILIES.CORE_RSS,
+      source_collection: 'direct',
+      fetch_strategy: 'metadata',
     });
   }
 

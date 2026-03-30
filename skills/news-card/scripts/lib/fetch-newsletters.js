@@ -7,7 +7,9 @@
 
 import { writeFileSync } from 'fs';
 import { parseArgs } from 'util';
+import { pathToFileURL } from 'url';
 import RssParser from 'rss-parser';
+import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
 // ─── English newsletter sources ──────────────────────────────────────────────
 const EN_RSS_SOURCES = [
@@ -15,18 +17,24 @@ const EN_RSS_SOURCES = [
     name: 'Import AI',
     url: 'https://importai.substack.com/feed',
     authority: 4,
-    filterSponsors: false,
+    filterSponsors: true,
   },
   {
     name: 'The Rundown AI',
     url: 'https://rss.beehiiv.com/feeds/2R3C6Bt5wj.xml',
     authority: 4,
-    filterSponsors: false,
+    filterSponsors: true,
   },
   {
     name: 'AlphaSignal',
     url: 'https://alphasignalai.substack.com/feed',
     authority: 4,
+    filterSponsors: true,
+  },
+  {
+    name: 'AI Supremacy',
+    url: 'https://aisupremacy.substack.com/feed',
+    authority: 3,
     filterSponsors: false,
   },
 ];
@@ -176,6 +184,8 @@ async function fetchRSS(source) {
     // Extract CN entities and remove internal _content field
     items = items.map(({ _content, ...rest }) => ({
       ...rest,
+      source_family: SOURCE_FAMILIES.NEWSLETTER_SIGNAL,
+      source_collection: 'editorial-consensus',
       ...(source.lang === 'zh' ? { cn_entities: extractCnEntities(rest.title) } : {}),
     }));
 
@@ -249,7 +259,21 @@ async function main() {
   console.error(`[fetch-nl] Wrote ${totalItems} signals (${enCount} EN + ${cnCount} CN) from ${results.length} newsletters to ${outputPath}`);
 }
 
-main().catch(err => {
-  console.error(`[fetch-nl] Fatal: ${err.message}`);
-  process.exit(1);
-});
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectExecution) {
+  main().catch(err => {
+    console.error(`[fetch-nl] Fatal: ${err.message}`);
+    process.exit(1);
+  });
+}
+
+export {
+  EN_RSS_SOURCES,
+  CN_RSS_SOURCES,
+  fetchRSS,
+  fetchTLDR,
+  isSponsored,
+  main,
+};

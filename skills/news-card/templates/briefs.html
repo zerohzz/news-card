@@ -78,6 +78,7 @@
     flex-direction: column;
     border-left: 5px solid transparent;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden; /* safety net: clip if content exceeds cell */
   }
 
   .brief-card .category-tag {
@@ -157,11 +158,11 @@
     {{#each progress_dots}}<span class="dot{{#if active}} active{{/if}}"></span>{{/each}}
   </div>
   <div class="top-bar">
-    <span class="page-num">{{page_num}} / 8</span>
+    <span class="page-num">{{page_num}} / {{total_pages}}</span>
     <span class="date">{{date}}</span>
   </div>
 
-  <div class="section-title">快讯速览</div>
+  <div class="section-title">{{section_title}}</div>
 
   <div class="grid">
     {{#each briefs}}

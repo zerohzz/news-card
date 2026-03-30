@@ -7,17 +7,33 @@
  */
 
 import { writeFileSync } from 'fs';
+import { pathToFileURL } from 'url';
+import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
 const FEED_X_URL = 'https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-x.json';
 const FEED_PODCASTS_URL = 'https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-podcasts.json';
 const FEED_BLOGS_URL = 'https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-blogs.json';
 
-// X/Twitter source authority by tier (sources-spec.md v2)
+// X/Twitter source authority by tier.
+// Official/company accounts are elevated to 4.
+// Builder/practitioner accounts default to 3.
+// Commentary/investor accounts are lowered to 2.
 const X_AUTHORITY_TIERS = {
-  'claudeai': 3, 'sama': 3, 'OpenAI': 3, 'AnthropicAI': 3, 'GoogleAI': 3,
-  'petergyang': 1, 'thenanyu': 1, 'madhuguru_': 1, 'garrytan': 1, 'mattturck': 1, 'zarazhang': 1,
+  claudeai: 4,
+  sama: 4,
+  openai: 4,
+  anthropicai: 4,
+  googleai: 4,
+  deepmind: 4,
+  demishassabis: 4,
+  petergyang: 2,
+  thenanyu: 2,
+  madhuguru_: 2,
+  garrytan: 2,
+  mattturck: 2,
+  zarazhang: 2,
 };
-const X_DEFAULT_AUTHORITY = 2;
+const X_DEFAULT_AUTHORITY = 3;
 
 const REQUEST_TIMEOUT_MS = 30000;
 const PREFIX = '[fetch-fb]';
@@ -65,13 +81,17 @@ function truncate(text, maxLen) {
 
 function convertTweet(builder, tweet) {
   const text = tweet.text || '';
+  const handle = builder.handle?.replace(/^@/, '').toLowerCase() || '';
   return {
     title: truncate(text, 100),
     url: tweet.url || '',
     source: `X/@${builder.handle} (${builder.name})`,
     published: tweet.createdAt || '',
     summary: text,
-    authority: X_AUTHORITY_TIERS[builder.handle?.replace(/^@/, '')] ?? X_DEFAULT_AUTHORITY,
+    source_authority: X_AUTHORITY_TIERS[handle] ?? X_DEFAULT_AUTHORITY,
+    source_family: SOURCE_FAMILIES.FOLLOW_BUILDERS_X,
+    source_collection: 'follow-builders',
+    fetch_strategy: 'metadata',
     requires_confirmation: true,
     community_metrics: {
       likes: tweet.likes || 0,
@@ -88,7 +108,10 @@ function convertPodcast(episode) {
     source: `Podcast/${episode.name || 'Unknown'}`,
     published: episode.publishedAt || '',
     summary: truncate(episode.transcript || '', 500),
-    authority: 4,
+    source_authority: 4,
+    source_family: SOURCE_FAMILIES.FOLLOW_BUILDERS_PODCAST,
+    source_collection: 'follow-builders',
+    fetch_strategy: 'summary',
     community_metrics: { likes: 0, comments: 0, score: 0 },
   };
 }
@@ -100,8 +123,47 @@ function convertBlog(post) {
     source: `Blog/${post.name || 'Unknown'}`,
     published: post.publishedAt || '',
     summary: truncate(post.content || post.description || '', 500),
-    authority: 5,
+    source_authority: 5,
+    source_family: SOURCE_FAMILIES.FOLLOW_BUILDERS_BLOG,
+    source_collection: 'follow-builders',
+    fetch_strategy: 'summary',
     community_metrics: { likes: 0, comments: 0, score: 0 },
+  };
+}
+
+function convertFeeds({ x = [], podcasts = [], blogs = [] } = {}) {
+  const candidates = [];
+  let tweetCount = 0;
+  let builderCount = x.length;
+  let podcastCount = 0;
+  let blogCount = 0;
+
+  for (const builder of x) {
+    const tweets = builder.tweets || [];
+    for (const tweet of tweets) {
+      candidates.push(convertTweet(builder, tweet));
+      tweetCount++;
+    }
+  }
+
+  for (const episode of podcasts) {
+    candidates.push(convertPodcast(episode));
+    podcastCount++;
+  }
+
+  for (const post of blogs) {
+    candidates.push(convertBlog(post));
+    blogCount++;
+  }
+
+  return {
+    candidates,
+    stats: {
+      tweetCount,
+      builderCount,
+      podcastCount,
+      blogCount,
+    },
   };
 }
 
@@ -116,23 +178,15 @@ async function main() {
     fetchJson(FEED_BLOGS_URL),
   ]);
 
-  const candidates = [];
-  let tweetCount = 0;
-  let builderCount = 0;
-  let podcastCount = 0;
-  let blogCount = 0;
+  const payload = {
+    x: [],
+    podcasts: [],
+    blogs: [],
+  };
 
   // Process X/Twitter feed
   if (xResult.status === 'fulfilled' && xResult.value) {
-    const builders = xResult.value.x || [];
-    builderCount = builders.length;
-    for (const builder of builders) {
-      const tweets = builder.tweets || [];
-      for (const tweet of tweets) {
-        candidates.push(convertTweet(builder, tweet));
-        tweetCount++;
-      }
-    }
+    payload.x = xResult.value.x || [];
   } else {
     const reason = xResult.status === 'rejected' ? xResult.reason?.message : 'empty';
     console.error(`${PREFIX} X feed failed: ${reason}`);
@@ -140,11 +194,7 @@ async function main() {
 
   // Process podcasts feed
   if (podcastResult.status === 'fulfilled' && podcastResult.value) {
-    const episodes = podcastResult.value.podcasts || [];
-    for (const episode of episodes) {
-      candidates.push(convertPodcast(episode));
-      podcastCount++;
-    }
+    payload.podcasts = podcastResult.value.podcasts || [];
   } else {
     const reason = podcastResult.status === 'rejected' ? podcastResult.reason?.message : 'empty';
     console.error(`${PREFIX} Podcasts feed failed: ${reason}`);
@@ -152,15 +202,21 @@ async function main() {
 
   // Process blogs feed
   if (blogResult.status === 'fulfilled' && blogResult.value) {
-    const posts = blogResult.value.blogs || [];
-    for (const post of posts) {
-      candidates.push(convertBlog(post));
-      blogCount++;
-    }
+    payload.blogs = blogResult.value.blogs || [];
   } else {
     const reason = blogResult.status === 'rejected' ? blogResult.reason?.message : 'empty';
     console.error(`${PREFIX} Blogs feed failed: ${reason}`);
   }
+
+  const {
+    candidates,
+    stats: {
+      tweetCount,
+      builderCount,
+      podcastCount,
+      blogCount,
+    },
+  } = convertFeeds(payload);
 
   console.error(
     `${PREFIX} Fetched ${tweetCount} tweets from ${builderCount} builders, ${podcastCount} podcast episodes, ${blogCount} blog posts`
@@ -176,7 +232,22 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(`${PREFIX} Fatal error: ${err.message}`);
-  process.exit(1);
-});
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectExecution) {
+  main().catch((err) => {
+    console.error(`${PREFIX} Fatal error: ${err.message}`);
+    process.exit(1);
+  });
+}
+
+export {
+  X_AUTHORITY_TIERS,
+  X_DEFAULT_AUTHORITY,
+  convertTweet,
+  convertPodcast,
+  convertBlog,
+  convertFeeds,
+  main,
+};

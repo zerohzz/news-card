@@ -427,8 +427,8 @@ const heroHtml = `<!DOCTYPE html>
   <!-- Slogan — above rule, two lines so highlights breathe -->
   <div class="slogan-above-rule">
     <div class="slogan">
-      每天阅读<span class="green">3&thinsp;分钟</span><br>
-      节约 <span class="red">{{savedHours}}&thinsp;小时</span> 无效刷新 · <span class="red">$\{{savedCost}}</span> 聚合费用
+      每天阅读<span class="green">{{readingMinutes}}&thinsp;分钟</span><br>
+      节约 <span class="red">{{savedHours}}&thinsp;小时</span> 无效刷新 · <span class="red">$\{{savedCost}}</span> 新闻获取 · 筛选 · 聚合 API 费用
     </div>
   </div>
 

@@ -9,6 +9,7 @@
 
 import RSSParser from 'rss-parser';
 import { writeFileSync } from 'fs';
+import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
 const USER_AGENT = 'Mozilla/5.0 NewsCard/1.0 (news aggregator)';
 const REQUEST_TIMEOUT_MS = 15000;
@@ -25,7 +26,7 @@ const parser = new RSSParser({
 });
 
 // Source registry with RSS URLs and authority weights
-// Audited 2026-03-27: all URLs verified returning 200 + XML/RSS content
+// Audited 2026-03-30: URLs verified, removed broken/low-yield sources
 const RSS_SOURCES = [
   // Company blogs (authority: 5)
   { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss.xml', authority: 5, strategy: 'title_only' },
@@ -38,7 +39,7 @@ const RSS_SOURCES = [
   { name: 'MIT Technology Review', url: 'https://www.technologyreview.com/feed/', authority: 4, strategy: 'metadata' },
   { name: 'The Verge (AI)', url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', authority: 4, strategy: 'metadata' },
   { name: 'TechCrunch (AI)', url: 'https://techcrunch.com/category/artificial-intelligence/feed/', authority: 4, strategy: 'metadata' },
-  { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', authority: 4, strategy: 'metadata' },
+  { name: 'The Decoder', url: 'https://the-decoder.com/feed/', authority: 4, strategy: 'metadata' },
   { name: 'Wired (AI)', url: 'https://www.wired.com/feed/tag/ai/latest/rss', authority: 4, strategy: 'metadata' },
   { name: '404 Media', url: 'https://www.404media.co/rss/', authority: 4, strategy: 'metadata' },
   { name: 'The Guardian (AI)', url: 'https://www.theguardian.com/technology/artificialintelligenceai/rss', authority: 4, strategy: 'metadata' },
@@ -48,9 +49,9 @@ const RSS_SOURCES = [
   { name: 'Import AI', url: 'https://importai.substack.com/feed', authority: 4, strategy: 'summary' },
   { name: 'Latent Space', url: 'https://www.latent.space/feed', authority: 3, strategy: 'summary' },
   { name: 'Interconnects', url: 'https://www.interconnects.ai/feed', authority: 3, strategy: 'summary' },
-  { name: 'AI Snake Oil', url: 'https://aisnakeoil.substack.com/feed', authority: 4, strategy: 'summary' },
+  { name: 'AI Snake Oil', url: 'https://aisnakeoil.substack.com/feed', authority: 3, strategy: 'summary' },
   { name: 'One Useful Thing', url: 'https://www.oneusefulthing.org/feed', authority: 3, strategy: 'summary' },
-  { name: 'Ahead of AI', url: 'https://magazine.sebastianraschka.com/feed', authority: 3, strategy: 'summary' },
+  { name: 'AI Supremacy', url: 'https://aisupremacy.substack.com/feed', authority: 3, strategy: 'summary' },
 
   // Indie blogs (authority: 3)
   { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/', authority: 3, strategy: 'metadata' },
@@ -98,6 +99,8 @@ function normalizeItem(item, source, strategy) {
     source_authority: source.authority,
     published: item.isoDate || item.pubDate || new Date().toISOString(),
     fetch_strategy: strategy,
+    source_family: SOURCE_FAMILIES.CORE_RSS,
+    source_collection: 'direct',
   };
 
   if (strategy === 'metadata' || strategy === 'summary' || strategy === 'full_text') {

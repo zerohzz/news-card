@@ -9,7 +9,9 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
+import { pathToFileURL } from 'url';
 import { extractEntities, entitiesMatch } from './entities.js';
+import { normalizeCandidateSchema } from './pipeline-utils.js';
 
 const STOP_WORDS = new Set([
   // General English
@@ -83,23 +85,29 @@ function keywordOverlap(kwA, kwB) {
  * Keep highest-authority version, accumulate related_sources.
  */
 function dedup(items) {
+  const normalizedItems = items.map((item, index) =>
+    normalizeCandidateSchema(item, {
+      index,
+      warn: (message) => console.error(message),
+    })
+  );
   const merged = new Set(); // indices that have been merged into another item
   const result = [];
 
   // Pre-compute tokens, keywords, and entities
-  const precomputed = items.map((item) => ({
+  const precomputed = normalizedItems.map((item) => ({
     tokens: tokenize(item.title),
     keywords: extractKeywords(item.title),
     entities: extractEntities((item.title || '') + ' ' + (item.summary || '')),
   }));
 
-  for (let i = 0; i < items.length; i++) {
+  for (let i = 0; i < normalizedItems.length; i++) {
     if (merged.has(i)) continue;
 
-    let best = { ...items[i] };
+    let best = { ...normalizedItems[i] };
     const relatedSources = [...(best.related_sources || [])];
 
-    for (let j = i + 1; j < items.length; j++) {
+    for (let j = i + 1; j < normalizedItems.length; j++) {
       if (merged.has(j)) continue;
 
       const titleSim = jaccard(precomputed[i].tokens, precomputed[j].tokens);
@@ -111,27 +119,26 @@ function dedup(items) {
 
         // Accumulate related sources from the absorbed item
         relatedSources.push(
-          ...(items[j].related_sources || []),
-          { source: items[j].source, url: items[j].url },
+          ...(normalizedItems[j].related_sources || []),
+          { source: normalizedItems[j].source, url: normalizedItems[j].url },
         );
 
         // If the duplicate has higher authority, swap to it (immutable)
-        const jAuthority = items[j].scores?.authority || items[j].source_authority || 0;
+        const jAuthority = normalizedItems[j].scores?.authority || normalizedItems[j].source_authority || 0;
         const bestAuthority = best.scores?.authority || best.source_authority || 0;
         if (jAuthority > bestAuthority) {
           best = {
             ...best,
-            title: items[j].title,
-            url: items[j].url,
-            source: items[j].source,
-            source_authority: items[j].source_authority,
-            summary: items[j].summary || best.summary,
+            ...normalizedItems[j],
+            related_sources: best.related_sources,
+            scores: best.scores,
+            summary: normalizedItems[j].summary || best.summary,
           };
         }
 
         // Keep the higher score (immutable)
-        if (items[j].scores && items[j].scores.total > (best.scores?.total || 0)) {
-          best = { ...best, scores: { ...items[j].scores } };
+        if (normalizedItems[j].scores && normalizedItems[j].scores.total > (best.scores?.total || 0)) {
+          best = { ...best, scores: { ...normalizedItems[j].scores } };
         }
       }
     }
@@ -150,7 +157,7 @@ function dedup(items) {
   // Re-sort by score after merges may have swapped scores
   result.sort((a, b) => (b.scores?.total || 0) - (a.scores?.total || 0));
 
-  console.error(`[dedup] ${items.length} → ${result.length} items (removed ${items.length - result.length} duplicates)`);
+  console.error(`[dedup] ${normalizedItems.length} → ${result.length} items (removed ${normalizedItems.length - result.length} duplicates)`);
   return result;
 }
 
@@ -158,8 +165,10 @@ function dedup(items) {
 const args = process.argv.slice(2);
 const inputIdx = args.indexOf('--input');
 const outputIdx = args.indexOf('--output');
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-if (inputIdx === -1) {
+if (isDirectExecution && inputIdx === -1) {
   console.error('Usage: node dedup.js --input scored.json [--output deduped.json]');
   process.exit(1);
 }
@@ -167,15 +176,17 @@ if (inputIdx === -1) {
 const inputFile = args[inputIdx + 1];
 const outputFile = outputIdx !== -1 ? args[outputIdx + 1] : null;
 
-const items = JSON.parse(readFileSync(inputFile, 'utf-8'));
-const deduped = dedup(items);
+if (isDirectExecution) {
+  const items = JSON.parse(readFileSync(inputFile, 'utf-8'));
+  const deduped = dedup(items);
 
-const output = JSON.stringify(deduped, null, 2);
-if (outputFile) {
-  writeFileSync(outputFile, output);
-  console.error(`[dedup] Wrote to ${outputFile}`);
-} else {
-  process.stdout.write(output);
+  const output = JSON.stringify(deduped, null, 2);
+  if (outputFile) {
+    writeFileSync(outputFile, output);
+    console.error(`[dedup] Wrote to ${outputFile}`);
+  } else {
+    process.stdout.write(output);
+  }
 }
 
 export { dedup, tokenize, jaccard };

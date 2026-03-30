@@ -8,7 +8,9 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
+import { pathToFileURL } from 'url';
 import { extractEntities, entitiesMatch } from './entities.js';
+import { normalizeCandidateSchema } from './pipeline-utils.js';
 
 // Weights
 const W_CROSS = 2.0;
@@ -19,14 +21,25 @@ const W_VIRALITY = 1.2;
 const W_ACTIONABILITY = 0.6;
 const W_PEER_REVIEW = 3.0;
 
-// X/Twitter source authority by tier (sources-spec.md v2)
+// X/Twitter source authority by tier.
 const X_AUTHORITY_TIERS = {
-  // Tier A — Official/Company (authority: 3)
-  'claudeai': 3, 'sama': 3, 'OpenAI': 3, 'AnthropicAI': 3, 'GoogleAI': 3,
-  // Tier C — Commentary/Investor (authority: 1)
-  'petergyang': 1, 'thenanyu': 1, 'madhuguru_': 1, 'garrytan': 1, 'mattturck': 1, 'zarazhang': 1,
+  // Tier A: official/company
+  claudeai: 4,
+  sama: 4,
+  openai: 4,
+  anthropicai: 4,
+  googleai: 4,
+  deepmind: 4,
+  demishassabis: 4,
+  // Tier C: commentary/investor
+  petergyang: 2,
+  thenanyu: 2,
+  madhuguru_: 2,
+  garrytan: 2,
+  mattturck: 2,
+  zarazhang: 2,
 };
-const X_DEFAULT_AUTHORITY = 2; // Tier B — Builder/Practitioner
+const X_DEFAULT_AUTHORITY = 3; // Tier B: builder/practitioner
 
 /**
  * Calculate recency score using exponential decay.
@@ -157,10 +170,18 @@ const SOURCE_ORG_MAP = new Map([
   ['openai blog', 'openai'], ['x/@openai', 'openai'], ['x/@sama', 'openai'],
   ['anthropic blog', 'anthropic'], ['x/@anthropicai', 'anthropic'], ['x/@claudeai', 'anthropic'],
   ['google ai blog', 'google'], ['deepmind blog', 'google'], ['x/@googleai', 'google'],
+  ['x/@deepmind', 'google'], ['x/@demishassabis', 'google'],
   ['google research blog', 'google'],
   ['nvidia blog', 'nvidia'],
   ['meta ai blog', 'meta'],
   ['mistral blog', 'mistral'],
+  ['blog/openai', 'openai'],
+  ['blog/anthropic', 'anthropic'],
+  ['blog/google', 'google'],
+  ['blog/deepmind', 'google'],
+  ['blog/nvidia', 'nvidia'],
+  ['blog/meta', 'meta'],
+  ['blog/mistral', 'mistral'],
 ]);
 
 function sourceToOrg(source) {
@@ -255,6 +276,7 @@ function scorePeerReview(item, signals) {
   const candidateWords = titleWords(item.title || '');
   const candidateEntities = candidateEntityNames(item);
   let mentionCount = 0;
+  let weightedSum = 0;
 
   for (const newsletter of signals) {
     let mentioned = false;
@@ -269,15 +291,22 @@ function scorePeerReview(item, signals) {
 
       if (isChinese) {
         // Chinese matching: use cn_entities extracted during fetch
-        // If a CN signal shares ≥1 entity with the candidate, it's a match
+        // Require ≥2 shared entities, OR 1 entity + title keyword overlap
+        // Single-entity matches (e.g. just "OpenAI") are too loose
         const cnEnts = signal.cn_entities || [];
         if (cnEnts.length > 0) {
           const shared = cnEnts.filter(e => candidateEntities.has(e));
-          // Require ≥1 shared entity (relaxed from ≥2; single-entity matches are
-          // valuable since CN sources often mention only one entity per headline)
-          if (shared.length >= 1) {
+          if (shared.length >= 2) {
             mentioned = true;
             break;
+          }
+          // 1 shared entity + title keyword overlap as fallback
+          if (shared.length === 1) {
+            const signalTitleWords = titleWords(signal.title || '');
+            if (jaccardSimilarityPeer(candidateWords, signalTitleWords) > 0.15) {
+              mentioned = true;
+              break;
+            }
           }
         }
       } else {
@@ -315,13 +344,20 @@ function scorePeerReview(item, signals) {
         }
       }
     }
-    if (mentioned) mentionCount++;
+    if (mentioned) {
+      // Weight by source authority: high-authority newsletters count more
+      const auth = newsletter.authority || 3;
+      const weight = auth >= 5 ? 1.5 : auth >= 4 ? 1.2 : auth >= 3 ? 1.0 : 0.7;
+      weightedSum += weight;
+      mentionCount++;
+    }
   }
 
-  if (mentionCount >= 4) return 5;
-  if (mentionCount >= 3) return 4;
-  if (mentionCount >= 2) return 3;
-  if (mentionCount >= 1) return 2;
+  // Map weighted sum to 0–5 score (preserves existing range + W_PEER_REVIEW = 3.0)
+  if (weightedSum >= 4.0) return 5;
+  if (weightedSum >= 3.0) return 4;
+  if (weightedSum >= 2.0) return 3;
+  if (weightedSum >= 0.5) return 2;
   return 0;
 }
 
@@ -329,28 +365,35 @@ function scorePeerReview(item, signals) {
  * Score all candidates.
  */
 function scoreAll(candidates, newsletterSignals) {
+  const normalizedCandidates = candidates.map((candidate, index) =>
+    normalizeCandidateSchema(candidate, {
+      index,
+      warn: (message) => console.error(message),
+    })
+  );
+
   // Group by event for cross-validation
-  const eventGroups = groupByEvent(candidates);
+  const eventGroups = groupByEvent(normalizedCandidates);
 
   // Build cross-validation map: item index → number of independent sources covering same event
   const crossMap = new Map();
   for (const group of eventGroups) {
     // Count unique organizations (not just source strings) for independent source counting
-    const orgs = new Set(group.map((idx) => sourceToOrg(candidates[idx].source)));
+    const orgs = new Set(group.map((idx) => sourceToOrg(normalizedCandidates[idx].source)));
     for (const idx of group) {
       crossMap.set(idx, orgs.size);
     }
   }
 
   // Score each candidate
-  const scored = candidates.map((item, idx) => {
+  const scored = normalizedCandidates.map((item, idx) => {
     const sourceCount = crossMap.get(idx) || 1;
     const crossValidation = Math.min(sourceCount > 1 ? (sourceCount - 1) * 3 : 0, 12);
     const community = communityScore(item.community_metrics);
     let authority = item.source_authority || 3;
-    // Apply X tier-based authority override (sources-spec.md v2)
+    // Apply X tier-based authority override.
     if (item.source && item.source.startsWith('X/')) {
-      const handle = item.source.replace(/^X\/@?/, '').split(' ')[0];
+      const handle = item.source.replace(/^X\/@?/, '').split(' ')[0].toLowerCase();
       authority = X_AUTHORITY_TIERS[handle] ?? X_DEFAULT_AUTHORITY;
     }
     const recency = recencyScore(item.published);
@@ -378,7 +421,7 @@ function scoreAll(candidates, newsletterSignals) {
     const eventGroup = eventGroups.find((g) => g.includes(idx)) || [idx];
     const relatedSources = eventGroup
       .filter((i) => i !== idx)
-      .map((i) => ({ source: candidates[i].source, url: candidates[i].url }));
+      .map((i) => ({ source: normalizedCandidates[i].source, url: normalizedCandidates[i].url }));
 
     return {
       ...item,
@@ -409,8 +452,10 @@ const args = process.argv.slice(2);
 const inputIdx = args.indexOf('--input');
 const outputIdx = args.indexOf('--output');
 const signalsIdx = args.indexOf('--signals');
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-if (inputIdx === -1) {
+if (isDirectExecution && inputIdx === -1) {
   console.error('Usage: node score-engine.js --input candidates.json [--output scored.json] [--signals newsletter-signals.json]');
   process.exit(1);
 }
@@ -430,18 +475,20 @@ if (signalsPath) {
   }
 }
 
-const candidates = JSON.parse(readFileSync(inputFile, 'utf-8'));
-const scored = scoreAll(candidates, newsletterSignals);
+if (isDirectExecution) {
+  const candidates = JSON.parse(readFileSync(inputFile, 'utf-8'));
+  const scored = scoreAll(candidates, newsletterSignals);
 
-console.error(`[score] Scored ${scored.length} candidates`);
-console.error(`[score] Score distribution: ≥12: ${scored.filter((s) => s.scores.total >= 12).length}, ≥6: ${scored.filter((s) => s.scores.total >= 6).length}, <6: ${scored.filter((s) => s.scores.total < 6).length}`);
+  console.error(`[score] Scored ${scored.length} candidates`);
+  console.error(`[score] Score distribution: ≥12: ${scored.filter((s) => s.scores.total >= 12).length}, ≥6: ${scored.filter((s) => s.scores.total >= 6).length}, <6: ${scored.filter((s) => s.scores.total < 6).length}`);
 
-const output = JSON.stringify(scored, null, 2);
-if (outputFile) {
-  writeFileSync(outputFile, output);
-  console.error(`[score] Wrote to ${outputFile}`);
-} else {
-  process.stdout.write(output);
+  const output = JSON.stringify(scored, null, 2);
+  if (outputFile) {
+    writeFileSync(outputFile, output);
+    console.error(`[score] Wrote to ${outputFile}`);
+  } else {
+    process.stdout.write(output);
+  }
 }
 
 export { scoreAll, tokenize, jaccardSimilarity, extractEntities, sourceToOrg };

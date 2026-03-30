@@ -8,6 +8,12 @@
 <meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
+  @font-face {
+    font-family: 'NotoSerifSCBlack';
+    src: url('file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/fonts/NotoSerifSC-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+  }
   :root {
     --bg: #FAF9F6; --card: #FFFFFF; --text: #1A1A1A; --text-mid: #6B7280;
     --text-dim: #9CA3AF; --accent: #D97706; --divider: #E5E7EB;
@@ -182,19 +188,89 @@
   }
 
   .footer .brand {
-    font-weight: 700;
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-weight: 900;
     color: var(--accent);
   }
 
   .footer .date-center { text-align: center; }
   .footer .spacer { width: 80px; }
 
+  /* Brand mark (scaled from hero-cover) */
+  .logo-brand-mark {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 6px;
+  }
+  .logo-brand-mark svg.arcs {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .logo-brand-zz {
+    position: relative;
+    z-index: 4;
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #c5a059;
+    line-height: 1;
+    margin-bottom: 1px;
+  }
+  .logo-brand-name-wrap {
+    position: relative;
+    z-index: 3;
+    background: var(--bg);
+    padding: 3px 10px;
+  }
+  .logo-brand-name {
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  /* Date line */
+  .logo-date-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 12px;
+  }
+  .logo-date-main {
+    font-family: var(--font-en);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-mid);
+    letter-spacing: 1px;
+  }
+  .logo-date-dow {
+    font-family: var(--font-en);
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin-left: 8px;
+    letter-spacing: 1px;
+  }
   /* Progress dots */
   .progress-dots {
+    position: absolute;
+    top: 16px;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     gap: 8px;
-    padding: 16px 0 0;
+    z-index: 10;
   }
   .progress-dots .dot {
     width: 8px;
@@ -216,9 +292,32 @@
   </div>
   <div class="content-group">
   <div class="header">
-    <div class="date">{{date}}</div>
-    <h1 style="font-size: 60px; letter-spacing: 4px;"><span style="color: var(--accent);">zz</span> AI 资讯日报</h1>
-    <div class="subtitle">今日 AI 领域新闻和资讯</div>
+    <div class="logo-date-line">
+      <span class="logo-date-main">{{date_year}}.{{date_md}}</span>
+      <span class="logo-date-dow">{{date_dow}}</span>
+    </div>
+    <div class="logo-brand-mark">
+      <svg class="arcs" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="gold-glow2" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <g filter="url(#gold-glow2)" opacity="0.9">
+          <path d="M 100,300 A 200,200 0 0,1 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
+          <path d="M 118,300 A 182,182 0 0,1 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
+        </g>
+        <g filter="url(#gold-glow2)" opacity="0.9">
+          <path d="M 100,300 A 200,200 0 0,0 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
+          <path d="M 118,300 A 182,182 0 0,0 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="logo-brand-zz">zz</span>
+      <div class="logo-brand-name-wrap">
+        <span class="logo-brand-name">AI资讯日报</span>
+      </div>
+    </div>
   </div>
   <div class="divider"></div>
   <div class="categories">
@@ -240,7 +339,7 @@
   </div>
   <div class="footer">
     <span class="brand">zz AI 资讯日报</span>
-    <span class="date-center">{{date}}</span>
+    <span class="date-center">{{date_year}}.{{date_md}} {{date_dow}}</span>
     <span class="spacer"></span>
   </div>
 </div>

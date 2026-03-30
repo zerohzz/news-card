@@ -16,7 +16,7 @@ IMAGES_DIR="$OUTPUT_ROOT/images"
 mkdir -p "$WORK_DIR" "$SLIDES_DIR" "$IMAGES_DIR"
 
 echo "============================================"
-echo "  News Card — AI 日报生成管线"
+echo "  News Card â€” AI æ—¥æŠ¥ç”Ÿæˆç®¡çº¿"
 echo "  Workspace: $WORK_DIR"
 echo "  Output:    $OUTPUT_ROOT"
 echo "  Date: $(date +%Y-%m-%d %H:%M:%S)"
@@ -32,19 +32,19 @@ bash "$SKILL_DIR/scripts/score.sh" "$WORK_DIR/candidates.json" "$WORK_DIR/scored
 
 echo ""
 echo "=== Step 3/5: Curate ==="
-echo "⏳ 等待 Claude 选题..."
-echo "   Claude 需要读取 $WORK_DIR/scored.json"
-echo "   然后输出 $WORK_DIR/digest.json"
+echo "â³ ç­‰å¾… Claude é€‰é¢˜..."
+echo "   Claude éœ€è¦è¯»å– $WORK_DIR/scored.json"
+echo "   ç„¶åŽè¾“å‡º $WORK_DIR/digest.json"
 echo ""
 
 # Check if digest.json already exists (e.g., from a previous run or Claude already wrote it)
 if [ -f "$WORK_DIR/digest.json" ]; then
-  echo "✅ digest.json 已存在，跳过 curate 步骤"
+  echo "âœ… digest.json å·²å­˜åœ¨ï¼Œè·³è¿‡ curate æ­¥éª¤"
 else
-  echo "❌ digest.json 不存在。请在 Claude 对话中完成选题后重新运行此脚本，"
-  echo "   或手动创建 $WORK_DIR/digest.json"
+  echo "âŒ digest.json ä¸å­˜åœ¨ã€‚è¯·åœ¨ Claude å¯¹è¯ä¸­å®Œæˆé€‰é¢˜åŽé‡æ–°è¿è¡Œæ­¤è„šæœ¬ï¼Œ"
+  echo "   æˆ–æ‰‹åŠ¨åˆ›å»º $WORK_DIR/digest.json"
   echo ""
-  echo "   提示: 你可以单独运行 Step 4-5:"
+  echo "   æç¤º: ä½ å¯ä»¥å•ç‹¬è¿è¡Œ Step 4-5:"
   echo "   node $SKILL_DIR/scripts/lib/render-html.js --input $WORK_DIR/digest.json --templates $SKILL_DIR/templates --output $SLIDES_DIR"
   echo "   bash $SKILL_DIR/scripts/screenshot.sh $SLIDES_DIR $IMAGES_DIR"
   exit 0
@@ -63,11 +63,12 @@ bash "$SKILL_DIR/scripts/screenshot.sh" "$SLIDES_DIR" "$IMAGES_DIR"
 
 # Copy digest.json to output for reference
 cp "$WORK_DIR/digest.json" "$OUTPUT_ROOT/digest.json" 2>/dev/null || true
+cp "$WORK_DIR/scored-candidates.md" "$OUTPUT_ROOT/scored-candidates.md" 2>/dev/null || true
 
 echo ""
 echo "============================================"
-echo "  ✅ 完成！"
-echo "  输出目录: $OUTPUT_ROOT"
-echo "    slides/ — 8 个 HTML 文件"
-echo "    images/ — 8 张 PNG 卡片 (1080×1920 @2x)"
+echo "  âœ… å®Œæˆï¼"
+echo "  è¾“å‡ºç›®å½•: $OUTPUT_ROOT"
+echo "    slides/ â€” 10 ä¸ª HTML æ–‡ä»¶"
+echo "    images/ â€” 10 å¼  PNG å¡ç‰‡ (1080Ã—1920 @2x)"
 echo "============================================"
