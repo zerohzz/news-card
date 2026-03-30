@@ -3,7 +3,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const logoDataUri = fs.readFileSync('logo_b64.txt', 'utf-8').trim();
 const fontPath = 'file:///' + path.resolve('skills/news-card/assets/fonts/ChillDuanHeiSongPro_Regular.otf').replace(/\\/g, '/');
 const notoBlackPath = 'file:///' + path.resolve('skills/news-card/assets/fonts/NotoSerifSC-Black.ttf').replace(/\\/g, '/');
 
@@ -494,81 +493,7 @@ console.log('Written hero-cover.html, length:', heroHtml.length);
 // Always read from the clean source to avoid double-patching on re-runs
 let coverHtml = fs.readFileSync('skills/news-card/templates/cover-source.html', 'utf-8').replace(/\r\n/g, '\n');
 
-// 1. Add logo-img CSS before the closing </style>
-const logoImgCss = `
-  .logo-header-img {
-    width: 200px;
-    height: auto;
-    mix-blend-mode: multiply;
-    display: block;
-    margin: 0 auto 4px;
-  }
-
-  .header-date-editorial {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 6px;
-  }
-
-  .header-date-year {
-    font-family: var(--font-en);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-mid);
-    letter-spacing: 1px;
-  }
-
-  .header-date-sep {
-    font-family: var(--font-en);
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--accent);
-    margin: 0 3px;
-  }
-
-  .header-date-md {
-    font-family: var(--font-en);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-mid);
-    letter-spacing: 1px;
-  }
-
-  .header-date-suffix {
-    font-family: var(--font-en);
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-left: 8px;
-  }
-`;
-
-coverHtml = coverHtml.replace('</style>', logoImgCss + '</style>');
-
-// 2. Replace the date + h1 + subtitle header block
-const oldHeader = `  <div class="header">
-    <div class="date">{{date}}</div>
-    <h1 style="font-size: 60px; letter-spacing: 4px;"><span style="color: var(--accent);">zz</span> AI 资讯日报</h1>
-    <div class="subtitle">今日 AI 领域新闻和资讯</div>
-  </div>`;
-
-const newHeader = `  <div class="header">
-    <img class="logo-header-img" src="${logoDataUri}" alt="ZZ AI资讯日报">
-    <div class="header-date-editorial">
-      <span class="header-date-year">{{date_year}}</span>
-      <span class="header-date-sep">—</span>
-      <span class="header-date-md">{{date_md}}</span>
-      <span class="header-date-suffix">{{date_month_en}} · {{date_day_ordinal}}</span>
-    </div>
-  </div>`;
-
-coverHtml = coverHtml.replace(oldHeader, newHeader);
-
-// 3. Replace footer brand text
+// 1. Replace footer brand text
 coverHtml = coverHtml.replace(
   '<span class="brand">zz AI 资讯日报</span>',
   '<span class="brand">ZZ AI 资讯日报</span>'
