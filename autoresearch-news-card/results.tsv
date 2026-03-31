@@ -1,5 +1,0 @@
-experiment	score	max_score	pass_rate	status	description
-0	4	6	66.7%	baseline	original skill — no changes
-1	6	6	100.0%	keep	block Google Fonts CDN requests in Playwright to prevent screenshot timeouts
-1-confirm1	6	6	100.0%	confirm	confirmation run 1
-1-confirm2	6	6	100.0%	confirm	confirmation run 2

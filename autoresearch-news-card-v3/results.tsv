@@ -1,5 +1,0 @@
-experiment	score	max_score	pass_rate	status	description
-0	5	6	83.3%	baseline	original templates + content_html in sample-digest.json — no template changes
-0-baseline1	5	6	83.3%	confirm	baseline run 1
-0-baseline2	5	6	83.3%	confirm	baseline run 2
-0-baseline3	5	6	83.3%	confirm	baseline run 3

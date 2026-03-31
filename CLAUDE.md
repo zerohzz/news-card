@@ -107,7 +107,6 @@ node gen-templates.cjs
 ```
 
 It reads:
-- `logo_b64.txt` — (legacy, no longer used in templates)
 - `skills/news-card/assets/fonts/NotoSerifSC-Black.ttf` — embedded via `@font-face` file:// URL
 - `skills/news-card/assets/fonts/ChillDuanHeiSongPro_Regular.otf` — same
 - `skills/news-card/templates/cover-source.html` — pristine cover source (never edit `cover.html` directly)
