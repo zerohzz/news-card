@@ -263,10 +263,12 @@ const isDirectExecution = process.argv[1]
   && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectExecution) {
-  main().catch(err => {
-    console.error(`[fetch-nl] Fatal: ${err.message}`);
-    process.exit(1);
-  });
+  main()
+    .then(() => process.exit(0))  // Force exit: rss-parser keeps handles alive on Windows
+    .catch(err => {
+      console.error(`[fetch-nl] Fatal: ${err.message}`);
+      process.exit(1);
+    });
 }
 
 export {

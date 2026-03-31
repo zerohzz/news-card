@@ -3,10 +3,15 @@ name: news-card
 description: >
   全自动 AI 新闻日报。抓取 65+ 英文 + 中文一手信息源，多维度评分筛选，AI 选题分三梯队，
   生成 10 张 9:16 小红书风格 PNG 卡片。说"今日 AI 日报"即可触发。
-version: 0.2.0
+version: 0.3.0
 ---
 
 # News Card Skill
+
+> **⚠️ 本技能是执行管线，不是开发任务。**
+> 不要执行 development-workflow.md 中的 Research & Reuse 步骤。
+> 不要手动阅读脚本源码来理解管线——直接按本文档的 Step 1-6 顺序执行。
+> 不要探索 algorithm.md 或其他文档来「理解」管线。SKILL.md 就是唯一指令来源。
 
 ## 触发方式
 
@@ -14,9 +19,25 @@ version: 0.2.0
 - "generate AI digest"
 - `$news-card`
 
+## 必须交付物清单（CRITICAL — 缺一不可）
+
+每次运行完成后，`output/<datetime>/` 目录中必须包含以下全部文件：
+
+| 文件 | 生成步骤 | 说明 |
+|------|---------|------|
+| `slides/*.html` (10 个) | Step 4 | 10 张 HTML 页面 |
+| `images/*.png` (10 张) | Step 5 | 10 张 PNG 卡片 |
+| `digest.json` | Step 3 | 选题数据（**必须恰好 24 条**） |
+| `scored-candidates.md` | Step 3.5 | 全部候选新闻评分报告 |
+| `selection-rationale.md` | Step 6a | 选题理由说明 |
+| `pipeline-issues.md` | Step 6b | 管线问题记录 |
+| `xiaohongshu-post.md` | Step 6c | 小红书发布文案 |
+
+**完成 Step 5 后，必须继续执行 Step 6 生成所有附带文档。Step 6 不是可选的。**
+
 ## 工作流概览
 
-执行以下 5 步，每步完成后再进入下一步：
+执行以下 6 步，每步完成后再进入下一步：
 
 ### Step 1 — Fetch
 
@@ -40,7 +61,13 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 - `workspace/scored-news.json` — 新闻主排名（RSS + Blogs + follow-builders Blog/Podcast）
 - `workspace/scored-signals.json` — 信号池（X/Twitter + Hacker News + HuggingFace Papers）
 
-按照下方「四梯队规则」和 `references/scoring-spec.md` 选出 24 条，填充为 `digest.json`。
+按照下方「四梯队规则」和 `references/scoring-spec.md` 选出 **恰好 24 条**（不多不少），填充为 `digest.json`。
+
+**⚠️ 24 条的分配（不可更改）：**
+- **4 条** tier 1（来自 scored-news.json）→ P2–P5 每页一条
+- **4 条** tier 2（来自 scored-news.json）→ P6–P7 每页两条
+- **8 条** tier 3 快讯（来自 scored-news.json 剩余）→ P8 的 2×4 网格
+- **8 条** tier 3 研究前沿/Builder 动态（来自 scored-signals.json）→ P9 的 2×4 网格
 
 **选题 Prompt**：
 
@@ -263,6 +290,21 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 - 追踪算法迭代的改进效果
 - 检查是否有高分候选被遗漏或低分候选被误选
 
+### Step 3.9 — digest.json 自检（CRITICAL — 必须通过才能进入 Step 4）
+
+写完 `digest.json` 后，**先验证再渲染**。以下任何一项不通过，必须回去修改 digest.json：
+
+| 检查项 | 要求 | 不通过后果 |
+|--------|------|-----------|
+| 总条数 | **恰好 24 条** | P8/P9 卡片数不对，布局崩溃 |
+| tier 分布 | tier 1 = 4, tier 2 = 4, tier 3 = 16 | 页面分配错误 |
+| tier 3 中 news vs signals | P8 用 8 条 news, P9 用 8 条 signals | 最后一页空或溢出 |
+| `headline_zh` 字数 | 每条 **≤ 25 字** | 标题溢出为 3 行 |
+| `summary_zh` 字数 (tier 3) | 每条 **60–90 字**（硬上限 90 字） | P8/P9 卡片溢出，页脚消失 |
+| `content_html` 长度 (tier 1) | **≤ 900 字符**（含标签） | 内容溢出，页脚消失 |
+| `content_html` 存在 (tier 1) | 4 条 tier 1 都必须有 | 页面空白 |
+| `content_html` 不存在 (tier 2/3) | tier 2 和 3 不应有 content_html | — |
+
 ### Step 4 — Render HTML
 
 ```bash
@@ -282,9 +324,9 @@ bash skills/news-card/scripts/screenshot.sh output/<datetime>/slides output/<dat
 
 Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目录。
 
-完成后告知用户输出位置。
+**⚠️ 截图完成 ≠ 管线完成。必须继续执行 Step 6 生成附带文档。**
 
-### Step 6 — 输出附带文档（必须）
+### Step 6 — 输出附带文档（CRITICAL — 不可跳过）
 
 每次运行完成后，必须在输出目录中生成以下文档：
 
@@ -336,7 +378,7 @@ Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目�
 
 生成可直接复制粘贴到小红书的发布文案。
 
-**标题格式（强制）**：
+**标题格式（20字内，强制）**：
 ```
 MM/DD日报 · <当日最大亮点，一句话>
 ```
@@ -346,24 +388,24 @@ MM/DD日报 · <当日最大亮点，一句话>
 ```markdown
 # MM/DD日报 · <亮点>
 
-🔥 今日头条
+📈 𝙏𝙤𝙥 𝙉𝙚𝙬𝙨
 1. <tier-1 headline> — <一句话说明>
 2. <tier-1 headline> — <一句话说明>
 3. <tier-1 headline> — <一句话说明>
 4. <tier-1 headline> — <一句话说明>
 
-📰 值得关注
+📰 𝙆𝙚𝙮 𝙐𝙥𝙙𝙖𝙩𝙚𝙨
 5. <tier-2 headline> — <一句话说明>
 6. <tier-2 headline> — <一句话说明>
 7. <tier-2 headline> — <一句话说明>
 8. <tier-2 headline> — <一句话说明>
 
-⚡ 快讯
+⚡ 𝙉𝙚𝙬𝙨 𝘽𝙧𝙞𝙚𝙛𝙨
 · <tier-3 headline>
 · <tier-3 headline>
 ...
 
-#AI日报 #AI资讯 #人工智能 #科技新闻
+#zz的AI日报 #AI资讯 #人工智能 #科技新闻
 ```
 
 **注意**：
@@ -373,31 +415,8 @@ MM/DD日报 · <当日最大亮点，一句话>
 
 **文风要求**：
 - xiaohongshu-post.md 应读起来像编辑部晨报简报，不像新闻稿罗列
-- 每条 headline 后的一句话描述必须包含编辑判断，不能只是重复标题
-
-| ❌ 坏描述 | ✅ 好描述 |
-|-----------|----------|
-| OpenAI 发布企业 Agents SDK — 新工具支持多种功能 | OpenAI 发布企业 Agents SDK — 从 demo 到生产的关键一步，tracing 和 eval hooks 是亮点 |
-| 欧盟公布 AI 审计细则 — 对高风险模型提出新要求 | 欧盟公布 AI 审计细则 — 合规成本会筛掉一批小厂，大公司反而受益 |
-
 - 4 条 tier-1 描述不得使用相同语法结构（避免 AI 痕迹）
 
-**小红书合规速查**（综合 10+ 个 GitHub 开源检测工具整理）：
-
-🔴 **违规词（删帖/封号风险）**：
-- 极限用语：最、极、首、顶级、第一、唯一、NO.1、全网最、史上最、国家级、世界级、百分百、绝对、永久
-- 跨平台引流：加微信、公众号、淘宝、链接（含谐音变体：薇信、v信）
-
-🟡 **限流词（降权/shadow ban）**：
-- 消费诱导：必入、必买、不买后悔、错过就没、强烈推荐
-- 虚假承诺：立竿见影、7天见效、无效退款
-- 诱导互动：点赞、收藏、关注、评论区见、私信我、双击
-
-🟠 **AI检测词（被判定 AI 内容）**：
-- 过渡词：值得一提的是、需要注意的是、总的来说、综上所述、与此同时、不言而喻、众所周知、显而易见、不难发现、可以预见
-- 句式模板：「在…的背景下」「随着…的发展」「这不仅…更…」「无论是…还是…」「一方面…另一方面…」
-- 结构特征：首先/其次/最后（刚性枚举）、由此可见、基于以上分析
-- 隐性特征：连续 3 句等长、完美并列、全文无口语化表达
 
 ## 输出目录结构
 
@@ -441,6 +460,8 @@ bash skills/news-card/scripts/run-digest.sh
 | P9 | Briefs | 研究前沿 / Builder 动态 (tier 3) | 8 条 | scored-signals.json | 方框卡片 2×4 网格 |
 
 总计 10 张 PNG：1 封面 + 1 目录 + 4 第一梯队 + 2 第二梯队 + 1 快讯速览 + 1 研究前沿。
+
+> **⚠️ digest.json 必须恰好 24 条：4 (tier 1) + 4 (tier 2) + 8 (tier 3, P8 快讯) + 8 (tier 3, P9 研究前沿)。少于 24 条会导致 P8/P9 网格不满，多于 24 条会溢出。**
 
 > **页码规则**：Hero Cover (P0) 不显示页码。内容页（P1–P9）显示 `X / 9`，共 9 页内容。
 

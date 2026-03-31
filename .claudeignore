@@ -3,5 +3,5 @@ workspace/
 output/
 *.png
 autoresearch-news-card/run-*/
-output/
-workspace/
+logo_b64.txt
+package-lock.json

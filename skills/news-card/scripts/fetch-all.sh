@@ -40,20 +40,24 @@ wait $PID_FB || echo "âš ï¸  Follow-builders fetch had errors (continuing
 wait $PID_NL || echo "âš ï¸  Newsletter signals had errors (continuing)"
 
 # Merge all JSON arrays into one
-node -e "
+# Use env vars so Node resolves Windows paths correctly (avoids /tmp → C:\tmp mismatch)
+MERGE_TMPDIR="$TMPDIR" MERGE_OUTPUT="$OUTPUT" node -e "
 import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+const tmpdir = process.env.MERGE_TMPDIR;
+const output = process.env.MERGE_OUTPUT;
 const files = ['rss.json', 'hn.json', 'hf.json', 'blogs.json', 'follow-builders.json'];
 const all = [];
 for (const f of files) {
   try {
-    const data = JSON.parse(readFileSync('$TMPDIR/' + f, 'utf-8'));
+    const data = JSON.parse(readFileSync(join(tmpdir, f), 'utf-8'));
     all.push(...data);
   } catch (e) {
     console.error('Skip ' + f + ': ' + e.message);
   }
 }
 console.error('[merge] Total candidates: ' + all.length);
-writeFileSync('$OUTPUT', JSON.stringify(all, null, 2));
+writeFileSync(output, JSON.stringify(all, null, 2));
 "
 
 # Copy newsletter signals alongside candidates
@@ -62,4 +66,4 @@ if [ -f "$TMPDIR/newsletter-signals.json" ]; then
   cp "$TMPDIR/newsletter-signals.json" "$(dirname "$OUTPUT")/newsletter-signals.json" 2>/dev/null || true
 fi
 
-echo "âœ… Wrote $(node -e "import{readFileSync as r}from'fs';console.log(JSON.parse(r('$OUTPUT','utf-8')).length)") candidates to $OUTPUT"
+MERGE_OUTPUT="$OUTPUT" node -e "import{readFileSync as r}from'fs';console.log(JSON.parse(r(process.env.MERGE_OUTPUT,'utf-8')).length)" | { read COUNT; echo "âœ… Wrote $COUNT candidates to $OUTPUT"; }

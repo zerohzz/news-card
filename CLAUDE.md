@@ -190,7 +190,7 @@ The hero cover layout (top → bottom within 3:4 safe zone):
 
 - `workspace/` stores intermediate data. Gitignored.
 - `output/` stores final deliverables. Gitignored.
-- Twitter/X fetcher uses guest mode and may fail — pipeline continues without it.
+- There is NO separate X/Twitter fetcher. X data comes exclusively from `follow-builders` (`feed-x.json` at https://github.com/zarazhangrui/follow-builders). Do not add or invoke a standalone X/Twitter scraper.
 - Playwright auto-detects Chromium from `~/.cache/ms-playwright/`. Install with `npx playwright install chromium`.
 - When modifying cover design: edit `gen-templates.cjs` → run `node gen-templates.cjs` → commit both `gen-templates.cjs` AND the generated `hero-cover.html` / `cover.html`.
 - Never edit `cover.html` directly — it is generated from `cover-source.html` by `gen-templates.cjs`.

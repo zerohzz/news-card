@@ -7,6 +7,7 @@
  */
 
 import { writeFileSync } from 'fs';
+import { execSync } from 'child_process';
 import { pathToFileURL } from 'url';
 import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
@@ -36,6 +37,8 @@ const X_AUTHORITY_TIERS = {
 const X_DEFAULT_AUTHORITY = 3;
 
 const REQUEST_TIMEOUT_MS = 30000;
+const MAX_RETRIES = 2;
+const RETRY_BACKOFF_MS = 1000;
 const PREFIX = '[fetch-fb]';
 
 // --- CLI arg parsing ---
@@ -54,7 +57,7 @@ function parseArgs(argv) {
 
 // --- Fetch helpers ---
 
-async function fetchJson(url) {
+async function fetchJsonOnce(url) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -68,6 +71,31 @@ async function fetchJson(url) {
     return await res.json();
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+function fetchJsonViaCurl(url) {
+  console.error(`${PREFIX} Falling back to curl for ${url}`);
+  const stdout = execSync(
+    `curl -sS --max-time 30 -H "User-Agent: Mozilla/5.0 NewsCard/1.0" "${url}"`,
+    { encoding: 'utf-8', timeout: 35000 },
+  );
+  return JSON.parse(stdout);
+}
+
+async function fetchJson(url) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fetchJsonOnce(url);
+    } catch (err) {
+      const isLastAttempt = attempt === MAX_RETRIES;
+      const reason = err.name === 'AbortError' ? 'timeout' : err.message;
+      console.error(`${PREFIX} fetch attempt ${attempt + 1}/${MAX_RETRIES + 1} failed for ${url}: ${reason}`);
+      if (isLastAttempt) {
+        return fetchJsonViaCurl(url);
+      }
+      await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS * (attempt + 1)));
+    }
   }
 }
 

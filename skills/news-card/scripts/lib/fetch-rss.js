@@ -9,6 +9,7 @@
 
 import RSSParser from 'rss-parser';
 import { writeFileSync } from 'fs';
+import { pathToFileURL } from 'url';
 import { SOURCE_FAMILIES } from './pipeline-utils.js';
 
 const USER_AGENT = 'Mozilla/5.0 NewsCard/1.0 (news aggregator)';
@@ -46,7 +47,8 @@ const RSS_SOURCES = [
   { name: 'The Register', url: 'https://www.theregister.com/headlines.rss', authority: 4, strategy: 'metadata', filterAI: true },
   { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', authority: 4, strategy: 'metadata', filterAI: true },
   { name: 'VentureBeat (AI)', url: 'https://venturebeat.com/category/ai/feed/', authority: 4, strategy: 'metadata' },
-  { name: 'MIT News (AI)', url: 'https://news.mit.edu/topic/artificial-intelligence2/feed', authority: 4, strategy: 'metadata' },
+  // Removed (404 as of 2026-03-31): MIT News AI RSS returns persistent 404
+  // { name: 'MIT News (AI)', url: 'https://news.mit.edu/topic/artificial-intelligence2/feed', authority: 4, strategy: 'metadata' },
 
   // Newsletters (authority: 3-4)
   { name: 'Import AI', url: 'https://importai.substack.com/feed', authority: 4, strategy: 'summary' },
@@ -186,40 +188,47 @@ async function fetchAllRSS(strategyOverride) {
   return allItems;
 }
 
-// CLI entry point
-const args = process.argv.slice(2);
-const outputIdx = args.indexOf('--output');
-const outputFile = outputIdx !== -1 ? args[outputIdx + 1] : null;
-const strategyIdx = args.indexOf('--strategy');
-const strategyOverride = strategyIdx !== -1 ? args[strategyIdx + 1] : null;
+// --- CLI entry point ---
 
-// Single URL mode
-const urlIdx = args.indexOf('--url');
-if (urlIdx !== -1) {
-  const url = args[urlIdx + 1];
-  const nameIdx = args.indexOf('--name');
-  const name = nameIdx !== -1 ? args[nameIdx + 1] : 'Custom';
-  const { items } = await fetchFeed(
-    { name, url, authority: 3, strategy: strategyOverride || 'metadata' },
-    strategyOverride
-  );
-  const output = JSON.stringify(items, null, 2);
-  if (outputFile) {
-    writeFileSync(outputFile, output);
-    console.error(`[fetch-rss] Wrote ${items.length} items to ${outputFile}`);
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectExecution) {
+  const args = process.argv.slice(2);
+  const outputIdx = args.indexOf('--output');
+  const outputFile = outputIdx !== -1 ? args[outputIdx + 1] : null;
+  const strategyIdx = args.indexOf('--strategy');
+  const strategyOverride = strategyIdx !== -1 ? args[strategyIdx + 1] : null;
+
+  const urlIdx = args.indexOf('--url');
+  if (urlIdx !== -1) {
+    const url = args[urlIdx + 1];
+    const nameIdx = args.indexOf('--name');
+    const name = nameIdx !== -1 ? args[nameIdx + 1] : 'Custom';
+    const { items } = await fetchFeed(
+      { name, url, authority: 3, strategy: strategyOverride || 'metadata' },
+      strategyOverride
+    );
+    const output = JSON.stringify(items, null, 2);
+    if (outputFile) {
+      writeFileSync(outputFile, output);
+      console.error(`[fetch-rss] Wrote ${items.length} items to ${outputFile}`);
+    } else {
+      process.stdout.write(output);
+    }
   } else {
-    process.stdout.write(output);
+    const items = await fetchAllRSS(strategyOverride);
+    const output = JSON.stringify(items, null, 2);
+    if (outputFile) {
+      writeFileSync(outputFile, output);
+      console.error(`[fetch-rss] Wrote ${items.length} items to ${outputFile}`);
+    } else {
+      process.stdout.write(output);
+    }
   }
-} else {
-  // Fetch all registered sources
-  const items = await fetchAllRSS(strategyOverride);
-  const output = JSON.stringify(items, null, 2);
-  if (outputFile) {
-    writeFileSync(outputFile, output);
-    console.error(`[fetch-rss] Wrote ${items.length} items to ${outputFile}`);
-  } else {
-    process.stdout.write(output);
-  }
+
+  // Force exit: rss-parser keeps TCP handles alive on Windows, preventing clean shutdown
+  process.exit(0);
 }
 
 export { fetchAllRSS, fetchFeed, RSS_SOURCES };

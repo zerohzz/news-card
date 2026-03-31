@@ -26,9 +26,7 @@
 | The Register (AI) | RSS | `https://www.theregister.com/headlines.rss` | metadata |
 | The Decoder | RSS | `https://the-decoder.com/feed/` | metadata |
 | VentureBeat (AI) | RSS | `https://venturebeat.com/category/ai/feed/` | metadata |
-| MIT News (AI) | RSS | `https://news.mit.edu/topic/artificial-intelligence2/feed` | metadata |
-
-> **Removed (404 as of 2026-03-27):** The Batch (`deeplearning.ai/the-batch/feed/`)
+> **Removed (404 as of 2026-03-31):** MIT News AI (`news.mit.edu/topic/artificial-intelligence2/feed`), The Batch (`deeplearning.ai/the-batch/feed/`)
 
 ## 社区 & 论文（authority_weight: 3）
 
