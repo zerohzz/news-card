@@ -118,7 +118,7 @@ It reads:
 ## Skill Invocation Rules
 
 - **autoresearch** — 仅在用户明确要求优化 skill 时调用（如「run autoresearch on ...」）。**绝不可自动调用**，无论任何上下文
-- **XHS-writer** — 仅在用户明确要求写小红书笔记时调用。news-card pipeline 的 Step 6c 生成 xiaohongshu-post.md 时**不调用** XHS-writer skill，直接按 news-card SKILL.md 中的指令生成
+- **XHS-writer** — 在用户要求写小红书笔记时调用，**也在 news-card pipeline Step 6c 生成 `xiaohongshu-post.md` 时调用**（需读取 XHS-writer SKILL.md 的文风、合规词库和反 AI 检测策略）
 - **news-card** — 仅在用户触发日报生成时调用（「今日 AI 日报」/`$news-card`）
 - 各 skill 独立运行，不互相调用
 

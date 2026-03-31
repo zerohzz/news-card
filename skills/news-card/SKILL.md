@@ -332,6 +332,8 @@ Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目�
 
 #### 6c. 小红书发布文案 (`xiaohongshu-post.md`)
 
+> **⚠️ 必须先读取 `skills/XHS-writer/SKILL.md`**，按其中的文风规范、限流词/敏感词速查表和反 AI 检测策略来生成本文案。
+
 生成可直接复制粘贴到小红书的发布文案。
 
 **标题格式（强制）**：
