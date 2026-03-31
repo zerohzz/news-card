@@ -44,6 +44,9 @@ const RSS_SOURCES = [
   { name: '404 Media', url: 'https://www.404media.co/rss/', authority: 4, strategy: 'metadata' },
   { name: 'The Guardian (AI)', url: 'https://www.theguardian.com/technology/artificialintelligenceai/rss', authority: 4, strategy: 'metadata' },
   { name: 'The Register', url: 'https://www.theregister.com/headlines.rss', authority: 4, strategy: 'metadata', filterAI: true },
+  { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', authority: 4, strategy: 'metadata', filterAI: true },
+  { name: 'VentureBeat (AI)', url: 'https://venturebeat.com/category/ai/feed/', authority: 4, strategy: 'metadata' },
+  { name: 'MIT News (AI)', url: 'https://news.mit.edu/topic/artificial-intelligence2/feed', authority: 4, strategy: 'metadata' },
 
   // Newsletters (authority: 3-4)
   { name: 'Import AI', url: 'https://importai.substack.com/feed', authority: 4, strategy: 'summary' },

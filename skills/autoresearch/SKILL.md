@@ -256,35 +256,48 @@ The improved skill is saved in-place (the original SKILL.md is modified). The ba
 
 ---
 
-## Example: Optimizing the news-card Skill
+## Example
 
 **Context:**
-- Target: `skills/news-card/SKILL.md`
-- Test inputs: "今日 AI 日报", "generate AI digest", "今日 AI 日报 (focus on open source)"
+- Target: `skills/<target>/SKILL.md`
+- Test inputs: 3-5 varied prompts that exercise different aspects
 - Runs per experiment: 5
 
-**Suggested evals for news-card:**
+**Suggested evals:**
 
 ```
-EVAL 1: Card Count
-Question: Does the run produce exactly 8 PNG files in the images/ directory?
-Pass: Exactly 8 PNG files exist
-Fail: Fewer or more than 8 PNG files
+EVAL 1: Output Count
+Question: Does the run produce the expected number of output files?
+Pass: Correct file count
+Fail: Fewer or more files
 
-EVAL 2: Correct Dimensions
-Question: Are all PNG files 2160×3840 pixels (@2x of 1080×1920)?
-Pass: Every PNG is exactly 2160×3840px
-Fail: Any PNG has different dimensions
+EVAL 2: Correct Dimensions / Format
+Question: Are all output files in the expected format?
+Pass: Every file meets format spec
+Fail: Any file deviates
 
-EVAL 3: Tier Distribution
-Question: Does digest.json contain exactly 4 tier-1, 4 tier-2, and 8 tier-3 items (16 total)?
-Pass: 4+4+8=16 items with correct tier assignments
-Fail: Wrong count or missing tier field
+EVAL 3: Content Distribution
+Question: Does the output contain the correct distribution of content types?
+Pass: Correct distribution
+Fail: Wrong count or missing fields
 
-EVAL 4: Serif Fonts Only
-Question: Do all generated HTML files use only serif font families (no sans-serif anywhere in CSS)?
-Pass: Zero occurrences of sans-serif, Helvetica, Arial, or system-ui in any HTML file
-Fail: Any sans-serif font declaration found
+EVAL 4: Design Compliance
+Question: Does the output follow all design constraints?
+Pass: All constraints met
+Fail: Any constraint violated
+```
+
+**Possible autoresearch trajectory:**
+- Exp 0 BASELINE (60%): Title overflow, wrong colors, missing fields
+- Exp 1 KEEP (70%): Added explicit character limits → overflow fixed
+- Exp 2 REVERT (65%): Tried rewriting selection logic → broke content distribution
+- Exp 3 KEEP (85%): Added explicit mapping table → design accuracy up
+- Exp 4 KEEP (95%): Added worked example of correct output → consistency across all evals
+- Final: 60% → 95% in 4 experiments
+
+---
+
+## The Quality Checklist
 
 EVAL 5: Category Color Accuracy
 Question: Does every item's color_tag in digest.json match its category per design-tokens.md?
@@ -304,18 +317,6 @@ Fail: Any {{...}} or similar template tag found in rendered output
 - Exp 3 KEEP (85%): Added explicit color mapping table to SKILL.md → color accuracy up
 - Exp 4 KEEP (95%): Added worked example of correct digest.json → consistency across all evals
 - Final: 60% → 95% in 4 experiments
-
----
-
-## How This Connects to Other Skills
-
-This skill can optimize ANY skill in your setup. Just point it at the SKILL.md and define evals.
-
-Common targets:
-- Writing skills (newsletters, tweets, emails) → eval for tone, length, structure
-- Code generation skills → eval for correctness (actually run the code), style, completeness
-- Visual/design skills → eval for dimensions, colors, text legibility
-- Data processing skills → eval for output format, completeness, accuracy
 
 ---
 
