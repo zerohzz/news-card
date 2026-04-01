@@ -63,6 +63,16 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 按照下方「四梯队规则」和 `references/scoring-spec.md` 选出 **恰好 24 条**（不多不少），填充为 `digest.json`。
 
+#### ⚠️ 跨期去重（CRITICAL — 选题前必须执行）
+
+**在选题前，必须读取上一期 digest.json 进行比对。** 查找 `output/` 目录下最近一期的 `digest.json`（按目录名时间戳排序取最新），提取其 tier 1 和 tier 2 的 `source_url` 列表。
+
+**去重规则：**
+- **Tier 1**：本期 4 条中，**至多 1 条**可与上期 tier 1 的 `source_url` 相同（即同一篇文章）。如果某条新闻自上期以来有重大后续进展（如新数据、官方回应、政策落地），可保留但必须更新摘要和 content_html 以反映增量信息。否则必须换掉。
+- **Tier 2**：本期 4 条中，**至多 2 条**可与上期 tier 1 + tier 2 的 `source_url` 相同。
+- **判断标准**：如果一条新闻自上期以来没有实质性更新（新数据、新反应、新进展），那么即使它仍然是评分最高的候选，也必须让位给新内容。读者订阅日报是为了看到新东西，不是重复昨天的头条。
+- **执行方式**：在 Step 3.9 验证中增加跨期去重检查。如果违反上述限制，报 error 并要求修改。
+
 **⚠️ 24 条的分配（不可更改）：**
 - **4 条** tier 1（来自 scored-news.json）→ P2–P5 每页一条
 - **4 条** tier 2（来自 scored-news.json）→ P6–P7 每页两条
@@ -293,7 +303,16 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 ### Step 3.9 — digest.json 自检（CRITICAL — 必须通过才能进入 Step 4）
 
-写完 `digest.json` 后，**先验证再渲染**。以下任何一项不通过，必须回去修改 digest.json：
+写完 `digest.json` 后，**先验证再渲染**。运行自动化验证脚本：
+
+```bash
+node skills/news-card/scripts/validate-digest.js workspace/digest.json
+```
+
+脚本自动检测上期 digest 进行跨期去重，也可手动指定：`--prev output/<prev>/digest.json`。
+输出包含每个 tier-1 的 HTML/文字双向空间余量。**exit code 0 = 全部通过，1 = 有违规**。
+
+任何一项不通过，必须回去修改 digest.json 后重新运行验证：
 
 | 检查项 | 要求 | 不通过后果 |
 |--------|------|-----------|
@@ -306,6 +325,8 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 | `content_html` 纯文字 (tier 1) | **≥ 400 字**（去标签后） | 页面半空，密度不足 |
 | `content_html` 存在 (tier 1) | 4 条 tier 1 都必须有 | 页面空白 |
 | `content_html` 不存在 (tier 2/3) | tier 2 和 3 不应有 content_html | — |
+| 跨期去重 (tier 1) | 与上期 tier 1 重复的 `source_url` **≤ 1 条** | 读者看到重复头条，体验极差 |
+| 跨期去重 (tier 2) | 与上期 tier 1+2 重复的 `source_url` **≤ 2 条** | 内容新鲜度不足 |
 
 ### Step 4 — Render HTML
 
@@ -376,7 +397,7 @@ Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目�
 
 #### 6c. 小红书发布文案 (`xiaohongshu-post.md`)
 
-> **⚠️ 必须先读取 `skills/XHS-writer/SKILL.md`**，按其中的文风规范、限流词/敏感词速查表和反 AI 检测策略来生成本文案。
+> **⚠️ CRITICAL：动笔前必须先读取 `skills/XHS-writer/SKILL.md` 并以其作为写作的底层规范。** XHS-writer 是小红书文案的唯一写作标准——文风人格、限流词/敏感词速查表、反 AI 检测策略、输出前自检清单全部以该 skill 为准。下方的格式模板和敏感词表是对 XHS-writer 的补充，不是替代。如有冲突，以 XHS-writer 为准。
 
 生成可直接复制粘贴到小红书的发布文案。
 
@@ -413,7 +434,26 @@ MM/DD日报 · <当日最大亮点，一句话>
 **注意**：
 - 标题 prefix 永远是 `MM/DD日报 · `，不可省略
 - 正文用中文，简洁有力
+- **全文字数硬上限 950 字**（含标题、正文、编辑点评、hashtag，不含备选标题区）。超过必须精简后再交付
 - hashtag 固定使用上述 3 个, 加上skills/XHS-writer/SKILL.md推荐，根据今天的新闻生成大概十个左右给我挑选
+
+**敏感词规避（CRITICAL）**：
+- 小红书会对特定词汇限流。生成文案后必须逐词检查，命中敏感词时按以下优先级替换：
+  1. **英文替代**：用对应英文词替换中文敏感词（如「融资」→「funding」，「估值」→「valuation」）
+  2. **Unicode 数学字体替代**：若英文本身也是敏感词，使用 Unicode Mathematical Sans-Serif Bold Italic 字体（如 `𝙁𝙪𝙣𝙙𝙞𝙣𝙜`）
+- 已知高频敏感词及推荐替代（持续补充）：
+
+| 中文敏感词 | 推荐替代 | 说明 |
+|-----------|---------|------|
+| 数据 | data | 科技语境常见 |
+| 融资 | funding / 融了→拿了 | 金融限流词 |
+| 估值 | valuation | 金融限流词 |
+| 医疗 | 健康 / health | 医疗类限流 |
+| 解雇 | 开了 / 不再合作 | 负面用语限流 |
+| 源码 | source code | 技术术语 |
+| 视频生成 | video generation | 组合敏感 |
+
+- 替换后需保持句子通顺自然，不要为规避而写出生硬的表达
 
 **文风要求**：
 - xiaohongshu-post.md 应读起来像编辑部晨报简报，不像新闻稿罗列
