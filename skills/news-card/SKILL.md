@@ -405,13 +405,13 @@ MM/DD日报 · <当日最大亮点，一句话>
 · <tier-3 headline>
 ...
 
-#zz的AI日报 #AI资讯 #人工智能 #科技新闻
+#zz的AI日报 #AI资讯 #科技新闻
 ```
 
 **注意**：
 - 标题 prefix 永远是 `MM/DD日报 · `，不可省略
 - 正文用中文，简洁有力
-- hashtag 固定使用上述 4 个
+- hashtag 固定使用上述 3 个, 加上skills/XHS-writer/SKILL.md推荐，根据今天的新闻生成大概十个左右给我挑选
 
 **文风要求**：
 - xiaohongshu-post.md 应读起来像编辑部晨报简报，不像新闻稿罗列

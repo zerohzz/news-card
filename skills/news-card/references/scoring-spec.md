@@ -48,7 +48,9 @@ total_score = cross_validation × 2.0
 | Hacker News | points > 500 | +6（不累加） |
 | HuggingFace Papers | upvotes > 30 | +2 |
 | HuggingFace Papers | upvotes > 80 | +4（不累加） |
-| Twitter/X | 无量化指标（guest mode 不返回） | 0 |
+| X/Twitter (follow-builders) | likes ≥ 300 | +2 |
+| X/Twitter (follow-builders) | likes ≥ 1000 | +4（不累加） |
+| X/Twitter (follow-builders) | likes ≥ 3000 | +6（不累加） |
 
 ### 3. 来源权威度（authority）
 
@@ -215,8 +217,9 @@ score = 3 × exp(-ln2/12 × hoursAgo)
 <!-- implementation_status: active -->
 
 当一条新闻仅由 X/Twitter 来源支撑时（`cross_validation = 0` 且唯一来源类型为 X/Twitter）：
-- 不得进入第一梯队（总分 cap 到 11.9，低于 spotlight 阈值 12）
+- 总分 cap 按 community_heat 分级：heat ≥ 6 → cap 18 / heat ≥ 4 → cap 15 / 其他 → cap 11.9
 - authority 分按 X tier 计算：Tier A（官方/公司）: 4 / Tier B（builder）: 3 / Tier C（评论/投资者）: 2
+- follow-builders 精选账号额外 +1 authority（curated builder bonus），上限 5
 - 可保留在候选池中作为早期信号
 
 ---

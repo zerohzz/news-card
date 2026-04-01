@@ -78,6 +78,12 @@ function communityScore(metrics) {
   if (hfUpvotes > 80) score = Math.max(score, 4);
   else if (hfUpvotes > 30) score = Math.max(score, 2);
 
+  // X/Twitter — follow-builders data already includes likes/comments
+  const xLikes = metrics.likes || 0;
+  if (xLikes >= 3000) score = Math.max(score, 6);
+  else if (xLikes >= 1000) score = Math.max(score, 4);
+  else if (xLikes >= 300) score = Math.max(score, 2);
+
   return score;
 }
 
@@ -396,6 +402,10 @@ function scoreAll(candidates, newsletterSignals) {
       const handle = item.source.replace(/^X\/@?/, '').split(' ')[0].toLowerCase();
       authority = X_AUTHORITY_TIERS[handle] ?? X_DEFAULT_AUTHORITY;
     }
+    // Curated builder bonus: follow-builders X accounts are hand-picked, +1 authority
+    const isCuratedBuilder = item.source_collection === 'follow-builders'
+      && item.source_family === 'follow_builders_x';
+    if (isCuratedBuilder) authority = Math.min(authority + 1, 5);
     const recency = recencyScore(item.published);
     const virality = scoreVirality(item);
     const actionability = scoreActionability(item);
@@ -412,9 +422,11 @@ function scoreAll(candidates, newsletterSignals) {
 
     const isXOnly = item.source?.startsWith('X/') && crossValidation === 0;
 
-    // X-only items cannot enter spotlight tier (scoring-spec.md: "不得进入第一梯队")
+    // X-only cap: tiered by community heat (curated builders with viral posts deserve higher caps)
     if (isXOnly) {
-      totalScore = Math.min(totalScore, 11.9);
+      if (community >= 6) totalScore = Math.min(totalScore, 18);
+      else if (community >= 4) totalScore = Math.min(totalScore, 15);
+      else totalScore = Math.min(totalScore, 11.9);
     }
 
     // Find related sources from the same event group
