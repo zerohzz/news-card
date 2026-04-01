@@ -107,13 +107,14 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 对于第一梯队的 4 条新闻，你必须生成 `content_html` 字段。这是纯 HTML，会被直接渲染到卡片的内容区域。
 
 **⚠️ 内容长度硬限制（CRITICAL）**：
+- content_html 纯文字（去除 HTML 标签后）**≥ 400 字**（硬下限，低于会导致页面半空）
 - content_html **最多 900 字符**（含 HTML 标签），超过会被裁剪
 - 内容区可用高度仅 **~1100px**（页面 1920px - 标题区 ~320px - 页脚区 ~150px - 内边距 ~350px）
 - **最多使用 4 个顶级组件**（段落 + 数据行 + 1 个语义组件 + 结尾段落）
 - **绝不使用 5 个以上组件** — 必然溢出导致页脚消失
 - 宁可少放一个组件，也不要让内容溢出
 
-**目标**：用信息把内容区填满但不溢出。写 300-400 字的深度内容，配合 1-2 个语义组件。
+**目标**：用信息把内容区填满但不溢出。写 400-500 字的深度内容，配合 1-2 个语义组件。
 
 **内容来源**：从原文中提取尽可能多的有价值信息：
 - 关键数据和数字
@@ -302,6 +303,7 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 | `headline_zh` 字数 | 每条 **≤ 25 字** | 标题溢出为 3 行 |
 | `summary_zh` 字数 (tier 3) | 每条 **60–90 字**（硬上限 90 字） | P8/P9 卡片溢出，页脚消失 |
 | `content_html` 长度 (tier 1) | **≤ 900 字符**（含标签） | 内容溢出，页脚消失 |
+| `content_html` 纯文字 (tier 1) | **≥ 400 字**（去标签后） | 页面半空，密度不足 |
 | `content_html` 存在 (tier 1) | 4 条 tier 1 都必须有 | 页面空白 |
 | `content_html` 不存在 (tier 2/3) | tier 2 和 3 不应有 content_html | — |
 
