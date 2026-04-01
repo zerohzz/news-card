@@ -184,6 +184,7 @@ The hero cover layout (top → bottom within 3:4 safe zone):
 | Density rules | `skills/news-card/references/density-spec.md` |
 | Design variables | `skills/news-card/references/design-tokens.md` |
 | Sample data | `skills/news-card/examples/sample-digest.json` |
+| Digest validator | `skills/news-card/scripts/validate-digest.js` |
 | Main pipeline | `skills/news-card/scripts/run-digest.sh` |
 
 ## Development Notes
