@@ -59,6 +59,71 @@ sparse · balanced · dense · list · comparison · flow · mindmap · quadrant
 
 通用预设 → `references/style-presets.md`
 
+### 风格画廊
+
+| Style | Description |
+|-------|-------------|
+| `cute` | Sweet, adorable, girly — 经典小红书少女风 |
+| `fresh` | Clean, refreshing, natural — 清新自然 |
+| `warm` | Cozy, friendly, approachable — 温暖治愈 |
+| `bold` | High impact, attention-grabbing — 高冲击力 |
+| `minimal` | Ultra-clean, sophisticated — 极简高级 |
+| `retro` | Vintage, nostalgic, trendy — 复古怀旧 |
+| `pop` | Vibrant, energetic, eye-catching — 活力四射 |
+| `notion` | Minimalist hand-drawn line art — 知识卡片风（**日报首推**） |
+| `chalkboard` | Colorful chalk on black board — 黑板粉笔风 |
+| `study-notes` | Realistic handwritten photo style — 学霸笔记风 |
+| `screen-print` | Bold poster art, halftone textures — 丝网海报风 |
+
+详细风格定义 → `references/presets/<style>.md`
+
+### 布局画廊
+
+| Layout | Description |
+|--------|-------------|
+| `sparse` | 极简信息，最大冲击力（1-2 个要点） |
+| `balanced` | 标准内容布局（3-4 个要点） |
+| `dense` | 高信息密度，知识卡片风格（5-8 个要点） |
+| `list` | 列举/排名格式（4-7 项） |
+| `comparison` | 左右对比布局 |
+| `flow` | 流程/时间线布局（3-6 步） |
+| `mindmap` | 中心辐射思维导图（4-8 分支） |
+| `quadrant` | 四象限 / 环形分区布局 |
+
+详细布局定义 → `references/elements/canvas.md`
+
+### 自动风格匹配
+
+| 内容信号 | Style | Layout | 推荐预设 |
+|---------|-------|--------|---------|
+| AI 日报、digest.json、每日新闻 | `notion` | sparse/dense | `daily-cover`, `daily-dense` |
+| 热点新闻、重大事件、突发 | `bold` | balanced | `hot-topic` |
+| 技术解释、概念科普、教程 | `chalkboard` | flow/balanced | `tech-explain` |
+| 工具推荐、模型排名、榜单 | `minimal` | list | `ai-ranking` |
+| 深度分析、论文解读、研究 | `study-notes` | dense | `deep-dive` |
+| 趋势观点、行业评论、预测 | `screen-print` | sparse | `trend-poster` |
+| 模型对比、产品测评、A vs B | `notion` | comparison | `model-compare` |
+| AI 发展史、里程碑、回顾 | `retro` | flow | `timeline` |
+| 周报、月度合集、盘点 | `fresh` | list | `weekly-recap` |
+
+### Style × Layout 兼容矩阵
+
+（✓✓ = 强烈推荐, ✓ = 可用, ✗ = 不建议）
+
+| | sparse | balanced | dense | list | comparison | flow | mindmap | quadrant |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| cute | ✓✓ | ✓✓ | ✓ | ✓✓ | ✓ | ✓ | ✓ | ✓ |
+| fresh | ✓✓ | ✓✓ | ✓ | ✓ | ✓ | ✓✓ | ✓ | ✓ |
+| warm | ✓✓ | ✓✓ | ✓ | ✓ | ✓✓ | ✓ | ✓ | ✓ |
+| bold | ✓✓ | ✓ | ✓ | ✓✓ | ✓✓ | ✓ | ✓ | ✓✓ |
+| minimal | ✓✓ | ✓✓ | ✓✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| retro | ✓✓ | ✓✓ | ✓ | ✓✓ | ✓ | ✓ | ✓ | ✓ |
+| pop | ✓✓ | ✓✓ | ✓ | ✓✓ | ✓✓ | ✓ | ✓ | ✓ |
+| notion | ✓✓ | ✓✓ | ✓✓ | ✓✓ | ✓✓ | ✓✓ | ✓✓ | ✓✓ |
+| chalkboard | ✓✓ | ✓✓ | ✓✓ | ✓✓ | ✓ | ✓✓ | ✓✓ | ✓ |
+| study-notes | ✗ | ✓ | ✓✓ | ✓✓ | ✓ | ✓ | ✓✓ | ✓ |
+| screen-print | ✓✓ | ✓✓ | ✗ | ✓ | ✓✓ | ✓ | ✗ | ✓✓ |
+
 ---
 
 ## 品牌调性（日报专属）
@@ -102,16 +167,60 @@ sparse · balanced · dense · list · comparison · flow · mindmap · quadrant
 
 ## 工作流
 
+### 进度清单
+
+```
+XHS Infographic Progress:
+- [ ] Step 0: 检查偏好设置 (EXTEND.md) ⛔ BLOCKING
+  - [ ] 找到 → 加载偏好 → 继续
+  - [ ] 未找到 → 首次设置 → 必须完成后才能进入 Step 1
+- [ ] Step 1: 分析内容 → analysis.md
+- [ ] Step 2: 智能确认 ⚠️ 必须确认
+  - [ ] 路径 A: 快速确认 → 生成推荐大纲
+  - [ ] 路径 B: 自定义 → 调整后生成大纲
+  - [ ] 路径 C: 详细模式 → 3 套大纲 → 二次确认 → 生成大纲
+- [ ] Step 3: 顺序生成图片
+- [ ] Step 4: 完成报告
+```
+
+### 流程图
+
+```
+Input → [Step 0: 偏好] ─┬─ 找到 → 继续
+                        │
+                        └─ 未找到 → 首次设置 ⛔ BLOCKING
+                                    │
+                                    └─ 完成设置 → 保存 EXTEND.md → 继续
+                                                                      │
+        ┌─────────────────────────────────────────────────────────────┘
+        ↓
+分析 → [智能确认] ─┬─ 快速: 确认推荐 → outline.md → 生成 → 完成
+                   │
+                   ├─ 自定义: 调整选项 → outline.md → 生成 → 完成
+                   │
+                   └─ 详细: 3 套大纲 → [二次确认] → outline.md → 生成 → 完成
+```
+
 ### Step 0 — 加载偏好设置（阻塞步骤）
 
-检查 `EXTEND.md` 是否存在：
-- **存在** → 加载偏好，进入 Step 1
-- **不存在** → 执行首次设置（3 个问题），然后进入 Step 1
+**CRITICAL**: 如果 EXTEND.md 未找到，必须先完成首次设置。不得跳过，不得先询问内容/风格/受众。
+
+检查 EXTEND.md 存在性（优先级顺序）：
+
+| 路径 | 位置 |
+|------|------|
+| `.xhs-image/EXTEND.md` | 项目目录 |
+| `$HOME/.xhs-image/EXTEND.md` | 用户目录 |
+
+| 结果 | 操作 |
+|------|------|
+| 找到 | 读取、解析、显示摘要 → 进入 Step 1 |
+| 未找到 | ⛔ BLOCKING: 仅执行首次设置 → 保存 EXTEND.md → 然后 Step 1 |
 
 首次设置流程 → `references/config/first-time-setup.md`
 偏好格式 → `references/config/preferences-schema.md`
 
-> **CRITICAL**: 首次设置未完成前，不得询问内容、风格或受众相关问题。
+EXTEND.md 支持：水印 | 偏好风格/布局 | 自定义风格定义 | 语言偏好
 
 ### Step 1 — 深度内容分析
 
@@ -156,42 +265,133 @@ sparse · balanced · dense · list · comparison · flow · mindmap · quadrant
 
 #### 路径 2: 自定义
 
-用户指定调整项 → 应用调整 → 生成大纲 → 进入 Step 3
+用户可调整的选项（留空 = 保持推荐值）：
+
+1. **策略风格**: A 信息密集(notion) | B 故事驱动(warm) | C 视觉冲击(screen-print)。或直接指定风格名/预设名
+2. **布局**: sparse | balanced | dense | list | comparison | flow | mindmap | quadrant
+3. **图片数量**: 2-10
+4. **补充说明**（可选）: 重点强调、受众调整、颜色偏好等
+
+调整后 → 生成大纲 → 保存 `outline.md` → 进入 Step 3
 
 #### 路径 3: 详细模式
 
-1. 生成 3 种策略大纲变体：
-   - A: **信息密集型** — 日报精选 + 数据亮点 + 行业洞察（日报首推）
-   - B: **故事驱动型** — 围绕当日最大新闻展开叙事
-   - C: **视觉冲击型** — 极简海报风，一个核心观点
-2. 用户选择一个策略（或混合）
-3. 生成选定策略的完整大纲
-4. 用户确认大纲 → 进入 Step 3
+**Step 2a: 内容理解确认**
+
+询问用户：
+1. 核心卖点（多选）
+2. 目标受众
+3. 风格偏好: 真诚分享 / 专业测评 / 氛围感 / 自动
+4. 补充说明（可选）
+
+更新 `analysis.md`。
+
+**Step 2b: 生成 3 套大纲**
+
+| 策略 | 文件 | 推荐风格 | 焦点 |
+|------|------|---------|------|
+| A: 信息密集型 | `outline-strategy-a.md` | notion, minimal, chalkboard | 日报精选 + 数据亮点 + 行业洞察（**日报首推**） |
+| B: 故事驱动型 | `outline-strategy-b.md` | warm, cute, fresh | 围绕当日最大新闻展开叙事 |
+| C: 视觉冲击型 | `outline-strategy-c.md` | bold, pop, screen-print | 极简海报风，一个核心观点 |
+
+大纲格式要求（YAML front matter + 内容）：
+```yaml
+---
+strategy: a
+name: Information-Dense
+style: notion
+style_reason: "Notion 风格的知识卡片感最适合日报信息密集呈现"
+elements:
+  background: solid-white
+  decorations: [hand-drawn-lines, arrows-curvy]
+  emphasis: circle-mark
+  typography: none
+layout: dense
+image_count: 3
+---
+```
+
+**差异化要求**：
+- 每种策略必须有不同的大纲结构和不同的推荐风格
+- 页数适配: A 通常 3-5, B 通常 4-6, C 通常 3-4
+- 必须包含 `style_reason` 解释为什么这个风格适合该策略
+
+**Step 2c: 大纲选择确认**
+
+用户选择：
+- Q1: 策略选择 (A / B / C / 混合)
+- Q2: 视觉风格 (用推荐 | 选预设 | 选风格 | 自定义描述)
+- Q3: 视觉元素 (用默认 | 调整背景 | 调整装饰 | 自定义)
+
+确认后 → 保存 `outline.md` → 进入 Step 3
 
 大纲模板 → `references/workflows/outline-template.md`
 
 ### Step 3 — 顺序生成图片
 
-**按顺序逐张生成**，确保视觉一致性：
+**按顺序逐张生成**，确保视觉一致性。
 
-1. 为每张图组装 prompt（风格 + 布局 + 内容 + 水印）
-2. 保存 prompt 文件到 `prompts/` 目录
-3. **图片 1（封面）**：直接生成，建立视觉锚点
-4. **图片 2+**：使用图片 1 作为 `--ref` 参考图，确保风格一致
+**对每张图（封面 + 内容 + 结尾）**：
+
+1. 保存 prompt 到 `prompts/NN-{type}-[slug].md`（使用用户偏好语言）
+   - **备份规则**: 如果 prompt 文件已存在，重命名为 `NN-{type}-[slug]-backup-YYYYMMDD-HHMMSS.md`
+2. 生成图片：
+   - **图片 1**: 直接生成（无 `--ref`），建立视觉锚点
+   - **图片 2+**: 使用图片 1 作为 `--ref` 参考图，确保风格一致
+   - **备份规则**: 如果图片文件已存在，重命名加时间戳后缀
+3. 每张生成后报告进度
 
 Prompt 组装规则 → `references/workflows/prompt-assembly.md`
 
-**视觉一致性**:
-- 封面图建立整个系列的色彩、笔触、角色设计基准
-- 后续图片通过引用封面图保持一致性
-- 使用 session ID 最大化跨图一致性
+**水印应用**（如偏好中启用）：
+在每张图的 prompt 中添加水印指令。参考 → `references/config/watermark-guide.md`
+
+**Session 管理**：
+如果图片生成工具支持 `--sessionId`：
+1. 生成唯一 session ID: `xhs-{topic-slug}-{timestamp}`
+2. 所有图片使用同一 session ID
+3. 配合参考图链，确保最大视觉一致性
 
 ### Step 4 — 完成报告
 
-生成完成后输出：
-- 所有图片文件位置
-- 使用的风格和布局
-- 每张图的文件名和描述
+```
+Xiaohongshu Infographic Series Complete!
+
+Topic: [topic]
+Mode: [快速 / 自定义 / 详细]
+Strategy: [A/B/C/混合]
+Style: [style name]
+Layout: [layout name or "varies"]
+Location: [directory path]
+Images: N total
+
+✓ analysis.md
+✓ outline.md
+✓ outline-strategy-a/b/c.md (仅详细模式)
+
+Files:
+- 01-cover-[slug].png ✓ Cover (sparse)
+- 02-content-[slug].png ✓ Content (balanced)
+- 03-ending-[slug].png ✓ Ending (sparse)
+```
+
+---
+
+## 图片修改
+
+| 操作 | 步骤 |
+|------|------|
+| **编辑** | **先更新 prompt 文件** → 用同一 session ID 重新生成 |
+| **添加** | 指定位置 → 创建 prompt → 生成 → 后续文件重新编号（NN+1）→ 更新大纲 |
+| **删除** | 删除文件 → 后续文件重新编号（NN-1）→ 更新大纲 |
+
+**IMPORTANT**: 修改图片时，**必须先更新 prompt 文件**再重新生成。这确保改动可记录、可复现。
+
+## 内容拆分原则
+
+1. **封面（图 1）**: 钩子 + 视觉冲击 → `sparse` 布局
+2. **内容（中间）**: 每张一个核心价值点 → `balanced`/`dense`/`list`/`comparison`/`flow`
+3. **结尾（最后）**: CTA / 总结 → `sparse` 或 `balanced`
 
 ---
 
@@ -217,6 +417,40 @@ Prompt 组装规则 → `references/workflows/prompt-assembly.md`
 ```
 
 如果目录下已有文件，重命名备份文件加时间戳后缀。
+
+---
+
+## 大纲策略详解
+
+### 策略 A: 信息密集型（日报首推）
+
+| 维度 | 说明 |
+|------|------|
+| **理念** | 价值优先，高效信息传递 |
+| **特点** | 结构清晰、要点明确、专业可信 |
+| **适合** | 日报封面、工具推荐、对比测评、知识卡片 |
+| **结构** | 核心结论 → 信息卡 → 优劣对比 → 推荐 |
+| **推荐风格** | notion, minimal, chalkboard |
+
+### 策略 B: 故事驱动型
+
+| 维度 | 说明 |
+|------|------|
+| **理念** | 以个人体验为主线，情感共鸣优先 |
+| **特点** | 从痛点出发，展示前后变化，真实感强 |
+| **适合** | 热点事件叙事、行业深度分析、趋势解读 |
+| **结构** | 钩子 → 问题 → 发现 → 体验 → 总结 |
+| **推荐风格** | warm, cute, fresh |
+
+### 策略 C: 视觉冲击型
+
+| 维度 | 说明 |
+|------|------|
+| **理念** | 视觉冲击为核心，极简文字 |
+| **特点** | 大画面、强氛围、即时吸引 |
+| **适合** | 趋势海报、重大事件速报、品牌宣传 |
+| **结构** | 主视觉 → 细节 → 氛围场景 → CTA |
+| **推荐风格** | bold, pop, retro, screen-print |
 
 ---
 
@@ -306,3 +540,14 @@ Prompt 组装规则 → `references/workflows/prompt-assembly.md`
 | 大纲模板 | `references/workflows/outline-template.md` |
 | Prompt 组装指南 | `references/workflows/prompt-assembly.md` |
 | 风格预设（11 种） | `references/presets/*.md` |
+
+## Notes
+
+- 生成失败自动重试一次 | 敏感人物使用卡通替代
+- 使用用户确认的语言偏好 | 保持系列内风格一致性
+- **智能确认（Step 2）必须执行** — 不可跳过；详细模式使用两次子确认
+- 日报场景下默认推荐 `notion` 风格 — 知识卡片感最契合 AI 日报调性
+
+## Extension Support
+
+通过 EXTEND.md 自定义配置。见 **Step 0** 中的路径和支持选项。
