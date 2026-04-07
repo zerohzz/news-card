@@ -83,7 +83,7 @@ Create a 2×2 comic-style editorial infographic with 4 panels:
 ## Rules (CRITICAL)
 
 1. ALL text MUST be hand-drawn style — NO computer-generated or realistic fonts
-2. Keep each headline concise, maximum 15 Chinese characters
+2. Headlines must be COMPLETE — use the full headline from digest.json, do NOT truncate or shorten
 3. Each panel has a distinct illustration but shares the same art style
 4. Maintain visual consistency: same line weight, same color temperature
 5. NO realistic or photographic elements — everything is hand-drawn

@@ -98,7 +98,7 @@ digest.json → 提取 4 条 tier-1 → 组装 prompt → 生成图片 → 嵌�
 使用 `references/hero-prompt-template.md` 作为骨架，将 4 条新闻填入对应面板。
 
 每条新闻需要：
-1. `headline_zh` — 中文标题（≤15 字，可缩写）
+1. `headline_zh` — 中文标题（**必须使用 digest.json 中的完整标题，禁止截断**）
 2. `category` + `color_tag` — 分类色标识（也作为面板边框颜色）
 3. `primary_tag` — 右上角关键词标签（公司名/产品名/核心主题，**不是色号**）
 4. `3 keyword tags` — 底部三个关键词 pill（苹果风圆角空心框）
