@@ -5,3 +5,5 @@ output/
 autoresearch-news-card/run-*/
 logo_b64.txt
 package-lock.json
+archived/
+.env

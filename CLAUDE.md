@@ -120,6 +120,7 @@ It reads:
 - **autoresearch** — 仅在用户明确要求优化 skill 时调用（如「run autoresearch on ...」）。**绝不可自动调用**，无论任何上下文
 - **XHS-writer** — 在用户要求写小红书笔记时调用，**也在 news-card pipeline Step 6c 生成 `xiaohongshu-post.md` 时调用**（需读取 XHS-writer SKILL.md 的文风、合规词库和反 AI 检测策略）
 - **news-card** — 仅在用户触发日报生成时调用（「今日 AI 日报」/`$news-card`）
+- **xhs-image-hero** — 仅在用户明确说"现在用xhs-image-hero生成封面"时调用，为 V2 封面生成 1:1 四格漫画 Hero Image
 - 各 skill 独立运行，不互相调用
 
 ## Key Architecture Decisions

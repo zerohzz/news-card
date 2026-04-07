@@ -636,8 +636,22 @@
   }
 
   .brand-bar .brand {
-    font-weight: 700;
-    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-bar .brand-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .brand-bar .brand-name {
+    font: 400 24px/1.5 var(--font-zh);
+    color: var(--text-mid);
+    letter-spacing: 0.03em;
   }
 
   .brand-bar .date-center { text-align: center; }
@@ -691,13 +705,16 @@
     <div class="source-bar">
       <span class="source-name">{{source}}</span>
       <span class="dot"></span>
-      <span class="source-url">{{source_url}}</span>
+      <span class="source-url">{{headline_en}}</span>
     </div>
     {{#if related_sources}}
     <div style="font-size: 17px; color: var(--text-mid); padding: 8px 0 0; line-height: 1.5;">同题报道：{{related_sources}}</div>
     {{/if}}
     <div class="brand-bar">
-      <span class="brand">zz AI 资讯日报</span>
+      <div class="brand">
+        <img class="brand-avatar" src="file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/Avatar-zz.png" alt="">
+        <span class="brand-name">zz 的 AI 日报</span>
+      </div>
       <span class="date-center">{{date}}</span>
       <span class="spacer"></span>
     </div>

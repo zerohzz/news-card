@@ -19,6 +19,12 @@ version: 0.4.0
 - "generate AI digest"
 - `$news-card`
 
+### 封面切换
+
+- **默认**：使用 HTML hero-cover 模板生成封面（始终生成作为备用）
+- **手动切换**：当用户明确说"现在用xhs-image-hero生成封面"时，调用 `xhs-image-hero` skill 生成 1:1 四格漫画 Hero Image，嵌入 V2 封面模板（`skills/xhs-image-hero/templates/v2-cover.html`）
+- xhs-image-hero 封面不会替代 HTML 封面，两者共存，仅在手动触发时生成
+
 ---
 
 ## 必须交付物清单（CRITICAL — 缺一不可）
@@ -176,6 +182,7 @@ Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目�
 | 用途 | 路径 |
 |------|------|
 | 输出目录结构与交付物 | `references/config/output-structure.md` |
+| 小红书敏感词替换库 | `references/config/sensitive-word-dict.md` |
 
 ### 元素 (`references/elements/`)
 

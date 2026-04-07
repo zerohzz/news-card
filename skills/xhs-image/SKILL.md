@@ -47,6 +47,7 @@ sparse · balanced · dense · list · comparison · flow · mindmap · quadrant
 | --preset | Style | Layout | 场景 |
 |----------|-------|--------|------|
 | `daily-cover` | `notion` | `sparse` | 日报封面（默认推荐） |
+| `daily-cover-v2` | HTML+NanoBanana | `quadrant` | 四格漫画混合封面（手动触发） |
 | `daily-dense` | `notion` | `dense` | 日报信息密集版封面 |
 | `hot-topic` | `bold` | `balanced` | 热点事件速报 |
 | `tech-explain` | `chalkboard` | `flow` | 技术概念解读 |
@@ -341,6 +342,14 @@ image_count: 3
    - **备份规则**: 如果图片文件已存在，重命名加时间戳后缀
 3. 每张生成后报告进度
 
+**当前仓库最小执行后端（Google / Gemini 官方 API）**：
+- 命令入口：`node skills/xhs-image/scripts/generate.js`
+- 图片 1：`node skills/xhs-image/scripts/generate.js --promptfile prompts/01-cover-topic.md --image images/01-cover-topic.png`
+- 图片 2+：`node skills/xhs-image/scripts/generate.js --promptfile prompts/02-content-topic.md --image images/02-content-topic.png --ref images/01-cover-topic.png`
+- 密钥加载：优先读取 shell 环境变量；若项目根目录存在 `.env`，也会自动加载其中的 `GOOGLE_API_KEY` 或 `GEMINI_API_KEY`
+- 可选默认值：可在 `.xhs-image/EXTEND.md` 中添加 `image_generation.provider`、`image_generation.model`、`image_generation.quality`、`image_generation.aspect_ratio`
+- 当前优先级：`命令行参数 > .env / shell 环境变量 > .xhs-image/EXTEND.md > 内置默认值`
+
 Prompt 组装规则 → `references/workflows/prompt-assembly.md`
 
 **水印应用**（如偏好中启用）：
@@ -523,11 +532,50 @@ Files:
 
 ---
 
+## V2 封面模式（daily-cover-v2）
+
+HTML + NanoBanana 混合封面，专为小红书首图设计。
+
+### 布局结构
+
+```
+┌─────────────────────────────┐  280px safe-top
+│    日期 + zz AI资讯日报 logo │
+│    精简 slogan（无 $10）     │
+│    ════════════════════     │
+│    N精选 | M+候选 | P+来源   │
+│  ┌──────────┬──────────┐    │
+│  │  news 1  │  news 2  │    │  ← 2×2 四格漫画
+│  ├──────────┼──────────┤    │     placeholder / NanoBanana 生成
+│  │  news 3  │  news 4  │    │
+│  └──────────┴──────────┘    │
+│              [含AI辅助生成内容]│
+└─────────────────────────────┘  240px safe-bot
+```
+
+### 触发方式
+
+用户必须明确说"现在用xhs-image生成封面"才会触发。默认不生成。
+
+### 两阶段生成
+
+1. **Phase A — HTML 渲染**：使用 `templates/v2-cover.html` 模板 + digest.json 数据渲染 → Playwright 截图。四格区域显示 placeholder（分类色底 + 标题文字）
+2. **Phase B — NanoBanana 替换**（未来）：为 4 条 tier-1 新闻各生成一张漫画风配图 → 注入 `comic_image` 字段 → 重新渲染截图
+
+### 模板变量
+
+与 news-card hero-cover.html 相同：`date_year`, `date_md`, `date_dow`, `readingMinutes`, `savedHours`, `total`, `sourceCount`, `numSources`, `tier1[]`
+
+额外变量：`tier1[].comic_image` — NanoBanana 生成的图片路径（可选，为空时显示 placeholder）
+
+---
+
 ## 文件索引
 
 | 用途 | 路径 |
 |------|------|
 | 本文件（Skill 入口） | `SKILL.md` |
+| V2 封面 HTML 模板 | `templates/v2-cover.html` |
 | 预设快捷方式 | `references/style-presets.md` |
 | 首次设置流程 | `references/config/first-time-setup.md` |
 | 偏好格式定义 | `references/config/preferences-schema.md` |

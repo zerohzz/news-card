@@ -9,7 +9,9 @@
     "score": "bash scripts/score.sh",
     "screenshot": "bash scripts/screenshot.sh",
     "digest": "bash scripts/run-digest.sh",
-    "verify:news-card": "node skills/news-card/scripts/lib/verify-fixtures.js"
+    "verify:news-card": "node skills/news-card/scripts/lib/verify-fixtures.js",
+    "xhs-image:generate": "node skills/xhs-image/scripts/generate.js",
+    "verify:xhs-image": "node --test skills/xhs-image/scripts/generate.test.js"
   },
   "dependencies": {
     "playwright": "^1.52.0",

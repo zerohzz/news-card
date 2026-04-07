@@ -142,8 +142,22 @@
   }
 
   .footer .brand {
-    font-weight: 700;
-    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .footer .brand-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .footer .brand-name {
+    font: 400 24px/1.5 var(--font-zh);
+    color: var(--text-mid);
+    letter-spacing: 0.03em;
   }
 
   .footer .date-center { text-align: center; }
@@ -194,7 +208,10 @@
   </div>
 
   <div class="footer">
-    <span class="brand">zz AI 资讯日报</span>
+    <div class="brand">
+      <img class="brand-avatar" src="file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/Avatar-zz.png" alt="">
+      <span class="brand-name">zz 的 AI 日报</span>
+    </div>
     <span class="date-center">{{date}}</span>
     <span class="spacer"></span>
   </div>

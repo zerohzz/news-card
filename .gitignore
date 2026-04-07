@@ -5,3 +5,5 @@ output/
 autoresearch-news-card/run-*/
 output/
 workspace/
+archived/
+.env
