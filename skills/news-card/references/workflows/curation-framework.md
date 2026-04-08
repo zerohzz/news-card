@@ -85,10 +85,10 @@ description: 编辑人格、选题标准、跨期去重、验证清单
 | tier 分布 | tier 1 = 4, tier 2 = 4, tier 3 = 16 | 页面分配错误 |
 | tier 3 中 news vs signals | P8 用 8 条 news, P9 用 8 条 signals | 最后一页空或溢出 |
 | `headline_zh` 字数 | 每条 **≤ 25 字** | 标题溢出为 3 行 |
-| `summary_zh` 字数 (tier 2) | 每条 **150–200 字**（硬上限 200 字） | P6/P7 页脚消失 |
+| `summary_zh` 字数 (tier 2) | 每条 **180–250 字**（硬上限 250 字） | P6/P7 页脚消失 |
 | `summary_zh` 字数 (tier 3) | 每条 **60–90 字**（硬上限 90 字） | P8/P9 卡片溢出，页脚消失 |
-| `content_html` 长度 (tier 1) | **≤ 900 字符**（含标签） | 内容溢出，页脚消失 |
-| `content_html` 纯文字 (tier 1) | **≥ 400 字**（去标签后） | 页面半空，密度不足 |
+| `content_html` 长度 (tier 1) | **≤ 1100 字符**（含标签） | 内容溢出，页脚消失 |
+| `content_html` 纯文字 (tier 1) | **≥ 500 字**（去标签后） | 页面半空，密度不足 |
 | `content_html` 存在 (tier 1) | 4 条 tier 1 都必须有 | 页面空白 |
 | `content_html` 不存在 (tier 2/3) | tier 2 和 3 不应有 content_html | — |
 | 跨期去重 (tier 1) | 与上期 tier 1 重复 **≤ 1 条** | 读者看到重复头条 |

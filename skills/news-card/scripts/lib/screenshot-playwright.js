@@ -83,7 +83,7 @@ async function screenshotAll(inputDir, outputDir) {
     const outputPath = join(outputDir, pngName);
 
     try {
-      const isCover = htmlFile.includes('cover');
+      const isCover = htmlFile.includes('cover') && !htmlFile.includes('v2-cover');
       const viewportHeight = isCover ? VIEWPORT_HEIGHT_COVER : VIEWPORT_HEIGHT_DEFAULT;
 
       const page = await context.newPage();

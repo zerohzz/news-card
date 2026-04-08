@@ -300,14 +300,25 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
   console.error(`[render] Page 0: Hero Cover`);
 
   // Page 1: Menu (content index — old cover.html)
+  // Chinese day-of-week for menu brand-row date card
+  const DAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
+  const dateDowZh = DAYS_ZH[dateObj.getUTCDay()];
+  const dateMonth = String(dateObj.getUTCMonth() + 1);
+  const dateDay = String(dateObj.getUTCDate()).padStart(2, '0');
+
   const menuHTML = renderTemplate(menuTpl, {
     date: today,
     date_year: dateYear,
     date_md: dateMD,
+    date_dow: dateDow,
+    date_dow_zh: dateDowZh,
+    date_month: dateMonth,
+    date_day: dateDay,
     date_month_en: dateMonthEn,
     date_day_ordinal: dateDayOrdinal,
     total: allItems.length,
     sourceCount: sourceCount || allItems.length,
+    numSources,
     issue,
     categories: groupByCategory(allItems),
     progress_dots: makeProgressDots(1),

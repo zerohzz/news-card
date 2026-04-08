@@ -6,8 +6,14 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
 <style>
+  @font-face {
+    font-family: 'ChillDuanHei';
+    src: url('file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/fonts/ChillDuanHeiSongPro_Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
   @font-face {
     font-family: 'NotoSerifSCBlack';
     src: url('file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/fonts/NotoSerifSC-Black.ttf') format('truetype');
@@ -16,8 +22,9 @@
   }
 
   :root {
-    --bg: #FAF9F6; --card: #FFFFFF; --text: #1A1A1A; --text-mid: #6B7280;
-    --text-dim: #9CA3AF; --accent: #D97706; --divider: #E5E7EB;
+    --bg: #FFF9F5; --card: #FFFFFF; --ink: #1C1917; --text: #1A1A1A; --text-mid: #6B7280;
+    --text-dim: #9CA3AF; --accent: #E8734A; --gold: #B8852A; --gold-light: #D4A855;
+    --green: #059669; --red: #DC2626; --divider: #E5E7EB;
     --cat-model-release: #4A90D9;
     --cat-product: #7B68EE;
     --cat-safety: #E74C3C;
@@ -72,32 +79,203 @@
     z-index: 100;
   }
 
-  .header {
-    text-align: center;
-    margin-bottom: 28px;
+  /* ── Brand Row: 3-column layout — copied from v2-cover.html ── */
+  .brand-row {
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    margin-bottom: 20px;
+    padding-top: 20px;
+    border-top: 3px solid var(--accent);
   }
 
-  .header .date {
+  /* Left: Stats vertical */
+  .stats-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    flex-shrink: 0;
+  }
+
+  .sv-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid var(--accent);
+  }
+  .sv-item:last-child { border-bottom: none; }
+
+  .sv-num {
+    font-family: var(--font-en);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .sv-num sup {
+    font-size: 14px;
+    font-weight: 600;
+    vertical-align: super;
+  }
+
+  .sv-label {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-mid);
+    white-space: nowrap;
+  }
+
+  /* Center: Avatar + Logo */
+  .brand-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .brand-avatar-wrap {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2.5px solid var(--gold-light);
+    box-shadow: 0 3px 12px rgba(185,133,42,0.12);
+    flex-shrink: 0;
+  }
+  .brand-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .brand-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .brand-identity .bi-logo {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-identity .bi-logo svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .brand-identity .bi-zz {
+    position: relative;
+    z-index: 4;
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: #c5a059;
+    line-height: 1;
+    margin-bottom: 1px;
+  }
+  .brand-identity .bi-name-wrap {
+    position: relative;
+    z-index: 3;
+    background: var(--bg);
+    padding: 4px 12px;
+  }
+  .brand-identity .bi-name {
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Right: Date Card */
+  .date-card {
+    flex-shrink: 0;
+    width: 240px;
+    height: 190px;
+    position: relative;
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    background: linear-gradient(145deg, #FAF0E4 0%, #F5E6D0 40%, #F0DCC4 100%);
+    border: 1.5px solid rgba(197,160,89,0.3);
+    box-shadow: 0 6px 24px rgba(185,133,42,0.10), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .date-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(197,160,89,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(232,115,74,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .date-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 22px;
+    right: 22px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    opacity: 0.4;
+  }
+
+  .dc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    position: relative;
+    z-index: 1;
+  }
+  .dc-dow {
+    font-family: var(--font-zh);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .dc-year {
     font-family: var(--font-en);
     font-size: 20px;
-    font-weight: 300;
-    color: var(--text-mid);
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    font-weight: 600;
+    color: rgba(28,25,23,0.30);
+    letter-spacing: 2px;
   }
-
-  .header h1 {
-    font-size: 72px;
+  .dc-main {
+    font-family: var(--font-en);
+    font-size: 84px;
     font-weight: 900;
-    margin: 6px 0 4px;
-    line-height: 1.2;
-    letter-spacing: 8px;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -3px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
   }
-
-  .header .subtitle {
-    font-size: 28px;
-    color: var(--text-mid);
-    font-weight: 400;
+  .dc-label {
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 12px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
   }
 
   .divider {
@@ -210,71 +388,7 @@
   .footer .date-center { text-align: center; }
   .footer .spacer { width: 80px; }
 
-  /* Brand mark (scaled from hero-cover) */
-  .logo-brand-mark {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 6px;
-  }
-  .logo-brand-mark svg.arcs {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  .logo-brand-zz {
-    position: relative;
-    z-index: 4;
-    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
-    font-size: 28px;
-    font-weight: 900;
-    color: #c5a059;
-    line-height: 1;
-    margin-bottom: 1px;
-  }
-  .logo-brand-name-wrap {
-    position: relative;
-    z-index: 3;
-    background: var(--bg);
-    padding: 3px 10px;
-  }
-  .logo-brand-name {
-    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
-    font-size: 19px;
-    font-weight: 900;
-    color: var(--text);
-    line-height: 1;
-    white-space: nowrap;
-  }
-  /* Date line */
-  .logo-date-line {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 12px;
-  }
-  .logo-date-main {
-    font-family: var(--font-en);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-mid);
-    letter-spacing: 1px;
-  }
-  .logo-date-dow {
-    font-family: var(--font-en);
-    font-size: 17px;
-    font-weight: 400;
-    color: var(--text-dim);
-    margin-left: 8px;
-    letter-spacing: 1px;
-  }
+  /* (old logo-brand-mark styles removed — now using brand-identity from v2-cover) */
   /* Progress dots */
   .progress-dots {
     position: absolute;
@@ -311,35 +425,62 @@
     {{#each progress_dots}}<span class="dot{{#if active}} active{{/if}}"></span>{{/each}}
   </div>
   <div class="content-group">
-  <div class="header">
-    <div class="logo-date-line">
-      <span class="logo-date-main">{{date_year}}.{{date_md}}</span>
-      <span class="logo-date-dow">{{date_dow}}</span>
-    </div>
-    <div class="logo-brand-mark">
-      <svg class="arcs" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="gold-glow2" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
-        </defs>
-        <g filter="url(#gold-glow2)" opacity="0.9">
-          <path d="M 100,300 A 200,200 0 0,1 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
-          <path d="M 118,300 A 182,182 0 0,1 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
-        </g>
-        <g filter="url(#gold-glow2)" opacity="0.9">
-          <path d="M 100,300 A 200,200 0 0,0 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
-          <path d="M 118,300 A 182,182 0 0,0 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
-        </g>
-      </svg>
-      <span class="logo-brand-zz">zz</span>
-      <div class="logo-brand-name-wrap">
-        <span class="logo-brand-name">AI资讯日报</span>
+  <!-- Brand Row: Stats | Logo+Avatar | Date Card -->
+  <div class="brand-row">
+    <div class="stats-vertical">
+      <div class="sv-item">
+        <div class="sv-num">{{total}}</div>
+        <div class="sv-label">精选</div>
+      </div>
+      <div class="sv-item">
+        <div class="sv-num">{{sourceCount}}<sup>+</sup></div>
+        <div class="sv-label">条候选</div>
+      </div>
+      <div class="sv-item">
+        <div class="sv-num">{{numSources}}<sup>+</sup></div>
+        <div class="sv-label">个来源</div>
       </div>
     </div>
+
+    <div class="brand-center">
+      <div class="brand-avatar-wrap">
+        <img src="file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/Avatar-zz.png" alt="zz">
+      </div>
+      <div class="brand-identity">
+        <div class="bi-logo">
+          <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="gold-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+              </filter>
+            </defs>
+            <g filter="url(#gold-glow)" opacity="0.9">
+              <path d="M 100,300 A 200,200 0 0,1 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
+              <path d="M 118,300 A 182,182 0 0,1 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
+            </g>
+            <g filter="url(#gold-glow)" opacity="0.9">
+              <path d="M 100,300 A 200,200 0 0,0 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
+              <path d="M 118,300 A 182,182 0 0,0 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
+            </g>
+          </svg>
+          <span class="bi-zz">zz</span>
+          <div class="bi-name-wrap">
+            <span class="bi-name">AI资讯日报</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-card">
+      <div class="dc-top">
+        <span class="dc-dow">{{date_dow_zh}}</span>
+        <span class="dc-year">{{date_year}}</span>
+      </div>
+      <div class="dc-main">{{date_month}}/{{date_day}}</div>
+      <div class="dc-label">日 报</div>
+    </div>
   </div>
-  <div class="divider"></div>
   <div class="categories">
     {{#each categories}}
     <div class="cat-group">
@@ -362,7 +503,6 @@
       <img class="brand-avatar" src="file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/Avatar-zz.png" alt="">
       <span class="brand-name">zz 的 AI 日报</span>
     </div>
-    <span class="date-center">{{date_year}}.{{date_md}} {{date_dow}}</span>
     <span class="spacer"></span>
   </div>
 </div>

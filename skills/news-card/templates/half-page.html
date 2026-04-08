@@ -118,9 +118,23 @@
     padding-top: 12px;
   }
 
+  .story .source-bar .source-label {
+    font-size: 18px;
+    color: var(--text-dim);
+    font-family: var(--font-zh);
+  }
+
   .story .source-bar .source-name {
     font-family: var(--font-en);
     font-weight: 600;
+  }
+
+  .story .source-bar .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-mid);
+    flex-shrink: 0;
   }
 
   .story .source-bar .source-url {
@@ -199,11 +213,11 @@
     <div class="story">
       <div class="category-tag" style="background: {{color_tag}}">{{category}}</div>
       <div class="headline-zh">{{headline_zh}}</div>
-      <div class="headline-en">{{headline_en}}</div>
       <div class="summary">{{summary_zh}}</div>
       <div class="source-bar">
         <span class="source-name">{{source}}</span>
-        <span class="source-url">{{source_url}}</span>
+        <span class="dot"></span>
+        <span class="source-url">{{headline_en}}</span>
       </div>
     </div>
     {{/each}}
@@ -214,7 +228,6 @@
       <img class="brand-avatar" src="file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/Avatar-zz.png" alt="">
       <span class="brand-name">zz 的 AI 日报</span>
     </div>
-    <span class="date-center">{{date}}</span>
     <span class="spacer"></span>
   </div>
 </div>
