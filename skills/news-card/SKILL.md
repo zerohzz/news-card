@@ -36,10 +36,11 @@ version: 0.4.0
 | `slides/*.html` (10 个) | Step 4 | 10 张 HTML 页面 |
 | `images/*.png` (10 张) | Step 5 | 10 张 PNG 卡片 |
 | `digest.json` | Step 3 | 选题数据（**必须恰好 24 条**） |
+| `digest-xhs.json` | Step 3.95 | XHS 合规和谐版（渲染用） |
 | `scored-candidates.md` | Step 3.5 | 全部候选新闻评分报告 |
+| `xiaohongshu-post.md` | Step 3.6 | 小红书发布文案（经 3.95 审核） |
 | `selection-rationale.md` | Step 6a | 选题理由说明 |
 | `pipeline-issues.md` | Step 6b | 管线问题记录 |
-| `xiaohongshu-post.md` | Step 6c | 小红书发布文案 |
 
 **完成 Step 5 后，必须继续执行 Step 6 生成所有附带文档。Step 6 不是可选的。**
 
@@ -108,6 +109,12 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 格式 → `references/config/output-structure.md`
 
+### Step 3.6 — 小红书文案（提前生成，供 Step 3.95 审核）
+
+按 `references/workflows/xhs-post-guide.md` 生成 `xiaohongshu-post.md`，写入输出目录。
+
+**此步骤必须在 Step 3.95 之前完成**，因为 XHS 合规审核需要同时审查卡片内容和发布文案。
+
 ### Step 3.9 — digest.json 自检（CRITICAL — 必须通过才能进入 Step 4）
 
 ```bash
@@ -118,6 +125,31 @@ node skills/news-card/scripts/validate-digest.js workspace/digest.json
 输出包含每个 tier-1 的 HTML/文字双向空间余量。**exit code 0 = 全部通过，1 = 有违规**。
 
 验证清单 → `references/workflows/curation-framework.md` § 验证清单
+
+### Step 3.95 — XHS 合规审核（CRITICAL — 必须通过才能进入 Step 4）
+
+**本步骤必须调用 `skills/xhs-reviewer/SKILL.md` 执行完整的 6 维度审核，不可用简单的字符串替换代替。**
+
+#### 审核范围（三个文件，缺一不可）
+
+| 审核对象 | 来源 | 说明 |
+|---------|------|------|
+| `digest.json` 的全部文本字段 | Step 3 输出 | headline_zh, summary_zh, content_html, highlight |
+| `xiaohongshu-post.md` | Step 6c 输出 | 标题 + 正文 + hashtag（**因此 Step 6c 必须在 3.95 之前生成**） |
+| V2 封面 slogan | `skills/xhs-image-hero/templates/v2-cover.html` | 固定文案，每期确认无新增敏感词 |
+
+#### 审核流程
+
+1. 加载 `references/config/sensitive-word-dict.md` 完整敏感词库
+2. 对照 xhs-reviewer 的 **6 个维度**（法律法规、行业准入、社区规范、内容质量、平台元素、营销合规）逐项检查
+3. **重点扫描**：自杀/自残/心理等心理危机词（XHS 零容忍）、广告法极限词（最/绝对/完美）、医疗/金融行业词、强负面词（封杀/崩溃/暴跌）
+4. 输出审核报告，列出所有问题及修复建议
+5. 执行修复，生成 `digest-xhs.json`（对 digest.json 的和谐版）和修正后的 `xiaohongshu-post.md`
+6. 对 `digest-xhs.json` 重新运行 `validate-digest.js` 确认字数限制仍然通过
+
+**⚠️ `category` 字段（如「安全对齐」）不可替换** — 详见 `sensitive-word-dict.md` § 不可替换的固定词。
+
+**所有下游步骤（Step 4 render、Step 5 screenshot、Phase 2 hero）使用 `digest-xhs.json`，不使用 digest.json。**
 
 ### Step 4 — Render HTML
 
@@ -148,7 +180,8 @@ Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目�
 |------|--------|---------|
 | 6a. 选题理由 | `selection-rationale.md` | `references/config/output-structure.md` § 6a |
 | 6b. 管线问题 | `pipeline-issues.md` | `references/config/output-structure.md` § 6b |
-| 6c. 小红书文案 | `xiaohongshu-post.md` | `references/workflows/xhs-post-guide.md` |
+
+> **注意**：`xiaohongshu-post.md`（原 6c）已移至 Step 3.6，在 XHS 合规审核之前生成。
 
 ---
 
