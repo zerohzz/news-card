@@ -57,11 +57,11 @@ test("parseSimpleYaml ignores inline comments in EXTEND values", () => {
   const config = parseSimpleYaml(`---
 image_generation:
   provider: google # google | auto
-  model: "gemini-3-pro-image-preview" # default
+  model: "gemini-3.1-flash-image-preview" # default
 ---`);
 
   assert.equal(config.image_generation.provider, "google");
-  assert.equal(config.image_generation.model, "gemini-3-pro-image-preview");
+  assert.equal(config.image_generation.model, "gemini-3.1-flash-image-preview");
 });
 
 test("parseDotEnv reads quoted values and ignores comments", () => {
@@ -158,7 +158,7 @@ test("resolveGenerationSettings prefers env model over EXTEND model", () => {
       {
         image_generation: {
           provider: "google",
-          model: "gemini-3-pro-image-preview",
+          model: "gemini-3.1-flash-image-preview",
           quality: "2k",
           aspect_ratio: "3:4",
         },

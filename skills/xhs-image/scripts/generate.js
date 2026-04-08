@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const DEFAULT_PROVIDER = "google";
-const DEFAULT_MODEL = "gemini-3-pro-image-preview";
+const DEFAULT_MODEL = "gemini-3.1-flash-image-preview";
 const DEFAULT_ASPECT_RATIO = "3:4";
 const DEFAULT_QUALITY = "2k";
 const SUPPORTED_PROVIDER = new Set(["google", "auto"]);
@@ -22,7 +22,7 @@ Options:
   --image             Output image path (required)
   --ref               Reference image path (repeatable)
   --provider          google | auto (default: auto)
-  --model, -m         Google image model (default: gemini-3-pro-image-preview)
+  --model, -m         Google image model (default: gemini-3.1-flash-image-preview)
   --ar                Aspect ratio hint appended to prompt (default: 3:4)
   --quality           normal | 2k (default: 2k)
   --json              Print JSON result
