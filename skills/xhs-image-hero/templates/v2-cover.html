@@ -338,6 +338,23 @@
   .hero-image .hero-slogan .hl-red    { color: var(--red);   font-weight: 700; }
   .hero-image .hero-slogan .hl-accent { color: var(--accent); font-weight: 600; }
 
+  /* Strikethrough row */
+  .hero-image .hero-slogan .strike-row {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+  .hero-image .hero-slogan .strike-row span {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--accent);
+    text-decoration: line-through;
+    letter-spacing: 2px;
+  }
+
   /* ═══════════════════════════════════════════════
      § AI BADGE — bottom-right of page
      ═══════════════════════════════════════════════ */
@@ -430,7 +447,12 @@
     <div class="hero-slogan">
       <div class="slogan">
         每天阅读<span class="hl-green">{{readingMinutes}}&thinsp;分钟</span>，节约<span class="hl-red">{{savedHours}}&thinsp;小时</span>无效刷新<br>
-        节省大量新闻获取 · 筛选 · 聚合 <span class="hl-accent">API 费用和时间成本</span>
+        节省大量新闻获取 · 筛选 · 聚合的<span class="hl-accent">API，Token和时间</span>
+      </div>
+      <div class="strike-row">
+        <span>信息过载</span>
+        <span>新闻FOMO</span>
+        <span>落后焦虑</span>
       </div>
     </div>
   </div>
