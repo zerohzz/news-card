@@ -36,8 +36,11 @@ Create a 2×2 comic-style editorial infographic with 4 panels:
 
 1. **Top-left**: Category dot (colored circle) + category name in Chinese
 2. **Top-right**: Primary tag with # prefix — the MOST RELEVANT keyword prefixed with "#" (e.g. "#Anthropic", "#健康", "#Gemini"). NOT a color hex code.
-3. **Center**: Hand-drawn illustration + hand-drawn Chinese headline
-4. **Bottom**: 3 keyword tags in Apple-style hollow rounded-rect pill badges, spaced evenly. Each badge is an outlined (not filled) rounded rectangle with the keyword inside.
+3. **Upper-center**: Hand-drawn Chinese headline text (ONCE ONLY — do NOT repeat it anywhere else in the panel)
+4. **Lower-center**: Hand-drawn illustration (below the headline, above the keyword tags)
+5. **Bottom**: 3 keyword tags in Apple-style hollow rounded-rect pill badges, spaced evenly. Each badge is an outlined (not filled) rounded rectangle with the keyword inside.
+
+**CRITICAL: The headline text must appear EXACTLY ONCE per panel — in position 3 (upper-center) only. Do NOT draw the headline a second time below the illustration or anywhere else.**
 
 ## Brand Colors
 
@@ -84,14 +87,15 @@ Create a 2×2 comic-style editorial infographic with 4 panels:
 
 1. ALL text MUST be hand-drawn style — NO computer-generated or realistic fonts
 2. Headlines must be COMPLETE — use the full headline from digest.json, do NOT truncate or shorten
-3. Each panel has a distinct illustration but shares the same art style
-4. Maintain visual consistency: same line weight, same color temperature
-5. NO realistic or photographic elements — everything is hand-drawn
-6. Panel borders use CATEGORY COLOR, not black
-7. Top-right tag is "#keyword" format (e.g. #Anthropic), NOT a hex color code
-8. Bottom of each panel has 3 keyword pills in outlined rounded-rect badges
-9. Leave breathing room — do not overcrowd any panel
-10. Keyword pill badges: outlined (hollow), rounded corners, hand-drawn style
+3. **Each headline appears EXACTLY ONCE per panel (upper-center). Do NOT duplicate the headline below the illustration or elsewhere. This is the #1 most common error.**
+4. Each panel has a distinct illustration but shares the same art style
+5. Maintain visual consistency: same line weight, same color temperature
+6. NO realistic or photographic elements — everything is hand-drawn
+7. Panel borders use CATEGORY COLOR, not black
+8. Top-right tag is "#keyword" format (e.g. #Anthropic), NOT a hex color code
+9. Bottom of each panel has 3 keyword pills in outlined rounded-rect badges
+10. Leave breathing room — do not overcrowd any panel
+11. Keyword pill badges: outlined (hollow), rounded corners, hand-drawn style
 
 Aspect ratio: 1:1.
 High resolution 2048px.
