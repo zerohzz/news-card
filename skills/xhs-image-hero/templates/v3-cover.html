@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<!-- V3 Cover — 1080×1920 — Brand above safe zone, hero inside safe zone     -->
+<!-- Brand row lives in top padding; orange lines mark safe zone boundaries  -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'ChillDuanHei';
+    src: url('file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/fonts/ChillDuanHeiSongPro_Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'NotoSerifSCBlack';
+    src: url('file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/fonts/NotoSerifSC-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+  }
+
+  :root {
+    --bg: #FFF9F5;
+    --ink: #1C1917;
+    --text: #1A1A1A;
+    --text-mid: #6B7280;
+    --text-dim: #9CA3AF;
+    --accent: #E8734A;
+    --gold: #B8852A;
+    --gold-light: #D4A855;
+    --green: #059669;
+    --red: #DC2626;
+    --rule: rgba(28,25,23,0.13);
+    --font-zh: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    --font-en: 'Source Serif Pro', Georgia, serif;
+    --safe-top: 280px;
+    --safe-bot: 240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    margin: 0; padding: 0; overflow: hidden;
+    background: var(--bg);
+    font-family: var(--font-zh);
+    color: var(--text);
+  }
+
+  .page {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--safe-top) 60px var(--safe-bot);
+  }
+
+  .page::after {
+    content: '';
+    position: absolute; inset: 0;
+    filter: url(#grain);
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+
+
+  /* ═══════════════════════════════════════════════
+     § BRAND ROW — positioned ABOVE safe zone
+     ═══════════════════════════════════════════════ */
+  .brand-row {
+    position: absolute;
+    top: 0;
+    left: 60px;
+    right: 60px;
+    height: var(--safe-top);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding-top: 20px;
+  }
+
+  /* ═══════════════════════════════════════════════
+     § COVER TITLE — giant XHS-style hook text
+     Inside safe zone, between top orange line and hero
+     ═══════════════════════════════════════════════ */
+  .cover-title {
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 0 24px;
+  }
+
+  .cover-title .ct-line {
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1.3;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .cover-title .ct-line .kw {
+    background-color: rgba(212, 168, 85, 0.25);
+    padding: 4px 8px;
+    margin: 0 -4px;
+    border-radius: 4px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  /* Title color utilities */
+  .ct-accent { color: var(--accent); }
+  .ct-ink    { color: var(--ink); }
+  .ct-green  { color: var(--green); }
+  .ct-blue   { color: #4A90D9; }
+  .ct-red    { color: var(--red); }
+  .ct-gold   { color: var(--gold); }
+  .ct-purple { color: #7B68EE; }
+
+  .kw.kw-accent { background-color: rgba(232, 115, 74, 0.20); }
+  .kw.kw-green  { background-color: rgba(5, 150, 105, 0.18); }
+  .kw.kw-blue   { background-color: rgba(74, 144, 217, 0.20); }
+  .kw.kw-red    { background-color: rgba(220, 38, 38, 0.18); }
+  .kw.kw-gold   { background-color: rgba(212, 168, 85, 0.25); }
+
+  /* ── Center: Avatar + Logo ── */
+  .brand-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .brand-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2.5px solid var(--gold-light);
+    box-shadow: 0 3px 12px rgba(185,133,42,0.12);
+    flex-shrink: 0;
+  }
+
+  .brand-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .brand-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .brand-identity .bi-logo {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-identity .bi-logo svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .brand-identity .bi-zz {
+    position: relative;
+    z-index: 4;
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: #c5a059;
+    line-height: 1;
+    margin-bottom: 1px;
+  }
+
+  .brand-identity .bi-name-wrap {
+    position: relative;
+    z-index: 3;
+    background: var(--bg);
+    padding: 4px 12px;
+  }
+
+  .brand-identity .bi-name {
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+
+  /* ── Date Bar — horizontal strip between brand row and safe zone ── */
+  .date-bar {
+    flex-shrink: 0;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 10px 28px;
+    background: linear-gradient(135deg, #FAF0E4 0%, #F5E6D0 50%, #F0DCC4 100%);
+    border: 1.5px solid rgba(197,160,89,0.25);
+    border-radius: 8px;
+  }
+
+  .date-bar .db-text {
+    font-family: var(--font-en);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  .date-bar .db-sep {
+    width: 1.5px;
+    height: 18px;
+    background: rgba(197,160,89,0.4);
+  }
+
+  .date-bar .db-name {
+    font-family: 'NotoSerifSCBlack', 'Noto Serif SC', serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 3px;
+  }
+
+  /* ── Right: Stats vertical ── */
+  .stats-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    flex-shrink: 0;
+  }
+
+  .sv-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid var(--accent);
+  }
+
+  .sv-item:last-child {
+    border-bottom: none;
+  }
+
+  .sv-num {
+    font-family: var(--font-en);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .sv-num sup {
+    font-size: 14px;
+    font-weight: 600;
+    vertical-align: super;
+  }
+
+  .sv-label {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-mid);
+    white-space: nowrap;
+  }
+
+  /* ═══════════════════════════════════════════════
+     § HERO IMAGE — single NanoBanana placeholder
+     ═══════════════════════════════════════════════ */
+  /* ═══════════════════════════════════════════════
+     § SAFE ZONE wrapper — orange lines top & bottom
+     ═══════════════════════════════════════════════ */
+  .safe-zone {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 3px solid var(--accent);
+    border-bottom: 3px solid var(--accent);
+  }
+
+  .hero-image {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 10px;
+  }
+
+  .hero-image .hero-img {
+    width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    z-index: 2;
+    display: none;
+  }
+
+  .hero-image .hero-img[src]:not([src=""]) {
+    display: block;
+  }
+
+  /* Slogan — positioned BELOW safe zone (in bottom padding) */
+  .slogan-below {
+    position: absolute;
+    bottom: var(--safe-bot);
+    left: 60px;
+    right: 60px;
+    text-align: center;
+    padding: 20px 0 0;
+    transform: translateY(100%);
+  }
+
+  .slogan-below .slogan {
+    font-size: 25px;
+    font-weight: 400;
+    color: var(--text-mid);
+    line-height: 1.85;
+  }
+
+  .slogan-below .hl-green  { color: var(--green); font-weight: 700; }
+  .slogan-below .hl-red    { color: var(--red);   font-weight: 700; }
+  .slogan-below .hl-accent { color: var(--accent); font-weight: 600; }
+
+  /* Strikethrough row */
+  .slogan-below .strike-row {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+  .slogan-below .strike-row span {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--accent);
+    text-decoration: line-through;
+    letter-spacing: 2px;
+  }
+
+  /* ═══════════════════════════════════════════════
+     § AI BADGE — bottom-right of page
+     ═══════════════════════════════════════════════ */
+  .ai-label {
+    position: absolute;
+    right: 52px;
+    bottom: 52px;
+    border: 1.5px solid var(--accent);
+    border-radius: 7px;
+    padding: 6px 16px;
+    font-family: var(--font-zh);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--accent);
+    background: transparent;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+
+  <!-- Brand row: 3 columns — Stats LEFT, Brand CENTER, Date RIGHT -->
+  <div class="brand-row">
+
+    <!-- LEFT: Stats vertical -->
+    <div class="stats-vertical">
+      <div class="sv-item">
+        <div class="sv-num">{{total}}</div>
+        <div class="sv-label">精选</div>
+      </div>
+      <div class="sv-item">
+        <div class="sv-num">{{sourceCount}}<sup>+</sup></div>
+        <div class="sv-label">条候选</div>
+      </div>
+      <div class="sv-item">
+        <div class="sv-num">{{numSources}}<sup>+</sup></div>
+        <div class="sv-label">个来源</div>
+      </div>
+    </div>
+
+    <!-- CENTER: Avatar + Logo -->
+    <div class="brand-center">
+      <div class="brand-avatar">
+        <img src="file:///C:/Users/AlexHuang/projects/news-card/skills/news-card/assets/Avatar-zz.png" alt="zz">
+      </div>
+      <div class="brand-identity">
+        <div class="bi-logo">
+          <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="gold-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+              </filter>
+            </defs>
+            <g filter="url(#gold-glow)" opacity="0.9">
+              <path d="M 100,300 A 200,200 0 0,1 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
+              <path d="M 118,300 A 182,182 0 0,1 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
+            </g>
+            <g filter="url(#gold-glow)" opacity="0.9">
+              <path d="M 100,300 A 200,200 0 0,0 500,300" fill="none" stroke="#c5a059" stroke-width="2.5"/>
+              <path d="M 118,300 A 182,182 0 0,0 482,300" fill="none" stroke="#c5a059" stroke-width="2.5" opacity="0.7"/>
+            </g>
+          </svg>
+          <span class="bi-zz">zz</span>
+          <div class="bi-name-wrap">
+            <span class="bi-name">AI资讯日报</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Safe zone: orange line top → date bar + title + hero → orange line bottom -->
+  <div class="safe-zone">
+    <!-- Date Bar — simple text line at top of safe zone -->
+    <div class="date-bar">
+      <span class="db-text">{{date_year}}/{{date_month}}/{{date_day}}</span>
+      <span class="db-sep"></span>
+      <span class="db-name">AI资讯日报</span>
+    </div>
+
+    <!-- Cover title — giant XHS-style hook text -->
+    <div class="cover-title">
+      {{cover_title_html}}
+    </div>
+
+    <!-- Hero image -->
+    <div class="hero-image">
+      <img class="hero-img" src="{{hero_image}}" alt="">
+    </div>
+  </div>
+
+  <!-- Slogan — below safe zone (in bottom padding area) -->
+  <div class="slogan-below">
+    <div class="slogan">
+      每天阅读<span class="hl-green">{{readingMinutes}}&thinsp;分钟</span>，减少<span class="hl-red">{{savedHours}}&thinsp;小时</span>无效刷新
+    </div>
+  </div>
+
+  <!-- AI badge -->
+  <div class="ai-label">含AI辅助生成内容</div>
+
+</div>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+</svg>
+</body>
+</html>
