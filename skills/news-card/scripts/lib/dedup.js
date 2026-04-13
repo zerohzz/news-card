@@ -12,6 +12,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { pathToFileURL } from 'url';
 import { extractEntities, entitiesMatch } from './entities.js';
 import { normalizeCandidateSchema } from './pipeline-utils.js';
+import { classifyTopic } from './score-engine.js';
 
 const STOP_WORDS = new Set([
   // General English
@@ -152,6 +153,23 @@ function dedup(items) {
       return true;
     });
     result.push({ ...best, related_sources: dedupedSources });
+  }
+
+  // Re-classify topic against the surviving item's title/summary and re-apply
+  // topic_adjustment. Dedup may have swapped scores from a merged duplicate whose
+  // topic differed from the survivor; this ensures topic_hint and adjustment
+  // always reflect the item being kept.
+  for (const item of result) {
+    const prevAdj = item.scores?.topic_adjustment || 0;
+    const topic = classifyTopic(item);
+    const newAdj = topic.adjustment;
+    item.topic_hint = topic.topic;
+    if (item.scores) {
+      item.scores.topic_adjustment = newAdj;
+      // Swap delta into total (already includes prevAdj from score-engine)
+      const delta = newAdj - prevAdj;
+      item.scores.total = Math.round((item.scores.total + delta) * 10) / 10;
+    }
   }
 
   // Re-sort by score after merges may have swapped scores

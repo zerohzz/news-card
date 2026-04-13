@@ -111,9 +111,31 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 ### Step 3.6 — 小红书文案（提前生成，供 Step 3.95 审核）
 
-按 `references/workflows/xhs-post-guide.md` 生成 `xiaohongshu-post.md`，写入输出目录。
+**必须调用 `skills/XHS-writer/SKILL.md` 执行完整创作流程**，再结合 `references/workflows/xhs-post-guide.md` 的日报格式模板生成 `xiaohongshu-post.md`。
+
+具体要求：
+1. 读取 `skills/XHS-writer/SKILL.md`，按其第三步生成 **5 个备选标题**（每个标注策略类型）
+2. 按 `xhs-post-guide.md` 的正文模板填充新闻内容
+3. 写作风格、反 AI 检测策略、敏感词规避均以 XHS-writer 为准
+4. 输出文件末尾包含「备选标题」区，列出全部 5 个标题方案
 
 **此步骤必须在 Step 3.95 之前完成**，因为 XHS 合规审核需要同时审查卡片内容和发布文案。
+
+### Step 3.7 — 话题配额自检（CRITICAL — 必须通过才能进入 Step 3.9）
+
+对照 `curation-framework.md` §「话题配额」硬约束检查 digest.json：
+
+```bash
+node skills/news-card/scripts/check-topic-quota.js output/<datetime>/digest.json
+```
+
+检查项：
+- T1 中 `politics` / `unrest` / `religion_ethics` / `health_ai` / `finance_ai` / `ai_reg` 条目必须为 0（「特别特别特别重要」例外需在 `selection-rationale.md` 中说明依据）
+- T2 对应话题 ≤ 1
+- T3 briefs（P8+P9）中 `politics+unrest` 合计 ≤ 2，医疗/金融 AI 合计 ≤ 2
+- `sovereignty` 任何位置都不允许出现
+
+不通过则回到 Step 3 重新选题。exit code 0 = 通过，1 = 违规。
 
 ### Step 3.9 — digest.json 自检（CRITICAL — 必须通过才能进入 Step 4）
 

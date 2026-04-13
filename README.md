@@ -62,7 +62,7 @@ output/
 
 - 双弧金环（SVG `path`，`stroke: #c5a059`）
 - `zz` — `Noto Serif SC 900`，金色
-- `AI资讯日报` — `Noto Serif SC 900`，墨黑，白色横条切断弧线
+- `AI每日资讯` — `Noto Serif SC 900`，墨黑，白色横条切断弧线
 
 ## 项目结构
 

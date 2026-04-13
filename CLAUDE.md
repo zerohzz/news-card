@@ -127,7 +127,7 @@ It reads:
 
 - **All pages 1080×1920** — hero cover is also 9:16; content sits in the center 3:4 safe zone (280px top / 240px bottom padding) so XHS thumbnails never crop content
 - **Local fonts** — `NotoSerifSC-Black.ttf` + `ChillDuanHeiSongPro_Regular.otf` loaded via `@font-face` with absolute `file://` paths; no CDN dependency at render time
-- **Logo is pure CSS/SVG** — double gold arc (`stroke: #c5a059`) + `zz` + `AI资讯日报`; source design in `assets/logo/src/App.tsx`
+- **Logo is pure CSS/SVG** — double gold arc (`stroke: #c5a059`) + `zz` + `AI每日资讯`; source design in `assets/logo/src/App.tsx`
 - **Skill lives in `skills/news-card/`** — follows Claude Code Skills best practice
 - **ESM modules** — all `.js` files use `import`/`export` (`"type": "module"`)
 - **Custom template engine** — handles `{{var}}`, `{{#each}}`, `{{#if}}` with nesting (no Handlebars dep)
@@ -150,8 +150,8 @@ It reads:
 The hero cover layout (top → bottom within 3:4 safe zone):
 
 1. **Date** — `2026.03.30 Mon` format, 40px, above logo
-2. **Brand mark** — SVG double arc circle + `zz` (gold, Noto Serif SC 900) + `AI资讯日报` (black)
-3. **Slogan** — 2 lines, green/red highlights: `每天阅读N分钟 / 节约N小时无效刷新 · $X 新闻获取 · 筛选 · 聚合 API 费用`
+2. **Brand mark** — SVG double arc circle + `zz` (gold, Noto Serif SC 900) + `AI每日资讯` (black)
+3. **Slogan** — 2 lines, green/red highlights: `每天阅读N分钟 / 节约N小时无效刷新 · $X 动态获取 · 筛选 · 聚合 API 费用`
 4. **Rule** — double line separator
 5. **Stats bar** — `精选N条 | M+条候选 | P+个来源` (compact, secondary)
 6. **Top 4 news** — tier-1 headlines (34px) + category badge + source

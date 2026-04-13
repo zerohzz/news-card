@@ -2,7 +2,13 @@
 
 /**
  * Multi-dimension scoring engine.
- * Formula: total = cross_validation × 2.0 + community × 1.5 + authority × 1.0 + recency × 0.8 + virality × 1.2 + actionability × 0.6 + peer_review × 3.0
+ * Formula: total = cross_validation × 2.0 + community × 1.5 + authority × 1.0 + recency × 0.8
+ *                + virality × 1.2 + actionability × 0.6 + peer_review × 3.0 + topic_adjustment × 1.0
+ *
+ * The `topic_adjustment` 8th dimension biases scoring toward XHS-suitable content:
+ * technical/product/research stories and Chinese AI ecosystem get bonuses;
+ * US-domestic political drama, unrest, medical/finance AI get soft penalties;
+ * sovereignty red lines get a hard filter.
  *
  * Usage: node score-engine.js --input candidates.json --output scored.json
  */
@@ -20,6 +26,59 @@ const W_RECENCY = 0.8;
 const W_VIRALITY = 1.2;
 const W_ACTIONABILITY = 0.6;
 const W_PEER_REVIEW = 3.0;
+const W_TOPIC = 1.0;
+
+// ── Topic classifier (8th scoring dimension) ──────────────────────────────
+// Biases scoring toward XHS-suitable content. First-match-wins priority.
+// Sovereignty lines are hard-rejected (−20 ≈ drop to bottom of ranking).
+// See references/scoring-spec.md for full rules.
+function classifyTopic(item) {
+  const text = (
+    (item.title || '') + ' ' +
+    (item.summary || '') + ' ' +
+    (item.source || '')
+  ).toLowerCase();
+
+  // Sovereignty red line — hard rejection
+  const SOVEREIGNTY = /\b(taiwan\s+independen|hong\s*kong\s+indepen|xinjiang|tibet\s+indepen|uyghur)\b|台独|港独|疆独|藏独|涉疆|西藏独立|台湾独立/i;
+
+  // Unrest / personal safety / violence
+  // Note: plain "attack" is too broad (matches "prompt injection attack"),
+  // so we require it to be paired with a residence/person indicator.
+  const UNREST = /\b(shooting|firebomb|riot|molotov|assassin|attack\s+on\s+(his|her|the)\s+(home|residence|house))\b|\bprotest(?:s|ers|ing|ed)?\b|枪击|袭击|抗议|示威|燃烧瓶|骚乱|游行/i;
+
+  // US domestic politics
+  const US_POLITICS = /\b(republican|democrat|senator|congress|white\s+house|pentagon|treasury|biden|trump\s+officials?)\b|两党|共和党|民主党|白宫|参议院|众议院|国防部|财政部|五角大楼/i;
+
+  // Health/medical AI — XHS industry blacklist
+  const HEALTH_AI = /\b(cancer|tumor|clinical|patient|diagnos|prescription|nhs|pharma)\b|医疗|诊疗|处方|疗效|肠癌|肿瘤|临床/i;
+
+  // Consumer finance AI — excludes pure academic/paper contexts
+  const FINANCE_AI = /\b(bank|banking|stock\s+market|trading|hedge\s+fund|insurance\s+firm|retail\s+investor)\b|银行|炒股|股价|理财|基金|保险公司/i;
+
+  // Religion / faith ethics
+  const RELIGION = /\b(christian|religious|clergy|pastor|bishop|islam|muslim|buddhist)\b|基督教|牧师|宗教|伊斯兰|佛教/i;
+
+  // China-positive AI ecosystem
+  const CHINA_AI_POS = /\b(qwen|deepseek|kimi|minimax|moonshot|glm|baichuan|stepfun|doubao|sensetime|ernie|wenxin|tongyi|hunyuan|ascend|cambricon|biren|zhipu)\b|通义|千问|智谱|百川|豆包|混元|文心|昇腾|寒武纪|阶跃|零一万物|商汤/i;
+
+  // Technical / product / research content
+  const TECH = /\b(launch|release|open[- ]?source|benchmark|api|sdk|model|paper|arxiv|framework|library|cli|runtime|repository|github|huggingface|architecture|alignment|rlhf)\b|发布|开源|模型|论文|框架|基准|评测/i;
+
+  // Generic AI regulation / policy (not specifically US politics)
+  const AI_REG = /\b(ai\s+act|ai\s+executive\s+order|ai\s+regulation|ai\s+policy)\b|AI法案|AI行政令/i;
+
+  if (SOVEREIGNTY.test(text))  return { topic: 'sovereignty',       adjustment: -20 };
+  if (UNREST.test(text))       return { topic: 'unrest',            adjustment: -4 };
+  if (US_POLITICS.test(text))  return { topic: 'politics',          adjustment: -3 };
+  if (HEALTH_AI.test(text))    return { topic: 'health_ai',         adjustment: -1 };
+  if (FINANCE_AI.test(text))   return { topic: 'finance_ai',        adjustment: -1 };
+  if (RELIGION.test(text))     return { topic: 'religion_ethics',   adjustment: -2 };
+  if (CHINA_AI_POS.test(text)) return { topic: 'china_ai_positive', adjustment: +3 };
+  if (TECH.test(text))         return { topic: 'tech',              adjustment: +2 };
+  if (AI_REG.test(text))       return { topic: 'ai_reg',            adjustment: -1 };
+  return                              { topic: 'neutral',           adjustment:  0 };
+}
 
 // X/Twitter source authority by tier.
 const X_AUTHORITY_TIERS = {
@@ -429,6 +488,11 @@ function scoreAll(candidates, newsletterSignals) {
       else totalScore = Math.min(totalScore, 11.9);
     }
 
+    // 8th dimension — topic_adjustment applied AFTER caps so penalties still bite X-only drama.
+    const topic = classifyTopic(item);
+    const topicAdjustment = topic.adjustment * W_TOPIC;
+    totalScore += topicAdjustment;
+
     // Find related sources from the same event group
     const eventGroup = eventGroups.find((g) => g.includes(idx)) || [idx];
     const relatedSources = eventGroup
@@ -437,6 +501,7 @@ function scoreAll(candidates, newsletterSignals) {
 
     return {
       ...item,
+      topic_hint: topic.topic,
       scores: {
         cross_validation: crossValidation,
         community_heat: community,
@@ -445,6 +510,7 @@ function scoreAll(candidates, newsletterSignals) {
         virality,
         actionability,
         peer_review: peerReview,
+        topic_adjustment: topic.adjustment,
         total: Math.round(totalScore * 10) / 10,
         x_only: isXOnly,
         requires_confirmation: item.requires_confirmation || isXOnly,
@@ -503,4 +569,4 @@ if (isDirectExecution) {
   }
 }
 
-export { scoreAll, tokenize, jaccardSimilarity, extractEntities, sourceToOrg };
+export { scoreAll, tokenize, jaccardSimilarity, extractEntities, sourceToOrg, classifyTopic };

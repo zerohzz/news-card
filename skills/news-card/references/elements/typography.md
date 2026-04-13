@@ -32,7 +32,7 @@ description: 字体系统、标题写作标准、摘要写作标准
 ## Logo 系统
 
 纯 CSS/SVG 实现，不依赖图片：
-- 双金弧（`stroke: #c5a059`）+ `zz` + `AI资讯日报`
+- 双金弧（`stroke: #c5a059`）+ `zz` + `AI每日资讯`
 - 源设计：`assets/logo/src/App.tsx`
 
 ---

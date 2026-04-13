@@ -1,5 +1,7 @@
 # 评分规则
 
+> **设计意图**：评分不只衡量「新闻价值」，还要衡量「XHS 平台适配度」。第 8 维 `topic_adjustment` 基于话题聚类给出加减分，偏向技术/国产 AI，降权美国国内政治、示威冲突、医疗/金融 AI，硬剔除主权红线。
+
 ## 总分公式
 
 ```
@@ -10,9 +12,11 @@ total_score = cross_validation × 2.0
             + virality         × 1.2
             + actionability    × 0.6
             + peer_review      × 3.0
+            + topic_adjustment × 1.0
 ```
 
 > ⚠️ peer_review 当前仍在主公式中计算。迁移至 2-stage rerank 见下方「2-Stage 评分流程」章节。
+> ⚠️ topic_adjustment 在 score-engine 打分后、dedup 合并后都会重新计算一次，确保最终条目的 topic_hint 与 adjustment 指向**实际保留的**条目（非被合并吞掉的 duplicate）。
 
 ---
 
@@ -152,6 +156,39 @@ score = 3 × exp(-ln2/12 × hoursAgo)
 - 1 个共享实体 + 标题 Jaccard > 0.15 作为 fallback
 
 **Sponsor 过滤：** EN 来源（Import AI, Rundown AI, AlphaSignal）已启用 sponsor filter。CN 来源未启用。
+
+---
+
+### 8. 话题聚类调整（topic_adjustment）
+
+<!-- implementation_status: active -->
+
+对 title + summary + source 运行关键词分类器，产出 `topic_hint` 与 `topic_adjustment`。first-match-wins 优先级：
+
+| 优先级 | 话题 | adjustment | 处理 |
+|-------|------|-----------|------|
+| 1 | `sovereignty` | −20 | 硬剔除（台独/港独/疆独/藏独/涉疆） |
+| 2 | `unrest` | −4 | 示威 / 枪击 / 袭击 / 燃烧瓶 / 抗议（示威/protest 独立命中） |
+| 3 | `politics` | −3 | 美国政党政治（Republican/Democrat/White House/Pentagon/Treasury/两党/国防部/财政部） |
+| 4 | `health_ai` | −1 | 医疗 AI（cancer/clinical/NHS/pharma/医疗/处方/疗效） |
+| 5 | `finance_ai` | −1 | 消费金融 AI（bank/stock/hedge/insurance firm/银行/炒股/理财） |
+| 6 | `religion_ethics` | −2 | 宗教伦理（christian/clergy/pastor/基督教/牧师/宗教） |
+| 7 | `china_ai_positive` | +3 | 国产 AI 正面动态（Qwen/DeepSeek/Kimi/通义/智谱/昇腾 等 × 发布/开源/论文） |
+| 8 | `tech` | +2 | launch/release/open-source/benchmark/API/SDK/paper/发布/开源/模型/论文 |
+| 9 | `ai_reg` | −1 | AI 法案 / AI 行政令（通用监管） |
+| 10 | `neutral` | 0 | 默认 |
+
+**实现位置**：`skills/news-card/scripts/lib/score-engine.js` 的 `classifyTopic()` 函数。
+
+**与 category 的区别**：
+- `category` 是人工在 curation 阶段为 digest.json 条目打的 9 类标签（模型发布/产品应用/…）
+- `topic_hint` 是 score-engine 自动分类出的「XHS 风险/偏好 hint」
+- 两者可以不同（例如 Anthropic × 基督教顾问，category=安全对齐，topic_hint=religion_ethics）
+
+**注意**：
+- 主权红线是硬剔除（−20）。其余均为软调整，仅影响排序，不剔除
+- topic_adjustment 在 dedup 之后会重新计算一次，保证指向最终保留条目的话题（而不是被合并吞掉的 dup）
+- X-only cap 先生效（≤18/15/11.9），然后才叠加 topic_adjustment
 
 ---
 

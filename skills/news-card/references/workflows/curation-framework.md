@@ -58,6 +58,38 @@ description: 编辑人格、选题标准、跨期去重、验证清单
 
 ---
 
+## 话题配额（硬约束 — 优先级高于分数排序）
+
+选题必须满足以下分布，**哪怕需要跳过分数更高的候选**。每条候选的 `topic_hint` 由 score-engine 自动分类（详见 scoring-spec.md §8）。
+
+| Tier | 技术/产品/研究<br>(tech/neutral) | 中国正面 AI<br>(china_ai_positive) | 医疗/金融 AI<br>(health_ai/finance_ai) | 政策/监管<br>(ai_reg/politics) | 宗教伦理<br>(religion_ethics) | 政治/冲突/主权<br>(politics/unrest/sovereignty) |
+|------|-:|-:|-:|-:|-:|-:|
+| T1 (4)    | ≥ 3 | 鼓励无上限 | 0 | 0（除「特别重要」）| 0 | 0 |
+| T2 (4)    | ≥ 2 | 鼓励无上限 | ≤ 1 | ≤ 1 | ≤ 1 | 0 |
+| T3×2 (16) | ≥ 8 | 鼓励无上限 | ≤ 2 | ≤ 2 | ≤ 2 | ≤ 2 |
+
+- 「鼓励无上限」= `china_ai_positive` 话题命中者不受数量限制，直接加分进入对应梯队
+- **主权类（sovereignty）任何 tier 都不允许出现，无例外**
+- politics 与 unrest 在 T1 永远为 0
+
+### 「特别特别特别重要」的政策/政治例外（T1 可破格一次）
+
+三选一命中即可：
+
+1. 直接决定主流大模型公司能否继续在某市场发布产品（例：EU AI Act 通过、US chip export 针对 Nvidia 扩容）
+2. 涉及 AI 公司战略性事件（例：Anthropic / OpenAI 股权、CEO 级人事变动、破产）
+3. 对 Builder 有直接影响的法规（例：开源模型责任法、Agent 注册制）
+
+单纯的「抗议 / 政治内斗 / 安全事件」即使 cross_validation 分数高，也不进入 T1/T2。
+
+### 如何处理被剔除的高分候选
+
+- 优先降 tier 而非整条丢弃（T1 降到 T3 briefs 仍可见）
+- 有同主题的 AI-native 替代时整条 swap
+- 在 `selection-rationale.md` 中写明每条被拒绝的高分候选 + 拒绝依据
+
+---
+
 ## 跨期去重（CRITICAL — 选题前必须执行）
 
 **在选题前，必须读取上一期 digest.json 进行比对。** 查找 `output/` 目录下最近一期的 `digest.json`（按目录名时间戳排序取最新），提取其 tier 1 和 tier 2 的 `source_url` 列表。
