@@ -45,7 +45,7 @@ Google Fonts 引入：
 --cat-research: #1ABC9C;       /* 研究前沿 — 青 */
 --cat-opensource: #E67E22;     /* 开源生态 — 深橙 */
 --cat-policy: #95A5A6;         /* 政策监管 — 灰 */
---cat-labor: #8E44AD;          /* 劳动力影响 — 紫红 */
+--cat-labor: #8E44AD;          /* 劳力影响 — 紫红 */
 ```
 
 Category → CSS 变量映射：
@@ -60,7 +60,7 @@ Category → CSS 变量映射：
 | 研究前沿 | `--cat-research` | #1ABC9C |
 | 开源生态 | `--cat-opensource` | #E67E22 |
 | 政策监管 | `--cat-policy` | #95A5A6 |
-| 劳动力影响 | `--cat-labor` | #8E44AD |
+| 劳力影响 | `--cat-labor` | #8E44AD |
 
 ---
 

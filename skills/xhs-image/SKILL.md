@@ -153,7 +153,7 @@ sparse · balanced · dense · list · comparison · flow · mindmap · quadrant
 | 研究前沿 | #1ABC9C 青 | 论文、突破 |
 | 开源生态 | #E67E22 深橙 | 开源项目 |
 | 政策监管 | #95A5A6 灰 | 法规、合规 |
-| 劳动力影响 | #8E44AD 紫红 | AI 与就业 |
+| 劳力影响 | #8E44AD 紫红 | AI 与就业 |
 
 ### 编辑人格
 

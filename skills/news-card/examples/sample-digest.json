@@ -84,7 +84,7 @@
     "summary_zh": "微软披露一批新的 Copilot 组织部署数据，重点展示企业在代码、文档与内部问答场景中的实际使用密度。相比过去偏营销导向的案例展示，这次更强调部署节奏、权限治理与试点转全员的转化过程，信息量明显更高。\n\n这类数据之所以重要，是因为它能帮助市场判断 AI 助手的渗透究竟停留在兴趣层，还是已经进入稳定采购与组织改造阶段，对 SaaS 与基础模型厂商都具有参考意义。",
     "source": "TechCrunch (AI)",
     "source_url": "https://techcrunch.com/2026/03/30/copilot-org-metrics",
-    "category": "劳动力影响",
+    "category": "劳力影响",
     "color_tag": "#8E44AD"
   },
   {
@@ -204,7 +204,7 @@
     "summary_zh": "一档 builder 播客围绕 agent ROI 展开讨论，涉及失败案例、成本回收周期与组织内部说服路径，信息密度高于常见乐观宣传。",
     "source": "Podcast/Training Data",
     "source_url": "https://trainingdata.fm/episodes/agent-roi",
-    "category": "劳动力影响",
+    "category": "劳力影响",
     "color_tag": "#8E44AD"
   },
   {

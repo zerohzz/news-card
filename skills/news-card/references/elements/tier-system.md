@@ -54,7 +54,7 @@ digest.json 包含 **恰好 24 条**新闻，分为 4 个梯队，映射到 10 �
   "content_html": "（仅 tier 1）富 HTML 内容",
   "source": "来源名",
   "source_url": "原文链接",
-  "category": "模型发布|产品应用|可信对齐|行业动态|开发工具|研究前沿|开源生态|政策监管|劳动力影响",
+  "category": "模型发布|产品应用|可信对齐|行业动态|开发工具|研究前沿|开源生态|政策监管|劳力影响",
   "color_tag": "#hex（对应 design-tokens.md 中的颜色）",
   "highlight": "仅 tier 1：一句关键数据或亮点"
 }
@@ -72,7 +72,7 @@ digest.json 包含 **恰好 24 条**新闻，分为 4 个梯队，映射到 10 �
 | 研究前沿 | 论文、学术突破 |
 | 开源生态 | 开源项目、社区动态 |
 | 政策监管 | 法规、政策、合规 |
-| 劳动力影响 | AI 对就业的影响 |
+| 劳力影响 | AI 对就业的影响 |
 
 `color_tag` 必须严格对应 `references/design-tokens.md` 中定义的 category 颜色。
 

@@ -107,7 +107,7 @@ total = cross_validation × 2.0 + community_heat × 1.5 + authority × 1.0
 | 研究前沿 | #1ABC9C 青 | `--cat-research` |
 | 开源生态 | #E67E22 深橙 | `--cat-opensource` |
 | 政策监管 | #95A5A6 灰 | `--cat-policy` |
-| 劳动力影响 | #8E44AD 紫红 | `--cat-labor` |
+| 劳力影响 | #8E44AD 紫红 | `--cat-labor` |
 
 ---
 
