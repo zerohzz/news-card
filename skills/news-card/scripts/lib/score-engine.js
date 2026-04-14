@@ -15,8 +15,13 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { pathToFileURL } from 'url';
-import { extractEntities, entitiesMatch } from './entities.js';
+import { extractEntities, entitiesMatch, extractProperNouns, PROPER_NOUN_BLOCKLIST, ORG_PATTERNS } from './entities.js';
 import { normalizeCandidateSchema } from './pipeline-utils.js';
+
+// Known org canonical names — used to exclude well-known orgs from dynamic proper
+// noun matching (rule 4). These orgs are already handled by static entity matching
+// (rule 3) and are too common to serve as distinctive "unknown entity" signals.
+const KNOWN_ORG_NAMES = new Set(ORG_PATTERNS.map(([, canonical]) => canonical));
 
 // Weights
 const W_CROSS = 2.0;
@@ -258,18 +263,66 @@ function sourceToOrg(source) {
 }
 
 /**
+ * Extract number-like tokens from text (dollar amounts, versions, percentages).
+ * These are strong corroborating signals for event matching.
+ * Returns Set<string> of lowercased number tokens.
+ */
+function extractNumberTokens(tokens) {
+  const numbers = new Set();
+  for (const t of tokens) {
+    // Match: $500m, 500m, 9b, 3.5, v4, 2.5b, 100k, etc.
+    if (/^\$?\d+(\.\d+)?[bmkt]?$/i.test(t) || /^v\d+/i.test(t)) {
+      numbers.add(t);
+    }
+  }
+  return numbers;
+}
+
+/**
+ * Check if two items share any number tokens (funding amounts, versions, etc.).
+ */
+function hasSharedNumbers(tokensA, tokensB) {
+  const numsA = extractNumberTokens(tokensA);
+  if (numsA.size === 0) return false;
+  const numsB = extractNumberTokens(tokensB);
+  for (const n of numsA) {
+    if (numsB.has(n)) return true;
+  }
+  return false;
+}
+
+/**
  * Group items by event similarity for cross-validation scoring.
- * Uses both title Jaccard similarity AND entity matching.
+ *
+ * Matching pipeline (all OR'd):
+ * 1. Same normalized URL (highest precision, zero false positives)
+ * 2. Title Jaccard > 0.2 (unchanged from original)
+ * 3. Static entity match via entitiesMatch() (expanded lists + relaxed threshold)
+ * 4. Shared proper noun + Jaccard > 0.1 (dynamic entity detection)
+ * 5. Shared rare token + Jaccard > 0.1 (compound weak signals)
  */
 function groupByEvent(items) {
   const groups = [];
   const assigned = new Set();
 
-  // Pre-compute tokens and entities
+  // Pre-compute tokens, entities, proper nouns, and normalized URLs
   const precomputed = items.map((item) => ({
     tokens: tokenize(item.title),
     entities: extractEntities((item.title || '') + ' ' + (item.summary || '')),
+    properNouns: extractProperNouns(item.title || ''),
+    normalizedUrl: normalizeUrl(item.url || ''),
   }));
+
+  // Compute document frequency for rare token detection.
+  // A "rare token" appears in very few items — it's a distinctive signal.
+  const docFreq = new Map();
+  for (const { tokens } of precomputed) {
+    const unique = new Set(tokens);
+    for (const t of unique) {
+      docFreq.set(t, (docFreq.get(t) || 0) + 1);
+    }
+  }
+  const rareThreshold = Math.max(3, Math.ceil(items.length * 0.05));
 
   for (let i = 0; i < items.length; i++) {
     if (assigned.has(i)) continue;
@@ -279,11 +332,73 @@ function groupByEvent(items) {
     for (let j = i + 1; j < items.length; j++) {
       if (assigned.has(j)) continue;
 
-      const titleSim = jaccardSimilarity(precomputed[i].tokens, precomputed[j].tokens);
-      const entityMatch = entitiesMatch(precomputed[i].entities, precomputed[j].entities, titleSim);
+      let matched = false;
 
-      // Match if title similarity > 0.2 OR entities match (which may use titleSim as context)
-      if (titleSim > 0.2 || entityMatch) {
+      // 1. URL match — if both point to the same URL, it's the same event
+      if (precomputed[i].normalizedUrl && precomputed[j].normalizedUrl
+          && precomputed[i].normalizedUrl === precomputed[j].normalizedUrl) {
+        matched = true;
+      }
+
+      if (!matched) {
+        const titleSim = jaccardSimilarity(precomputed[i].tokens, precomputed[j].tokens);
+
+        // 2. Title Jaccard > 0.2 (original threshold)
+        if (titleSim > 0.2) {
+          matched = true;
+        }
+
+        if (!matched) {
+          // 3. Static entity match (now with sharedNumber corroboration)
+          const sharedNumber = hasSharedNumbers(precomputed[i].tokens, precomputed[j].tokens);
+          const entityMatch = entitiesMatch(
+            precomputed[i].entities, precomputed[j].entities,
+            titleSim, { sharedNumber }
+          );
+          if (entityMatch) {
+            matched = true;
+          }
+        }
+
+        if (!matched && titleSim > 0.1) {
+          // 4. Dynamic proper noun overlap + minimal title similarity
+          // If two titles share a capitalized proper noun and have some lexical overlap,
+          // they likely cover the same entity's event.
+          // Known orgs (OpenAI, Google, etc.) are excluded — they appear across many
+          // unrelated stories and are already handled by static entity matching (rule 3).
+          const pnI = precomputed[i].properNouns;
+          const pnJ = precomputed[j].properNouns;
+          if (pnI.size > 0 && pnJ.size > 0) {
+            for (const noun of pnI) {
+              if (pnJ.has(noun) && !KNOWN_ORG_NAMES.has(noun)) {
+                matched = true;
+                break;
+              }
+            }
+          }
+
+          // 5. Shared rare token + minimal title similarity
+          // Rare tokens (e.g., specific dollar amounts, person names, niche terms)
+          // appearing in very few items are strong signals of the same event.
+          // Common words and known org names are excluded — they can appear
+          // across unrelated stories and seem "rare" only due to small dataset size.
+          if (!matched) {
+            const tokensI = new Set(precomputed[i].tokens);
+            const tokensJ = new Set(precomputed[j].tokens);
+            for (const t of tokensI) {
+              if (tokensJ.has(t)
+                  && (docFreq.get(t) || 0) <= rareThreshold
+                  && !PROPER_NOUN_BLOCKLIST.has(t)
+                  && !KNOWN_ORG_NAMES.has(t)) {
+                matched = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (matched) {
         group.push(j);
         assigned.add(j);
       }
@@ -569,4 +684,4 @@ if (isDirectExecution) {
   }
 }
 
-export { scoreAll, tokenize, jaccardSimilarity, extractEntities, sourceToOrg, classifyTopic };
+export { scoreAll, tokenize, jaccardSimilarity, extractEntities, extractProperNouns, sourceToOrg, classifyTopic };
