@@ -169,7 +169,7 @@ node skills/news-card/scripts/validate-digest.js workspace/digest.json
 5. 执行修复，生成 `digest-xhs.json`（对 digest.json 的和谐版）和修正后的 `xiaohongshu-post.md`
 6. 对 `digest-xhs.json` 重新运行 `validate-digest.js` 确认字数限制仍然通过
 
-**⚠️ `category` 字段（如「价值对齐」）不可替换** — 详见 `sensitive-word-dict.md` § 不可替换的固定词。
+**⚠️ `category` 字段（如「可信对齐」）不可替换** — 详见 `sensitive-word-dict.md` § 不可替换的固定词。
 
 **所有下游步骤（Step 4 render、Step 5 screenshot、Phase 2 hero）使用 `digest-xhs.json`，不使用 digest.json。**
 

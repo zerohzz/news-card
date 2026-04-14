@@ -579,7 +579,7 @@
   <div class="chat-avatar">D</div>
   <div class="chat-body">
     <div class="chat-name">Demis Hassabis</div>
-    <p class="chat-text">我们需要先解决价值对齐问题。</p>
+    <p class="chat-text">我们需要先解决可信对齐问题。</p>
   </div>
 </div>
 ```

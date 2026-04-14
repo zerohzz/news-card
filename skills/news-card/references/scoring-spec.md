@@ -183,7 +183,7 @@ score = 3 × exp(-ln2/12 × hoursAgo)
 **与 category 的区别**：
 - `category` 是人工在 curation 阶段为 digest.json 条目打的 9 类标签（模型发布/产品应用/…）
 - `topic_hint` 是 score-engine 自动分类出的「XHS 风险/偏好 hint」
-- 两者可以不同（例如 Anthropic × 基督教顾问，category=价值对齐，topic_hint=religion_ethics）
+- 两者可以不同（例如 Anthropic × 基督教顾问，category=可信对齐，topic_hint=religion_ethics）
 
 **注意**：
 - 主权红线是硬剔除（−20）。其余均为软调整，仅影响排序，不剔除

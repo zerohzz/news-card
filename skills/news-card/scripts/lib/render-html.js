@@ -13,7 +13,7 @@ import { pathToFileURL } from 'url';
 const CATEGORY_COLORS = {
   '模型发布': '#4A90D9',
   '产品应用': '#7B68EE',
-  '价值对齐': '#E74C3C',
+  '可信对齐': '#E74C3C',
   '行业动态': '#F39C12',
   '开发工具': '#2ECC71',
   '研究前沿': '#1ABC9C',

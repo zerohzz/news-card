@@ -24,7 +24,7 @@ description: 小红书敏感词替换库（权威单源），所有其他 skill 
 
 | 固定词 | 用途 | 说明 |
 |--------|------|------|
-| 价值对齐 | category 分类标签 | 红色色块 #E74C3C，永远使用中文「价值对齐」 |
+| 可信对齐 | category 分类标签 | 红色色块 #E74C3C，永远使用中文「可信对齐」 |
 
 XHS 合规审核时，**跳过所有 `category` 字段**，仅对 headline_zh、summary_zh、content_html 字段执行敏感词替换。
 
