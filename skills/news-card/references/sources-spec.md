@@ -180,7 +180,7 @@
 | 源 | 类型 | URL | Fetch 策略 | authority_weight | status | 补缺类别 |
 |----|------|-----|-----------|-----------------|--------|---------|
 | NIST AI | RSS | `https://www.nist.gov/artificial-intelligence/rss.xml` | metadata | 4 | pending_verification | 政策监管 |
-| Alignment Forum | RSS | `https://www.alignmentforum.org/feed.xml` | summary | 4 | pending_verification | 安全对齐 |
+| Alignment Forum | RSS | `https://www.alignmentforum.org/feed.xml` | summary | 4 | pending_verification | 价值对齐 |
 | AWS Machine Learning Blog | RSS | `https://aws.amazon.com/blogs/machine-learning/feed/` | metadata | 3 | pending_verification | 开发工具 |
 | Azure AI Blog | RSS | — | metadata | 3 | pending_verification | 开发工具 |
 

@@ -39,7 +39,7 @@ Google Fonts 引入：
 ```css
 --cat-model-release: #4A90D9;  /* 模型发布 — 蓝 */
 --cat-product: #7B68EE;        /* 产品应用 — 紫 */
---cat-safety: #E74C3C;         /* 安全对齐 — 红 */
+--cat-safety: #E74C3C;         /* 价值对齐 — 红 */
 --cat-industry: #F39C12;       /* 行业动态 — 橙 */
 --cat-devtools: #2ECC71;       /* 开发工具 — 绿 */
 --cat-research: #1ABC9C;       /* 研究前沿 — 青 */
@@ -54,7 +54,7 @@ Category → CSS 变量映射：
 |----------|---------|------|
 | 模型发布 | `--cat-model-release` | #4A90D9 |
 | 产品应用 | `--cat-product` | #7B68EE |
-| 安全对齐 | `--cat-safety` | #E74C3C |
+| 价值对齐 | `--cat-safety` | #E74C3C |
 | 行业动态 | `--cat-industry` | #F39C12 |
 | 开发工具 | `--cat-devtools` | #2ECC71 |
 | 研究前沿 | `--cat-research` | #1ABC9C |

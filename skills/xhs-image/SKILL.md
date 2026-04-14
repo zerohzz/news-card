@@ -147,7 +147,7 @@ sparse · balanced · dense · list · comparison · flow · mindmap · quadrant
 |----------|------|------|
 | 模型发布 | #4A90D9 蓝 | 新模型、基准测试 |
 | 产品应用 | #7B68EE 紫 | 产品上线、功能更新 |
-| 安全对齐 | #E74C3C 红 | AI 安全研究 |
+| 价值对齐 | #E74C3C 红 | AI 安全研究 |
 | 行业动态 | #F39C12 橙 | 融资、战略 |
 | 开发工具 | #2ECC71 绿 | SDK、框架 |
 | 研究前沿 | #1ABC9C 青 | 论文、突破 |
