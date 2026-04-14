@@ -113,7 +113,8 @@ function dedup(items) {
 
       const titleSim = jaccard(precomputed[i].tokens, precomputed[j].tokens);
       const kwOverlap = keywordOverlap(precomputed[i].keywords, precomputed[j].keywords);
-      const entityMatch = entitiesMatch(precomputed[i].entities, precomputed[j].entities, titleSim);
+      // Dedup uses stricter org+jaccard floor (0.3) since it destroys items
+      const entityMatch = entitiesMatch(precomputed[i].entities, precomputed[j].entities, titleSim, 0.3);
 
       if (titleSim > 0.6 || kwOverlap > 0.7 || entityMatch) {
         merged.add(j);

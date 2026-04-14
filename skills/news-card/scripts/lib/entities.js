@@ -21,6 +21,7 @@ export const ORG_PATTERNS = [
   [/\bfigure\s*ai\b/, 'figure'],
   [/\bbaai\b/, 'baai'],
   [/\bdeepseek\b/, 'deepseek'],
+  [/\bx\.?ai\b/, 'xai'], [/\bgrok\b/, 'xai'],
 ];
 
 // Product names — matched with word boundaries to avoid substring collisions.
@@ -40,7 +41,32 @@ export const PRODUCT_PATTERNS = [
   'stable diffusion',
   'aquila', 'deepseek',
   'sora', 'dall-e',
+  'grok',
 ].map(p => ({ re: new RegExp(`\\b${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`), name: p }));
+
+// Person-to-org mappings — resolves CEO/founder names to their affiliated org.
+// Last-name-only for distinctive names; full name for ambiguous ones.
+export const PERSON_ORG_MAP = [
+  // OpenAI
+  [/\baltman\b/, 'openai'],
+  [/\bbrockman\b/, 'openai'],
+  // Anthropic
+  [/\bamodei\b/, 'anthropic'],
+  // Meta
+  [/\bzuckerberg\b/, 'meta'],
+  [/\blecun\b/, 'meta'],
+  // Google / DeepMind
+  [/\bhassabis\b/, 'google'],
+  [/\bpichai\b/, 'google'],
+  // Microsoft
+  [/\bnadella\b/, 'microsoft'],
+  // NVIDIA
+  [/\bjensen\s+huang\b/, 'nvidia'],
+  // Mistral
+  [/\bmensch\b/, 'mistral'],
+  // xAI
+  [/\bmusk\b/, 'xai'],
+];
 
 /**
  * Extract key entities (company/org + product/model names) from text.
@@ -57,6 +83,9 @@ export function extractEntities(text) {
   for (const { re, name } of PRODUCT_PATTERNS) {
     if (re.test(lower)) products.add(name);
   }
+  for (const [re, canonical] of PERSON_ORG_MAP) {
+    if (re.test(lower)) orgs.add(canonical);
+  }
 
   return { orgs, products };
 }
@@ -65,16 +94,19 @@ export function extractEntities(text) {
  * Check if two items likely cover the same event using entity overlap.
  * Returns true if they share at least one org AND one product,
  * or share at least 2 products.
- * Also accepts titleJaccard as optional context — shared org + moderate title
- * similarity (>0.3) indicates same event for non-product news (funding, policy).
+ * Also accepts titleJaccard as optional context — shared org + title similarity
+ * indicates same event for non-product news (funding, policy, person-org variants).
+ *
+ * @param {number} orgJaccardFloor - min titleJaccard for the shared-org path.
+ *   Cross-validation uses 0.15 (lenient); dedup should pass 0.3 (stricter).
  */
-export function entitiesMatch(entA, entB, titleJaccard = 0) {
+export function entitiesMatch(entA, entB, titleJaccard = 0, orgJaccardFloor = 0.15) {
   const sharedOrgs = [...entA.orgs].filter(o => entB.orgs.has(o));
   const sharedProducts = [...entA.products].filter(p => entB.products.has(p));
 
   if (sharedOrgs.length >= 1 && sharedProducts.length >= 1) return true;
   if (sharedProducts.length >= 2) return true;
-  // Shared org + moderate title similarity → same event (e.g., funding news)
-  if (sharedOrgs.length >= 1 && titleJaccard > 0.3) return true;
+  // Shared org + title similarity above floor → same event
+  if (sharedOrgs.length >= 1 && titleJaccard > orgJaccardFloor) return true;
   return false;
 }

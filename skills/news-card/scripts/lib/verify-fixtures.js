@@ -11,6 +11,7 @@ import { CN_RSS_SOURCES, EN_RSS_SOURCES, isSponsored } from './fetch-newsletters
 import { renderAll } from './render-html.js';
 import { splitCandidates } from './pipeline-utils.js';
 import { scoreAll } from './score-engine.js';
+import { extractEntities, entitiesMatch } from './entities.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const skillRoot = resolve(__dirname, '..', '..');
@@ -73,7 +74,11 @@ function verifyScoringAndSplit() {
 
   const deduped = dedup(scored);
   const splitAfterDedup = splitCandidates(deduped);
-  assert.ok(splitAfterDedup.news.some((item) => item.source_family === 'follow_builders_blog'), 'dedup should preserve a follow_builders_blog news item');
+  // Blog may be merged into a higher-authority duplicate during dedup — that's correct.
+  // Verify an Agents SDK item survives dedup (blog or its merged winner).
+  const survivingSDK = [...splitAfterDedup.news, ...splitAfterDedup.signals]
+    .find((item) => item.title?.includes('Agents SDK'));
+  assert.ok(survivingSDK, 'an Agents SDK item should survive dedup');
   assert.ok(splitAfterDedup.signals.some((item) => item.source === 'X/@AnthropicAI (Anthropic)'), 'dedup should preserve unique follow_builders_x signals');
 }
 
@@ -119,11 +124,38 @@ function verifyRenderContract() {
   }
 }
 
+function verifyPersonOrgResolution() {
+  // Person names should resolve to their org
+  const zuck = extractEntities('Mark Zuckerberg is building an AI clone');
+  assert.ok(zuck.orgs.has('meta'), 'Zuckerberg should resolve to meta');
+
+  const altman = extractEntities('Sam Altman announces new model');
+  assert.ok(altman.orgs.has('openai'), 'Altman should resolve to openai');
+
+  const musk = extractEntities('Elon Musk unveils Grok 3');
+  assert.ok(musk.orgs.has('xai'), 'Musk should resolve to xai');
+  assert.ok(musk.products.has('grok'), 'Grok should be a product');
+
+  // Cross-validation: two articles about the same Zuckerberg/Meta event should match
+  const entA = extractEntities('Meta creating AI version of Mark Zuckerberg so staff can talk to the boss');
+  const entB = extractEntities('Mark Zuckerberg is reportedly building an AI clone to replace him in meetings');
+  assert.ok(entA.orgs.has('meta'), 'Guardian title should have meta org');
+  assert.ok(entB.orgs.has('meta'), 'Verge title should have meta org via person resolution');
+  assert.ok(entitiesMatch(entA, entB, 0.1875), 'Zuckerberg pair should match with jaccard 0.1875');
+
+  // Should NOT match unrelated articles just because they share a person-resolved org
+  const unrelated = extractEntities('Apple launches new MacBook Pro with M4 chip');
+  assert.ok(!entitiesMatch(entB, unrelated, 0.05), 'Unrelated articles should not match');
+
+  console.log('  ✓ person-org resolution');
+}
+
 function main() {
   verifyFollowBuildersConversion();
   verifyScoringAndSplit();
   verifyPeerReviewConfig();
   verifyRenderContract();
+  verifyPersonOrgResolution();
   console.log('verify-fixtures: OK');
 }
 
