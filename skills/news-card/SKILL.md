@@ -111,13 +111,18 @@ bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/score
 
 ### Step 3.6 — 小红书文案（提前生成，供 Step 3.95 审核）
 
-**必须调用 `skills/XHS-writer/SKILL.md` 执行完整创作流程**，再结合 `references/workflows/xhs-post-guide.md` 的日报格式模板生成 `xiaohongshu-post.md`。
+**必须调用 `skills/XHS-writer/SKILL.md` 执行完整创作流程**，再结合 `references/workflows/xhs-post-guide.md` 的日报格式模板生成**两个版本**：
+
+| 文件 | 版本 | 定位 |
+|------|------|------|
+| `xiaohongshu-post.md` | V1 编辑版 | 有 editorial bite，每条带分析 |
+| `xiaohongshu-post-v2.md` | V2 关键词版 | 每条极简，关键词密度最大化，防限流 |
 
 具体要求：
 1. 读取 `skills/XHS-writer/SKILL.md`，按其第三步生成 **5 个备选标题**（每个标注策略类型）
-2. 按 `xhs-post-guide.md` 的正文模板填充新闻内容
+2. V1 按 `xhs-post-guide.md` 的 V1 模板填充，V2 按 V2 模板填充
 3. 写作风格、反 AI 检测策略、敏感词规避均以 XHS-writer 为准
-4. 输出文件末尾包含「备选标题」区，列出全部 5 个标题方案
+4. 两个文件末尾均包含「备选标题」区，列出全部 5 个标题方案
 
 **此步骤必须在 Step 3.95 之前完成**，因为 XHS 合规审核需要同时审查卡片内容和发布文案。
 
