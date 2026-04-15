@@ -23,6 +23,8 @@ const LIMITS = Object.freeze({
   TIER2_COUNT: 4,
   TIER3_COUNT: 16,
   HEADLINE_ZH_MAX: 25,
+  T2_SUMMARY_MIN: 160,
+  T2_SUMMARY_MAX: 210,
   T3_SUMMARY_MIN: 60,
   T3_SUMMARY_MAX: 90,
   T1_HTML_MAX: 1100,
@@ -110,6 +112,15 @@ function validate(data, prevPath) {
     } else if (len > LIMITS.HEADLINE_ZH_MAX - 3) {
       warnings.push(`HEADLINE[${i}]: "${item.headline_zh}" = ${len} chars (close to ${LIMITS.HEADLINE_ZH_MAX} limit)`);
     }
+  }
+
+  // tier-2 summary_zh 160–210 (HARD — font-size is LOCKED at 36px/1.7,
+  // never shrink typography to fit more content; shorten content instead)
+  for (const [i, item] of tiers[2].entries()) {
+    const text = item.summary_zh.replace(/\n/g, '');
+    const len = text.length;
+    if (len < LIMITS.T2_SUMMARY_MIN) errors.push(`T2_SUMMARY[${i}]: "${item.headline_zh}" = ${len} chars (min ${LIMITS.T2_SUMMARY_MIN})`);
+    if (len > LIMITS.T2_SUMMARY_MAX) errors.push(`T2_SUMMARY[${i}]: "${item.headline_zh}" = ${len} chars (max ${LIMITS.T2_SUMMARY_MAX}, +${len - LIMITS.T2_SUMMARY_MAX} over — SHORTEN the content, do NOT shrink font)`);
   }
 
   // tier-3 summary_zh 60–90
