@@ -56,6 +56,7 @@
 
   .stories {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -63,10 +64,11 @@
 
   .story {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 36px 0;
+    padding: 32px 0;
     overflow: hidden;
   }
 
@@ -103,10 +105,14 @@
 
   .story .summary {
     flex: 1;
+    min-height: 0;
     font-size: 36px;
     line-height: 1.7;
     margin-bottom: 20px;
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 11;
+    -webkit-box-orient: vertical;
   }
 
   .story .source-bar {

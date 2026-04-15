@@ -60,6 +60,93 @@ description: 各梯队内容写作标准、content_html 规则、字数限制
 - 页面底部留有 footer 的空间 — 如果 footer 消失说明内容太长
 - 所有 HTML class 名必须使用上表中列出的 class（模板已定义样式）
 
+#### 组件多样性（CRITICAL — validator 强制）
+
+**4 条 T1 必须使用 4 种不同的语义组件，不允许重复**。`<ul class="key-points">` 是通用兜底，**整组 T1 中至多出现 1 次**。
+
+推荐分配（按梯队顺序，根据内容自由调整）：
+
+| T1 # | 内容特征 | 推荐组件 |
+|------|----------|---------|
+| #1 | 多用例 / 步骤 / 编号清单 | `numbered-grid`, `flowchart`, `timeline`, `checklist` |
+| #2 | 关键词 / 生态 / 概念集合 | `tag-cloud`, `badge-list`, `concept-map`, `definition-list` |
+| #3 | 风险/对策 / 优劣对比 | `pros-cons`, `compare-grid`, `compare-table`, `decision-tree` |
+| #4 | 数字 / 对比数据 / 进度 | `data-row` + `data-highlight`, `progress-group`, `pie-chart`, `bubble-chart` |
+
+兜底组件（`key-points`, 单纯 `<ul>`, 单纯 `<p>`）不算独特组件——validator 会按顶级组件 class 的 `.tag-cloud` / `.numbered-grid` / `.pros-cons` / `.data-row` / `.flowchart` / `.compare-grid` / `.timeline` / `.checklist` / `.callout` / `.blockquote` / `.concept-map` / `.cycle` / `.fishbone` / `.quadrant` / `.formula-box` / `.definition-list` / `.progress-group` / `.pie-chart` / `.bubble-chart` / `.tag-cloud` / `.badge-list` / `.chat-bubble` / `.person-card` / `.venn` 这些识别。
+
+**4 条 T1 提取出的组件 class 集合 size 必须 ≥ 4**，否则 validate-digest.js 报错。
+
+#### 四组件实操范例（直接抄）
+
+##### T1#1 — `numbered-grid`（适合多用例 / 步骤）
+
+```html
+<p>第一段 ~140 字，描述事件本身与背景。</p>
+<div class="numbered-grid">
+  <div class="numbered-item"><div class="num">1</div><div class="num-text">用例描述 1</div></div>
+  <div class="numbered-item"><div class="num">2</div><div class="num-text">用例描述 2</div></div>
+  <div class="numbered-item"><div class="num">3</div><div class="num-text">用例描述 3</div></div>
+  <div class="numbered-item"><div class="num">4</div><div class="num-text">用例描述 4</div></div>
+</div>
+<p>第二段 ~340 字，分析与影响判断。</p>
+```
+
+##### T1#2 — `tag-cloud`（适合关键词 / 概念集合）
+
+```html
+<p>第一段 ~160 字。</p>
+<div class="tag-cloud">
+  <span class="tag-cloud-item tag-lg">核心词</span>
+  <span class="tag-cloud-item tag-md">次级词1</span>
+  <span class="tag-cloud-item tag-md">次级词2</span>
+  <span class="tag-cloud-item tag-md">次级词3</span>
+  <span class="tag-cloud-item tag-sm">辅助词1</span>
+  <span class="tag-cloud-item tag-sm">辅助词2</span>
+  <span class="tag-cloud-item tag-sm">辅助词3</span>
+  <span class="tag-cloud-item tag-sm">辅助词4</span>
+</div>
+<p>第二段 ~320 字。</p>
+```
+
+##### T1#3 — `pros-cons`（适合风险对策 / 优劣对比）
+
+```html
+<p>第一段 ~170 字。</p>
+<div class="pros-cons">
+  <div class="pros-block">
+    <strong>正方/风险</strong>
+    <ul><li>要点1</li><li>要点2</li><li>要点3</li></ul>
+  </div>
+  <div class="cons-block">
+    <strong>反方/对策</strong>
+    <ul><li>要点1</li><li>要点2</li><li>要点3</li></ul>
+  </div>
+</div>
+<p>第二段 ~280 字。</p>
+```
+
+##### T1#4 — `data-row` + `data-highlight`（适合数字对比）
+
+```html
+<p>第一段 ~170 字。</p>
+<div class="data-row">
+  <div class="data-highlight">
+    <div class="data-value">$1.2T</div>
+    <div class="data-label">指标 A 描述</div>
+  </div>
+  <div class="data-highlight">
+    <div class="data-value">$380B</div>
+    <div class="data-label">指标 B 描述</div>
+  </div>
+</div>
+<p>第二段 ~280 字。</p>
+```
+
+#### 字数预算提示（避免组件膨胀触发字数下限）
+
+切换到富组件后，HTML 标签会吃掉 200–400 字符。**纯文字段必须打到 510-540 字才能稳定通过 ≥ 500 校验**，组件本身贡献的文字（如 numbered-item 的标签）不算多。建议：两段段落分别 160 + 350 字，组件文字 30-60 字。
+
 ---
 
 ## Tier 2 — 第二梯队（Half-page，P6–P7）

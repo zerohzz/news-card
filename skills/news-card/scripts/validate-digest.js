@@ -27,9 +27,30 @@ const LIMITS = Object.freeze({
   T3_SUMMARY_MAX: 90,
   T1_HTML_MAX: 1100,
   T1_TEXT_MIN: 500,
+  T1_DISTINCT_COMPONENTS_MIN: 4,
+  T1_KEY_POINTS_MAX: 1,
   DEDUP_T1_MAX: 1,
   DEDUP_T2_MAX: 2,
 });
+
+// Recognized semantic component classes (must appear in feature.html CSS)
+const SEMANTIC_COMPONENTS = Object.freeze([
+  'tag-cloud', 'numbered-grid', 'pros-cons', 'data-row', 'flowchart',
+  'compare-grid', 'compare-table', 'timeline', 'checklist', 'callout',
+  'blockquote', 'concept-map', 'cycle', 'fishbone', 'quadrant',
+  'formula-box', 'definition-list', 'progress-group', 'pie-chart',
+  'bubble-chart', 'badge-list', 'chat-bubble', 'person-card', 'venn',
+  'decision-tree', 'funnel', 'gantt', 'key-points'
+]);
+
+function extractComponents(html) {
+  const found = new Set();
+  for (const cls of SEMANTIC_COMPONENTS) {
+    const re = new RegExp(`class\\s*=\\s*"[^"]*\\b${cls}\\b`, 'i');
+    if (re.test(html)) found.add(cls);
+  }
+  return found;
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 function stripHtml(html) {
@@ -122,6 +143,27 @@ function validate(data, prevPath) {
       errors.push(`NON_T1_CONTENT: "${item.headline_zh}" (tier ${item.tier}) should not have content_html`);
     }
   }
+
+  // T1 component diversity: 4 stories must use 4 different semantic components
+  const componentSets = tiers[1].map(it => extractComponents(it.content_html || ''));
+  const allComponents = new Set();
+  for (const s of componentSets) for (const c of s) allComponents.add(c);
+  const keyPointsCount = componentSets.filter(s => s.has('key-points') && s.size === 1).length
+    + componentSets.filter(s => s.has('key-points') && s.size > 1).length;
+  // Distinct primary component per story (pick first non-key-points class, fallback to key-points)
+  const primary = componentSets.map(s => {
+    const non = [...s].find(c => c !== 'key-points');
+    return non || (s.has('key-points') ? 'key-points' : null);
+  });
+  const distinctPrimary = new Set(primary.filter(Boolean));
+  if (distinctPrimary.size < LIMITS.T1_DISTINCT_COMPONENTS_MIN) {
+    errors.push(`T1_COMPONENTS: only ${distinctPrimary.size} distinct primary components (need ${LIMITS.T1_DISTINCT_COMPONENTS_MIN}); got [${primary.join(', ')}]`);
+  }
+  const kpAsPrimary = primary.filter(c => c === 'key-points').length;
+  if (kpAsPrimary > LIMITS.T1_KEY_POINTS_MAX) {
+    errors.push(`T1_KEY_POINTS: key-points used as primary component in ${kpAsPrimary} stories (max ${LIMITS.T1_KEY_POINTS_MAX})`);
+  }
+  console.log(`  T1 components: [${primary.join(', ')}] — distinct=${distinctPrimary.size}/${LIMITS.T1_DISTINCT_COMPONENTS_MIN} ${distinctPrimary.size >= LIMITS.T1_DISTINCT_COMPONENTS_MIN ? '✓' : '✗'}`);
 
   // Cross-period dedup
   if (prevPath && existsSync(prevPath)) {

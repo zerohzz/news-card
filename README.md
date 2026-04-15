@@ -33,7 +33,7 @@ Fetch (65+ 源) → Score (8 维) → Curate (24 条) → XHS Review → Render 
 | 4 Render | digest-xhs.json → 10 页 HTML | `slides/*.html` |
 | 5 Screenshot | Playwright 1080×1920 @2x | `images/*.png` |
 | 6 文档 | 选题理由 + 管线问题 | `selection-rationale.md` / `pipeline-issues.md` |
-| Hero + V3 | Gemini 四格漫画 + 3 行钩子标题封面 | `hero-image.png` / `v3-cover.png` |
+| Hero + V3 | Gemini 四格漫画 + 3 行钩子标题封面 | `hero-image.png` / `page-0-v3-cover.png` |
 
 ---
 
@@ -129,8 +129,8 @@ total = cross_validation × 2.0 + community_heat × 1.5 + authority × 1.0
 
 ```
 output/<timestamp>/
-├── slides/          # 10 HTML + v3-cover.html
-├── images/          # 10 PNG + v3-cover.png（@2x 2160×3840）
+├── slides/          # 10 HTML + page-0-v3-cover.html
+├── images/          # 10 PNG + page-0-v3-cover.png（@2x 2160×3840）
 ├── digest.json      # 原始 24 条
 ├── digest-xhs.json  # XHS 和谐版（下游用）
 ├── scored-candidates.md
