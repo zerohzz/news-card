@@ -64,84 +64,34 @@ description: 各梯队内容写作标准、content_html 规则、字数限制
 
 **4 条 T1 必须使用 4 种不同的语义组件，不允许重复**。`<ul class="key-points">` 是通用兜底，**整组 T1 中至多出现 1 次**。
 
-推荐分配（按梯队顺序，根据内容自由调整）：
+**不要每天用同一组组件。** 从 `references/components-spec.md` 的 28 个组件中，根据每条新闻的内容语义自由选择。组件库按语义分 7 类：
 
-| T1 # | 内容特征 | 推荐组件 |
-|------|----------|---------|
-| #1 | 多用例 / 步骤 / 编号清单 | `numbered-grid`, `flowchart`, `timeline`, `checklist` |
-| #2 | 关键词 / 生态 / 概念集合 | `tag-cloud`, `badge-list`, `concept-map`, `definition-list` |
-| #3 | 风险/对策 / 优劣对比 | `pros-cons`, `compare-grid`, `compare-table`, `decision-tree` |
-| #4 | 数字 / 对比数据 / 进度 | `data-row` + `data-highlight`, `progress-group`, `pie-chart`, `bubble-chart` |
+| 语义类别 | 可用组件 |
+|---------|---------|
+| 步骤/流程 | `numbered-grid`, `flowchart`, `timeline`, `funnel`, `gantt`, `checklist` |
+| 对比/选择 | `pros-cons`, `compare-grid`, `compare-table`, `decision-tree` |
+| 数字/数据 | `data-row`+`data-highlight`, `progress-group`, `pie-chart`, `bubble-chart` |
+| 定义/概念 | `concept-map`, `formula-box`, `definition-list`, `callout` |
+| 多要素关联 | `venn`, `quadrant`, `cycle`, `fishbone` |
+| 要点/关键词 | `tag-cloud`, `badge-list` |
+| 观点/引用 | `blockquote`, `chat-bubble`, `highlight`, `person-card` |
 
-兜底组件（`key-points`, 单纯 `<ul>`, 单纯 `<p>`）不算独特组件——validator 会按顶级组件 class 的 `.tag-cloud` / `.numbered-grid` / `.pros-cons` / `.data-row` / `.flowchart` / `.compare-grid` / `.timeline` / `.checklist` / `.callout` / `.blockquote` / `.concept-map` / `.cycle` / `.fishbone` / `.quadrant` / `.formula-box` / `.definition-list` / `.progress-group` / `.pie-chart` / `.bubble-chart` / `.tag-cloud` / `.badge-list` / `.chat-bubble` / `.person-card` / `.venn` 这些识别。
+兜底组件（`key-points`, 单纯 `<ul>`, 单纯 `<p>`）不算独特组件——validator 会按顶级组件 class 识别。
 
 **4 条 T1 提取出的组件 class 集合 size 必须 ≥ 4**，否则 validate-digest.js 报错。
 
-#### 四组件实操范例（直接抄）
+#### 跨日组件去重（CRITICAL — 防止视觉疲劳）
 
-##### T1#1 — `numbered-grid`（适合多用例 / 步骤）
+**本期 4 个组件中，至少 2 个必须是上期未使用过的。** 选组件前先读取上期 digest.json 的 T1 content_html，提取其使用的 4 个组件 class，然后确保本期至少换掉一半。
 
-```html
-<p>第一段 ~140 字，描述事件本身与背景。</p>
-<div class="numbered-grid">
-  <div class="numbered-item"><div class="num">1</div><div class="num-text">用例描述 1</div></div>
-  <div class="numbered-item"><div class="num">2</div><div class="num-text">用例描述 2</div></div>
-  <div class="numbered-item"><div class="num">3</div><div class="num-text">用例描述 3</div></div>
-  <div class="numbered-item"><div class="num">4</div><div class="num-text">用例描述 4</div></div>
-</div>
-<p>第二段 ~340 字，分析与影响判断。</p>
-```
+示例：上期用了 `numbered-grid, tag-cloud, pros-cons, data-row`，本期必须至少引入 2 个不同的组件（如 `timeline, compare-grid, progress-group, concept-map` 等）。
 
-##### T1#2 — `tag-cloud`（适合关键词 / 概念集合）
+#### 组件选择原则
 
-```html
-<p>第一段 ~160 字。</p>
-<div class="tag-cloud">
-  <span class="tag-cloud-item tag-lg">核心词</span>
-  <span class="tag-cloud-item tag-md">次级词1</span>
-  <span class="tag-cloud-item tag-md">次级词2</span>
-  <span class="tag-cloud-item tag-md">次级词3</span>
-  <span class="tag-cloud-item tag-sm">辅助词1</span>
-  <span class="tag-cloud-item tag-sm">辅助词2</span>
-  <span class="tag-cloud-item tag-sm">辅助词3</span>
-  <span class="tag-cloud-item tag-sm">辅助词4</span>
-</div>
-<p>第二段 ~320 字。</p>
-```
-
-##### T1#3 — `pros-cons`（适合风险对策 / 优劣对比）
-
-```html
-<p>第一段 ~170 字。</p>
-<div class="pros-cons">
-  <div class="pros-block">
-    <strong>正方/风险</strong>
-    <ul><li>要点1</li><li>要点2</li><li>要点3</li></ul>
-  </div>
-  <div class="cons-block">
-    <strong>反方/对策</strong>
-    <ul><li>要点1</li><li>要点2</li><li>要点3</li></ul>
-  </div>
-</div>
-<p>第二段 ~280 字。</p>
-```
-
-##### T1#4 — `data-row` + `data-highlight`（适合数字对比）
-
-```html
-<p>第一段 ~170 字。</p>
-<div class="data-row">
-  <div class="data-highlight">
-    <div class="data-value">$1.2T</div>
-    <div class="data-label">指标 A 描述</div>
-  </div>
-  <div class="data-highlight">
-    <div class="data-value">$380B</div>
-    <div class="data-label">指标 B 描述</div>
-  </div>
-</div>
-<p>第二段 ~280 字。</p>
-```
+1. **先看新闻内容，再选组件** — 不要先决定组件再硬套内容
+2. **匹配内容语义** — 有时间线的用 `timeline`，有对立观点的用 `pros-cons`，有多方数据的用 `progress-group`
+3. **查阅 `components-spec.md`** — 每个组件都有 HTML 范例和字数限制，直接参考
+4. **禁止固定分配** — 不存在「T1#1 永远用 numbered-grid」这种规则
 
 #### 字数预算提示（避免组件膨胀触发字数下限）
 
@@ -199,6 +149,28 @@ Tier 3 **不使用** content_html 字段。
 ---
 
 ## 跨梯队通用规则
+
+### 禁止暴露管线内部逻辑（CRITICAL — 全部梯队）
+
+读者面向的内容（headline_zh、summary_zh、content_html）中 **绝对不能出现管线内部的筛选标准、评分机制和数据源元信息**。这些是编辑部的内部工具，不是读者需要知道的信息。
+
+**禁止写入正文的内容：**
+- 交叉验证分数、评分维度（「交叉验证高达12分」「评分排名第一」）
+- 媒体报道数量作为论据（「六家媒体同步报道」「14家媒体报道证明影响力」）
+- 候选池/来源数（「从130条候选中筛选」「65个信息源」）
+- 信号池/排名术语（「scored-news排名」「topic_hint分类」）
+- 任何暗示内容经过算法筛选的表述
+
+**正确做法：** 用新闻本身的事实来支撑重要性判断，而非管线元数据。
+
+| ❌ 错误 | ✅ 正确 |
+|--------|--------|
+| 六家权威媒体同步报道这一发现 | 两项独立研究同时得出了相似结论 |
+| 交叉验证分数高达12分 | （直接删除，不需要替代） |
+| 这是今日所有候选中的顶格值 | （直接删除，不需要替代） |
+| 14家媒体报道证明其行业冲击力 | 这一发布引发了行业广泛关注 |
+
+> **原则**：读者应该因为新闻内容本身而觉得重要，不是因为你告诉他「我们的算法认为它重要」。
 
 ### headline_zh — 全部梯队
 
