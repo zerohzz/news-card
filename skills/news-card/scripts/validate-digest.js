@@ -35,6 +35,26 @@ const LIMITS = Object.freeze({
   DEDUP_T2_MAX: 2,
 });
 
+// Component height tiers — different components consume different vertical space.
+// Character-count alone cannot prevent overflow; these adjusted limits account for
+// the rendered height of each component type.
+const COMPONENT_HEIGHT_TIERS = Object.freeze({
+  compact:   { htmlMax: 1100, textMin: 500, textMax: 550, components: ['data-row','tag-cloud','badge-list','highlight','callout','formula-box','blockquote'] },
+  medium:    { htmlMax: 1050, textMin: 460, textMax: 510, components: ['numbered-grid','compare-grid','flowchart','checklist','funnel','pie-chart','progress-group'] },
+  tall:      { htmlMax: 980,  textMin: 420, textMax: 470, components: ['concept-map','timeline','pros-cons','compare-table','definition-list','cycle','fishbone','gantt','quadrant','venn','bubble-chart','person-card'] },
+  very_tall: { htmlMax: 920,  textMin: 380, textMax: 430, components: ['chat-bubble','decision-tree'] },
+});
+
+function getComponentTier(componentSet) {
+  for (const [tier, cfg] of Object.entries(COMPONENT_HEIGHT_TIERS)) {
+    for (const c of cfg.components) {
+      if (componentSet.has(c)) return { tier, ...cfg };
+    }
+  }
+  // Default (no recognized component or key-points only) — use compact limits
+  return { tier: 'compact', ...COMPONENT_HEIGHT_TIERS.compact };
+}
+
 // Recognized semantic component classes (must appear in feature.html CSS)
 const SEMANTIC_COMPONENTS = Object.freeze([
   'tag-cloud', 'numbered-grid', 'pros-cons', 'data-row', 'flowchart',
@@ -131,21 +151,28 @@ function validate(data, prevPath) {
     if (len > LIMITS.T3_SUMMARY_MAX) errors.push(`T3_SUMMARY[${i}]: "${item.headline_zh}" = ${len} chars (max ${LIMITS.T3_SUMMARY_MAX}, +${len - LIMITS.T3_SUMMARY_MAX} over)`);
   }
 
-  // tier-1 content_html
+  // tier-1 content_html (component-aware limits)
   for (const [i, item] of tiers[1].entries()) {
     if (!item.content_html) {
       errors.push(`T1_CONTENT[${i}]: "${item.headline_zh}" missing content_html`);
       continue;
     }
+    const comps = extractComponents(item.content_html);
+    const tierInfo = getComponentTier(comps);
+    const htmlMax = tierInfo.htmlMax;
+    const textMax = tierInfo.textMax;
+    const textMin = tierInfo.textMin;
+
     const htmlLen = item.content_html.length;
     const textLen = stripHtml(item.content_html).length;
-    const htmlRemaining = LIMITS.T1_HTML_MAX - htmlLen;
-    const textOver = LIMITS.T1_TEXT_MIN - textLen;
+    const htmlRemaining = htmlMax - htmlLen;
 
-    if (htmlLen > LIMITS.T1_HTML_MAX) errors.push(`T1_HTML[${i}]: "${item.headline_zh}" = ${htmlLen} chars (+${htmlLen - LIMITS.T1_HTML_MAX} over ${LIMITS.T1_HTML_MAX} limit)`);
-    if (textLen < LIMITS.T1_TEXT_MIN) errors.push(`T1_TEXT[${i}]: "${item.headline_zh}" = ${textLen} chars (need ${textOver} more to reach ${LIMITS.T1_TEXT_MIN})`);
+    if (htmlLen > htmlMax) errors.push(`T1_HTML[${i}]: "${item.headline_zh}" = ${htmlLen} chars (+${htmlLen - htmlMax} over ${htmlMax} limit for ${tierInfo.tier} component)`);
+    if (textLen < textMin) errors.push(`T1_TEXT[${i}]: "${item.headline_zh}" = ${textLen} chars (need ${textMin - textLen} more to reach ${textMin})`);
+    if (textLen > textMax) errors.push(`T1_TEXT_OVER[${i}]: "${item.headline_zh}" = ${textLen} text chars (max ${textMax} for ${tierInfo.tier} component — will overflow page footer)`);
 
-    console.log(`  T1[${i}] html=${htmlLen}/${LIMITS.T1_HTML_MAX} (${htmlRemaining >= 0 ? htmlRemaining + ' remaining' : Math.abs(htmlRemaining) + ' OVER'}) | text=${textLen}/${LIMITS.T1_TEXT_MIN}+ ${textLen >= LIMITS.T1_TEXT_MIN ? '✓' : '✗'}`);
+    const compName = [...comps].filter(c => c !== 'key-points')[0] || 'none';
+    console.log(`  T1[${i}] html=${htmlLen}/${htmlMax} (${htmlRemaining >= 0 ? htmlRemaining + ' remaining' : Math.abs(htmlRemaining) + ' OVER'}) | text=${textLen}/${textMin}–${textMax} ${textLen >= textMin && textLen <= textMax ? '✓' : '✗'} [${compName}→${tierInfo.tier}]`);
   }
 
   // content_html should NOT exist for tier 2/3

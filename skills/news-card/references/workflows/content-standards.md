@@ -93,9 +93,31 @@ description: 各梯队内容写作标准、content_html 规则、字数限制
 3. **查阅 `components-spec.md`** — 每个组件都有 HTML 范例和字数限制，直接参考
 4. **禁止固定分配** — 不存在「T1#1 永远用 numbered-grid」这种规则
 
-#### 字数预算提示（避免组件膨胀触发字数下限）
+#### 组件高度分级（CRITICAL — 防止内容溢出页脚）
 
-切换到富组件后，HTML 标签会吃掉 200–400 字符。**纯文字段必须打到 510-540 字才能稳定通过 ≥ 500 校验**，组件本身贡献的文字（如 numbered-item 的标签）不算多。建议：两段段落分别 160 + 350 字，组件文字 30-60 字。
+不同语义组件占用的渲染高度差异极大。**字符数通过 ≤ 1100 并不意味着页面不溢出。** 必须根据所选组件的高度等级调整纯文字段的长度。
+
+| 高度等级 | 组件 | 渲染高度 | HTML 上限 | 纯文字范围 |
+|---------|------|---------|----------|----------|
+| **紧凑** | `data-row`, `tag-cloud`, `badge-list`, `highlight`, `callout`, `formula-box`, `blockquote` | ~80px | 1100 | 500–550 |
+| **中等** | `numbered-grid`, `compare-grid`, `flowchart`, `checklist`, `funnel`, `pie-chart`, `progress-group` | ~120px | 1050 | 460–510 |
+| **高** | `concept-map`, `timeline`, `pros-cons`, `compare-table`, `definition-list`, `cycle`, `fishbone`, `gantt`, `quadrant`, `venn`, `bubble-chart`, `person-card` | ~160px | 980 | 420–470 |
+| **特高** | `chat-bubble`（×2）, `decision-tree` | ~220px | 920 | 380–430 |
+
+**规则**：
+1. 选定组件后，查表确定该组件的高度等级
+2. 按对应等级的 HTML 上限和纯文字上限写作
+3. `validate-digest.js` 会自动检测组件并应用对应等级的上限
+4. **特高组件**（如 2 个 chat-bubble）：两段段落分别控制在 130 + 260 字，组件文字 40 字
+5. **高组件**（如 concept-map）：两段段落分别控制在 140 + 290 字，组件文字 40 字
+6. **中等组件**（如 numbered-grid）：两段段落分别控制在 150 + 320 字，组件文字 40 字
+7. **紧凑组件**（如 data-row）：两段段落分别控制在 160 + 350 字，组件文字 40 字
+
+**为什么字符数通过了还会溢出？** 因为组件的 HTML 标签虽然只占几百字符，但渲染时有 padding、margin、avatar、分支布局等视觉元素，实际占用的页面高度远大于纯文字段落。1100 个字符的纯 `<p>` 内容 ≈ 1490px 可用高度刚好填满；但 1100 字符里含一个 concept-map（~160px）时，文字部分就只有 ~1330px 的空间了。
+
+#### 字数预算提示
+
+切换到富组件后，HTML 标签会吃掉 200–400 字符。根据上方高度分级表调整纯文字量。建议按等级选择段落分配方案，不要一律追求 510-540 字。
 
 ---
 
@@ -171,6 +193,30 @@ Tier 3 **不使用** content_html 字段。
 | 14家媒体报道证明其行业冲击力 | 这一发布引发了行业广泛关注 |
 
 > **原则**：读者应该因为新闻内容本身而觉得重要，不是因为你告诉他「我们的算法认为它重要」。
+
+### AI agent 术语 — 不要翻译成「代理」（CRITICAL — 全部梯队）
+
+凡指 **AI agent / 自治代理 / 软件代理** 的语境，所有 reader-facing 字段（headline_zh、summary_zh、content_html、highlight、xiaohongshu-post.md、V3 cover title、hero prompt 等）一律保留英文 **agent**，不要翻译成中文「代理」。
+
+**原因**：「代理」在中文里语义模糊（容易被误读为"中介/代理人/HTTP 代理"），而 agent 在 builder 圈是约定俗成的固定术语，保留英文更清晰、更专业。
+
+**规则与示例：**
+
+| ❌ 错误 | ✅ 正确 |
+|--------|--------|
+| AI 代理 | AI agent |
+| 代理对代理 / 代理调用代理 | agent-on-agent / agent 调用 agent |
+| 买方代理 / 卖方代理 | 买方 agent / 卖方 agent |
+| 代码代理 / 编程代理 | code agent / 编程 agent |
+| 手机代理 / 研究代理 | 手机 agent / 研究 agent |
+| 代理经济 / 代理框架 | agent 经济 / agent 框架 |
+| 代理替代率 | agent 替代率 |
+
+**写法约束：**
+- 中文字符与 `agent` 之间用半角空格分隔（`AI agent` / `编程 agent`）
+- agent 前后接非中文字符或紧跟标点时不强制空格（`agent-on-agent` / `agent，` 都可）
+- 与 hashtag 同步：`#Anthropic agent` 而非 `#Anthropic 代理`
+- 例外：HTTP 代理、网络代理等系统术语不受影响
 
 ### headline_zh — 全部梯队
 

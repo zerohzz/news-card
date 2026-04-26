@@ -197,7 +197,17 @@ bash skills/news-card/scripts/screenshot.sh output/<datetime>/slides output/<dat
 
 Playwright 截图，输出 10 张 PNG（1080×1920px @2x）到 `images/` 子目录。
 
-**⚠️ 截图完成 ≠ 管线完成。必须继续执行 Step 6 生成附带文档。**
+**⚠️ 截图完成 ≠ 管线完成。必须继续执行 Step 5.5 和 Step 6。**
+
+### Step 5.5 — 渲染溢出检测（CRITICAL — 必须通过才能进入 Step 6）
+
+```bash
+node skills/news-card/scripts/check-overflow.js output/<datetime>/slides
+```
+
+用 Playwright 测量 P2–P5 四张 T1 Feature 页面的实际渲染高度，检测内容是否溢出到 source-bar / footer 区域。**字符数通过 ≤ 1100 并不意味着页面不溢出**——不同语义组件占用的渲染高度差异极大（详见 `content-standards.md` § 组件高度分级）。
+
+exit code 0 = 全部通过，1 = 有溢出。如有溢出，回到 Step 3 缩短对应 T1 的 content_html 纯文字段，重新 render + screenshot + check-overflow。
 
 ### Step 6 — 输出附带文档（CRITICAL — 不可跳过）
 
