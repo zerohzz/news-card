@@ -67,33 +67,7 @@ total = cross_validation × 2.0
       + topic_adjustment × 1.0
 ```
 
-`topic_adjustment` is a first-match-wins classifier that boosts technical and China-AI stories and penalises politically charged or off-topic content:
-
-| Topic | Adjustment | Trigger keywords |
-|-------|-----------:|------------------|
-| `sovereignty` | **−20** (hard cut) | 台独/港独/疆独/藏独 |
-| `unrest` | −4 | 袭击/抗议/示威/燃烧瓶 |
-| `politics` | −3 | 两党/共和党/民主党/白宫/国防部/财政部 |
-| `religion_ethics` | −2 | 基督教/牧师/宗教 |
-| `health_ai` | −1 | 医疗/诊疗/处方/cancer/NHS |
-| `finance_ai` | −1 | 银行/炒股/股价/理财 |
-| `china_ai_positive` | **+3** | Qwen/DeepSeek/Kimi/通义/智谱/昇腾 |
-| `tech` | **+2** | launch/release/benchmark/paper/发布/开源 |
-| `ai_reg` | −1 | AI Act / AI 行政令 |
-
-Full rationale: [`skills/news-card/references/scoring-spec.md`](skills/news-card/references/scoring-spec.md).
-
----
-
-## Topic quotas per tier
-
-| Tier | Tech / neutral | China AI (positive) | Health / finance | Policy | Religion | Politics / unrest |
-|------|---------------:|--------------------:|-----------------:|-------:|---------:|------------------:|
-| T1 (4) | ≥ 3 | unlimited | 0 | 0 | 0 | 0 |
-| T2 (4) | ≥ 2 | unlimited | ≤ 1 | ≤ 1 | ≤ 1 | 0 |
-| T3 (16) | ≥ 8 | unlimited | ≤ 2 | ≤ 2 | ≤ 2 | ≤ 2 |
-
-Enforced by `skills/news-card/scripts/check-topic-quota.js`.
+`topic_adjustment` and the per-tier topic quotas exist to satisfy Xiaohongshu's content rules — they boost technical and China-AI stories and de-rank politically charged or off-topic content. If you are not publishing to Xiaohongshu (or any Chinese platform), swap them out: see [`skills/news-card/references/scoring-spec.md`](skills/news-card/references/scoring-spec.md) §8 and [`skills/news-card/scripts/check-topic-quota.js`](skills/news-card/scripts/check-topic-quota.js).
 
 ---
 

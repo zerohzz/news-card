@@ -163,6 +163,8 @@ score = 3 × exp(-ln2/12 × hoursAgo)
 
 <!-- implementation_status: active -->
 
+> **Platform note.** The rules in this section are tuned for **Xiaohongshu (小红书)** content policy: technical / 国产 AI 内容 boosted, 美国国内政治 / 示威 / 医疗 / 金融 AI 降权, 主权红线硬剔除. If you are not publishing to Xiaohongshu (or any Chinese platform), this is the layer to replace — rewrite `classifyTopic()` in [`scripts/lib/score-engine.js`](../scripts/lib/score-engine.js) and adjust the per-tier quotas in [`scripts/check-topic-quota.js`](../scripts/check-topic-quota.js). The rest of the scoring pipeline is platform-agnostic.
+
 对 title + summary + source 运行关键词分类器，产出 `topic_hint` 与 `topic_adjustment`。first-match-wins 优先级：
 
 | 优先级 | 话题 | adjustment | 处理 |
