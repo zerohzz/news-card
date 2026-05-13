@@ -218,6 +218,10 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
 
   mkdirSync(outputDir, { recursive: true });
 
+  // Asset base — absolute file:// URL to skills/news-card/assets (templates reference {{assetBase}}/...)
+  const assetsDir = resolve(templatesDir, '..', 'assets');
+  const assetBase = pathToFileURL(assetsDir).href;
+
   // Read templates
   const heroCoverTpl = readFileSync(join(templatesDir, 'hero-cover.html'), 'utf-8');
   const menuTpl = readFileSync(join(templatesDir, 'cover.html'), 'utf-8');
@@ -280,6 +284,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
     || 40;
 
   const heroHTML = renderTemplate(heroCoverTpl, {
+    assetBase,
     date: today,
     date_year: dateYear,
     date_md: dateMD,
@@ -307,6 +312,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
   const dateDay = String(dateObj.getUTCDate()).padStart(2, '0');
 
   const menuHTML = renderTemplate(menuTpl, {
+    assetBase,
     date: today,
     date_year: dateYear,
     date_md: dateMD,
@@ -337,6 +343,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
       .join(', ');
     const html = renderTemplate(featureTpl, {
       ...item,
+      assetBase,
       content_html: item.content_html || '<p>' + (item.summary_zh || '') + '</p>',
       page_num: pageNum,
       total_pages: totalPages,
@@ -357,6 +364,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
     if (stories.length === 0) break;
     const pageNum = 6 + i;
     const html = renderTemplate(halfPageTpl, {
+      assetBase,
       page_num: pageNum,
       total_pages: totalPages,
       date: today,
@@ -374,6 +382,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
   const briefs1 = tier3.slice(0, 8);
   if (briefs1.length > 0) {
     const html = renderTemplate(briefsTpl, {
+      assetBase,
       page_num: 8,
       total_pages: totalPages,
       date: today,
@@ -392,6 +401,7 @@ function renderAll(digestPath, templatesDir, outputDir, sourceCount = null, numS
   const briefs2 = tier3.slice(8, 16);
   if (briefs2.length > 0) {
     const html = renderTemplate(briefsTpl, {
+      assetBase,
       page_num: 9,
       total_pages: totalPages,
       date: today,

@@ -1,9 +1,23 @@
+# Files Claude tooling should skip when reading this project.
+
+# Dependencies
 node_modules/
-workspace/
+
+# Generated artifacts
 output/
-*.png
-autoresearch-news-card/run-*/
+workspace/
+tmp/
+
+# Local dev byproducts
+.playwright-mcp/
 logo_b64.txt
-package-lock.json
-archived/
+
+# Secrets
 .env
+.env.local
+.env.*.local
+
+# Personal archive
+archived/
+.xhs-image/
+New folder/

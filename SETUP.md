@@ -1,89 +1,73 @@
-# Environment Setup Guide
+# Setup
 
-This guide ensures the `news-card` pipeline runs correctly on a fresh machine or sandbox environment.
+This guide walks through getting `news-card` running on a fresh machine.
 
 ---
 
 ## Prerequisites
 
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| **Node.js** | v18+ | Runtime for all scripts |
-| **npm** | v8+ | Package manager |
-| **Bun** | v1.0+ | Required by gstack skills |
-| **Git** | v2+ | Version control |
-| **Playwright Chromium** | (auto-installed) | HTML → PNG screenshot |
+| Dependency | Version | Why |
+|------------|---------|-----|
+| Node.js | ≥ 18 | Runtime for every script |
+| npm | ≥ 8 | Package manager |
+| Git | ≥ 2 | Source control |
+| Playwright Chromium | auto-installed | HTML → PNG rendering |
+
+The pipeline runs offline once the feeds are cached. Only the fetch step needs the public internet.
 
 ---
 
-## Step 1: Install Node.js Dependencies
+## Install
 
 ```bash
-cd /path/to/news-card
+git clone https://github.com/zerohzz/news-card.git
+cd news-card
 npm install
-```
-
-This installs:
-- `rss-parser` — RSS feed parsing (used by `fetch-rss.js`, `fetch-newsletters.js`)
-- `playwright` — Headless browser for screenshots
-
-### Verify Playwright Browser
-
-```bash
 npx playwright install chromium
 ```
 
-> If running in a sandboxed environment without access to `storage.googleapis.com`, Playwright Chromium may fail to download. The fetch + score pipeline still works; only the screenshot step (`screenshot.sh`) requires Chromium.
+If `npx playwright install chromium` fails because `storage.googleapis.com` is blocked, the fetch / score / curate / render steps still work — only the screenshot step needs Chromium.
 
 ---
 
-## Step 2: Install Skills (Optional, for development workflow)
+## Optional: Gemini for the hero cover
 
-### gstack (code review, QA, investigation)
-
-```bash
-git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
-cd ~/.claude/skills/gstack && ./setup
-```
-
-Key skills for this project: `/review`, `/investigate`, `/plan-eng-review`, `/autoplan`
-
-### superpowers (planning, TDD, debugging)
+The four-panel hero image and V3 cover use Google Gemini. Without a key the rest of the pipeline still produces 10 finished cards; you just won't get the V3 hero.
 
 ```bash
-git clone --single-branch --depth 1 https://github.com/obra/superpowers.git ~/.claude/skills/superpowers
+cp .env.example .env
+# Get a key at https://aistudio.google.com/apikey and paste it into .env
 ```
 
-Key skills for this project: `/brainstorm`, `/write-plan`, `/execute-plan`, `systematic-debugging`
+Either `GEMINI_API_KEY` or `GOOGLE_API_KEY` works — they're aliases.
 
 ---
 
-## Step 3: Verify Pipeline
+## Smoke test
 
 ```bash
-# Test fetch (requires internet access to RSS feeds, HN API, HuggingFace API)
+# Fetch + score (needs outbound HTTPS to the source list)
 bash skills/news-card/scripts/fetch-all.sh workspace/candidates.json
-
-# Test score + dedup
-bash skills/news-card/scripts/score.sh workspace/candidates.json workspace/scored.json
+bash skills/news-card/scripts/score.sh    workspace/candidates.json workspace/scored.json
 ```
+
+If you see `workspace/scored-news.json` and `workspace/scored-signals.json`, the pipeline is healthy.
 
 ---
 
-## Network Requirements
+## Network endpoints
 
-The fetch step requires outbound HTTPS access to:
+The fetch step makes outbound HTTPS requests to:
 
 | Host | Purpose |
 |------|---------|
 | `news.ycombinator.com` | Hacker News API |
 | `huggingface.co` | HuggingFace Papers API |
-| Various RSS feed domains | RSS source fetching (see `references/sources-spec.md`) |
-| `x.com` / `api.x.com` | Twitter/X guest mode (optional, may fail) |
-| `www.anthropic.com`, `ai.meta.com`, etc. | Blog scraping |
+| RSS feed domains (~65) | See [`skills/news-card/references/sources-spec.md`](skills/news-card/references/sources-spec.md) |
 | `*.substack.com` | Newsletter signal fetching |
+| Vendor blogs (`anthropic.com`, `ai.meta.com`, etc.) | Blog scraping |
 
-> If any source is unreachable, the pipeline continues with partial results. Only `rss-parser` (npm) is a hard dependency for the fetch step.
+If a source is unreachable the pipeline continues with partial results.
 
 ---
 
@@ -91,31 +75,16 @@ The fetch step requires outbound HTTPS access to:
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `Cannot find package 'rss-parser'` | npm dependencies not installed | Run `npm install` |
-| `fetch failed` on all sources | No outbound network access | Check firewall / proxy settings |
-| Playwright Chromium download fails | `storage.googleapis.com` blocked | Run `npx playwright install chromium` manually, or set `PLAYWRIGHT_BROWSERS_PATH` |
-| gstack `./setup` fails at Chromium | Same as above | Core skills still work; browser skills (`/browse`, `/qa`) won't |
-| `0 candidates` after fetch | Network partially blocked or all feeds down | Check individual fetcher logs in stderr |
+| `Cannot find package 'rss-parser'` | npm deps not installed | `npm install` |
+| `fetch failed` everywhere | No outbound network | Check firewall / proxy |
+| Playwright Chromium download fails | `storage.googleapis.com` blocked | `npx playwright install chromium`, or `PLAYWRIGHT_BROWSERS_PATH=...` |
+| `0 candidates` after fetch | Most feeds blocked or down | Inspect per-fetcher stderr |
+| Hero image step errors out | Missing `GEMINI_API_KEY` | Skip the hero step or add a key |
 
 ---
 
-## API Keys (Future)
-
-Currently no API keys are required. Future integrations may need:
-
-| API | Env Variable | Purpose | Status |
-|-----|-------------|---------|--------|
-| Twitter/X API | `TWITTER_BEARER_TOKEN` | Authenticated tweet fetching | Planned |
-| OpenAI / Claude | `ANTHROPIC_API_KEY` | LLM-assisted curation (Stage 2 rerank) | Planned |
-
----
-
-## Quick Start (Copy-Paste)
+## One-liner for fresh environments
 
 ```bash
-# One-liner for fresh environment
-npm install && npx playwright install chromium
-
-# Full pipeline
-bash skills/news-card/scripts/run-digest.sh
+npm install && npx playwright install chromium && bash skills/news-card/scripts/run-digest.sh
 ```

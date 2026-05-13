@@ -1,51 +1,76 @@
+#!/usr/bin/env node
+/**
+ * Render the V3 hero cover for a given timestamped output directory.
+ *
+ * Usage:
+ *   node scripts/render-v3-cover.cjs <output-dir> [cover-title-file]
+ *
+ * <output-dir>        e.g. output/2026-05-12_20-30-15 — must contain hero-image.png
+ * [cover-title-file]  optional HTML fragment with 3 .ct-line blocks.
+ *                     Defaults to <output-dir>/cover-title.html if present.
+ *
+ * The output is written to <output-dir>/slides/page-0-v3-cover.html.
+ */
+
 const fs = require('fs');
 const path = require('path');
 
-const tpl = fs.readFileSync('skills/xhs-image-hero/templates/v3-cover.html', 'utf8');
+const [outputDir, coverTitleFile] = process.argv.slice(2);
+if (!outputDir) {
+  console.error('Usage: node scripts/render-v3-cover.cjs <output-dir> [cover-title-file]');
+  process.exit(1);
+}
 
-const coverTitle = `<div class="ct-line">
-        <span class="ct-purple">Anthropic</span>
-        <span class="ct-ink">桌面版</span>
-        <span class="kw kw-red ct-red">私装扩展</span>
-      </div>
-      <div class="ct-line">
-        <span class="ct-ink">机器人半马</span>
-        <span class="kw kw-gold ct-gold">50分</span>
-        <span class="ct-ink">破人类纪录</span>
-      </div>
-      <div class="ct-line">
-        <span class="ct-red">Kimi K2.6</span>
-        <span class="kw kw-green ct-green">开源追</span>
-        <span class="ct-ink">GPT-5.4</span>
-      </div>`;
+const repoRoot = path.resolve(__dirname, '..');
+const templatePath = path.join(repoRoot, 'skills/xhs-image-hero/templates/v3-cover.html');
+const assetBase = 'file:///' + path.join(repoRoot, 'skills/news-card/assets').split(path.sep).join('/');
 
-const heroAbs = path.resolve('output/2026-04-21_20-53-06/hero-image.png');
-const heroUrl = 'file:///' + heroAbs.split(path.sep).join('/');
+const tpl = fs.readFileSync(templatePath, 'utf8');
 
+const heroPng = path.resolve(outputDir, 'hero-image.png');
+if (!fs.existsSync(heroPng)) {
+  console.error(`hero-image.png not found at ${heroPng}`);
+  process.exit(1);
+}
+const heroUrl = 'file:///' + heroPng.split(path.sep).join('/');
+
+const titlePath = coverTitleFile
+  ? path.resolve(coverTitleFile)
+  : path.join(outputDir, 'cover-title.html');
+let coverTitleHtml = '';
+if (fs.existsSync(titlePath)) {
+  coverTitleHtml = fs.readFileSync(titlePath, 'utf8');
+} else {
+  console.warn(`[render-v3-cover] No cover title fragment at ${titlePath}; leaving placeholder empty.`);
+}
+
+const today = new Date();
 const vars = {
-  date_year: '2026',
-  date_month: '04',
-  date_day: '21',
+  assetBase,
+  date_year: String(today.getFullYear()),
+  date_month: String(today.getMonth() + 1).padStart(2, '0'),
+  date_day: String(today.getDate()).padStart(2, '0'),
   total: '24',
-  sourceCount: '162',
-  numSources: '65',
-  readingMinutes: '3',
-  savedHours: '3',
+  sourceCount: process.env.SOURCE_COUNT || '150',
+  numSources: process.env.NUM_SOURCES || '65',
+  readingMinutes: process.env.READING_MINUTES || '3',
+  savedHours: process.env.SAVED_HOURS || '3',
   hero_image: heroUrl,
-  cover_title_html: coverTitle,
+  cover_title_html: coverTitleHtml,
 };
 
 let out = tpl;
 for (const [k, v] of Object.entries(vars)) {
-  out = out.split('{{' + k + '}}').join(v);
+  out = out.split('{{' + k + '}}').join(String(v));
 }
 
 const leftover = out.match(/\{\{[a-zA-Z_]+\}\}/g);
 if (leftover) {
-  console.error('ERROR unresolved:', leftover);
+  console.error('Unresolved template variables:', leftover);
   process.exit(1);
 }
 
-const outPath = 'output/2026-04-21_20-53-06/slides/page-0-v3-cover.html';
+const outPath = path.join(outputDir, 'slides', 'page-0-v3-cover.html');
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, out);
-console.log('Wrote', outPath, '(' + out.length + ' bytes)');
+console.log(`Wrote ${outPath} (${out.length} bytes)`);

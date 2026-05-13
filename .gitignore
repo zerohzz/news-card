@@ -1,9 +1,39 @@
+# ---- Dependencies ----
 node_modules/
-workspace/
+
+# ---- Generated artifacts ----
+# Each run writes a timestamped folder under output/; intermediate data goes in workspace/
 output/
-*.png
-autoresearch-news-card/run-*/
-output/
 workspace/
-archived/
+tmp/
+
+# Generated PNGs are produced into output/ above; assets/*.png are tracked explicitly
+output/**/*.png
+workspace/**/*.png
+tmp/**/*.png
+
+# ---- Local dev byproducts ----
+.claude/
+.playwright-mcp/
+logo_b64.txt
+*.log
+.DS_Store
+Thumbs.db
+
+# ---- Editors / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- Secrets ----
 .env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ---- Personal archive (not for publication) ----
+archived/
+.xhs-image/
+New folder/

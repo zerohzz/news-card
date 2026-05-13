@@ -1,17 +1,24 @@
 {
   "name": "news-card",
-  "version": "0.1.0",
-  "description": "Claude Code Skill: Automated AI news digest to 10-page 9:16 cards",
-  "private": true,
+  "version": "0.4.0",
+  "description": "Claude Code skill that turns 65+ AI news sources into a curated 10-card visual digest (1080×1920 @2x).",
+  "license": "MIT",
+  "author": "Alex Huang",
+  "homepage": "https://github.com/zerohzz/news-card",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zerohzz/news-card.git"
+  },
   "type": "module",
+  "private": false,
   "scripts": {
-    "fetch": "bash scripts/fetch-all.sh",
-    "score": "bash scripts/score.sh",
-    "screenshot": "bash scripts/screenshot.sh",
-    "digest": "bash scripts/run-digest.sh",
+    "fetch": "bash skills/news-card/scripts/fetch-all.sh",
+    "score": "bash skills/news-card/scripts/score.sh",
+    "screenshot": "bash skills/news-card/scripts/screenshot.sh",
+    "digest": "bash skills/news-card/scripts/run-digest.sh",
     "verify:news-card": "node skills/news-card/scripts/lib/verify-fixtures.js",
-    "xhs-image:generate": "node skills/xhs-image/scripts/generate.js",
-    "verify:xhs-image": "node --test skills/xhs-image/scripts/generate.test.js"
+    "verify:xhs-image": "node --test skills/xhs-image/scripts/generate.test.js",
+    "xhs-image:generate": "node skills/xhs-image/scripts/generate.js"
   },
   "dependencies": {
     "playwright": "^1.52.0",
